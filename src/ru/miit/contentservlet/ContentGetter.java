@@ -48,7 +48,7 @@ public class ContentGetter {
 
 		} else {
 
-			boolean foundInCache = ContentServlet.cacheIsUp && cache.exists(idInCache)
+			boolean foundInCache = cache.isUp && cache.exists(idInCache)
 					&& cache.getHashById(idInCache).equals("someHash");
 
 			if (foundInCache) {

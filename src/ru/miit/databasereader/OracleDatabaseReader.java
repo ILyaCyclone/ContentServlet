@@ -270,7 +270,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 
-		if (cacheIsUp) {
+		if (cache.isUp) {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put(DatabaseReaderParamName.contentType, mimeType);
 			parameters.put(DatabaseReaderParamName.type, mimeType);

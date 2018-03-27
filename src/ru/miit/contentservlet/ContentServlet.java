@@ -56,7 +56,8 @@ public class ContentServlet extends HttpServlet {
 			cache = cacheInstance.getCache(); // Нужно ли коллекционировать их и заккрывать их всех в destroy?
 
 			long downtime = 0L; // берется из бд
-			cache.applyDowntine(downtime);
+			if (cache.isUp)
+				cache.applyDowntine(downtime);
 
 			// Инициализация класса со значениями всех параметров
 			RequestParameters requestParameters = null;
@@ -145,7 +146,7 @@ public class ContentServlet extends HttpServlet {
 
 					contentGetter.getObject(requestParameters, os, response, cache);
 
-					if (cacheIsUp) {
+					if (cache.isUp) {
 
 						CacheStatist statist = cache.getStatistics();
 
@@ -166,7 +167,7 @@ public class ContentServlet extends HttpServlet {
 				}
 			}
 			}
-		} catch (CacheMetadataStoreConnectionException e) {
+		} catch (CacheMetadataStoreConnectionException | CacheStartFailedException e) {
 			logger.log(Level.SEVERE, "Metadatastore connection was not opened. " + e.toString());
 			e.printStackTrace();
 			
