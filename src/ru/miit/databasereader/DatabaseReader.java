@@ -24,15 +24,15 @@ public interface DatabaseReader {
 	void getResTestListData(PrintWriter printWriter) throws OracleDatabaseReaderException;
 
 	void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache)
+			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
 
 	void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache)
+			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
 
 	void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache)
+			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
 
 	void setParameterInt(OraclePreparedStatement preparedStatement, String filed, Object value) throws SQLException;
@@ -45,5 +45,5 @@ public interface DatabaseReader {
 			throws OracleDatabaseReaderServletOSException;
 	
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache) throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException ;
+			HttpServletResponse response, Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException ;
 }

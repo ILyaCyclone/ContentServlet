@@ -101,7 +101,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache)
+			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException {
 
 		try (Connection connection = getConnection();
@@ -118,7 +118,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				fetchDataFromResultSet(resultSet, osServlet, response, cache, cacheIsUp, idInCache);
+				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
 		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
@@ -132,7 +132,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	
 	@Override
 	public void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache)
+			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException {
 
 		try (Connection connection = getConnection();
@@ -149,7 +149,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				fetchDataFromResultSet(resultSet, osServlet, response, cache, cacheIsUp, idInCache);
+				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
 		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
@@ -162,7 +162,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	
 	@Override
 	public void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache)
+			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException {
 
 		try (Connection connection = getConnection();
@@ -181,7 +181,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				fetchDataFromResultSet(resultSet, osServlet, response, cache, cacheIsUp, idInCache);
+				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
 		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
@@ -251,7 +251,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, final boolean cacheIsUp, String idInCache) throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException {
+			HttpServletResponse response, Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException {
 		
 		resultSet.next();
 
@@ -270,18 +270,17 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 
+		System.out.println("Data from database");
+		
 		if (cache.isUp) {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put(DatabaseReaderParamName.contentType, mimeType);
 			parameters.put(DatabaseReaderParamName.type, mimeType);
 			parameters.put(DatabaseReaderParamName.size, blobSize);
-			parameters.put(DatabaseReaderParamName.hash, "someHash");
-
-			cache.putAsync(idInCache, parameters);
-
+			parameters.put(DatabaseReaderParamName.hash, "someHash");			
 			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
 				writeToTwoStreams(blobObject, osServlet, cacheOs);
-				cache.allowAccess(idInCache);
+				cache.putAsync(idInCache, parameters);
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());

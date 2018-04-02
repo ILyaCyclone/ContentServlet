@@ -54,6 +54,7 @@ public class ContentGetter {
 			if (foundInCache) {
 
 				cache.get(idInCache, os, response);
+				System.out.println("Data from cache");
 
 				// увеличение попаданий в кэш
 				cache.increaseHits();
@@ -70,8 +71,7 @@ public class ContentGetter {
 					queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
 					queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
 
-					databaseReader.getBinaryDataByMetaId(queryParameters, os, response, cache, ContentServlet.cacheIsUp,
-							idInCache);
+					databaseReader.getBinaryDataByMetaId(queryParameters, os, response, cache, idInCache);
 
 				} else {
 					if (requestParameters.fileVersionId != null) {
@@ -80,8 +80,7 @@ public class ContentGetter {
 						queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
 						queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
 
-						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, cache,
-								ContentServlet.cacheIsUp, idInCache);
+						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, cache, idInCache);
 
 					} else {
 
@@ -93,15 +92,15 @@ public class ContentGetter {
 							queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
 							queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
 
-							databaseReader.getBinaryDataByClientId(queryParameters, os, response, cache,
-									ContentServlet.cacheIsUp, idInCache);
+							databaseReader.getBinaryDataByClientId(queryParameters, os, response, cache, idInCache);
 
 						}
 					}
 				}
-
+				
 				// увеличение промахов количество в кэш
-				cache.increaseMisses();
+				if (cache.isUp)
+					cache.increaseMisses();
 			}
 
 		}

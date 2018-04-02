@@ -32,16 +32,12 @@ public class ContentServlet extends HttpServlet {
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
 
-	public static boolean cacheIsUp = false;
-
 	public void init() {
 
 //		ContentLogger.initLogManager();
 
 		try {
 			cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
-			
-			cacheIsUp = true;
 
 		} catch (CacheStartFailedException e) {
 			logger.log(Level.SEVERE, "Cache didn't start. " + e.toString());
@@ -53,8 +49,8 @@ public class ContentServlet extends HttpServlet {
 		Cache cache = null;
 		
 		try {
-			cache = cacheInstance.getCache(); // Нужно ли коллекционировать их и заккрывать их всех в destroy?
-
+			cache = cacheInstance.getCache(); // Нужно ли коллекционировать их и заккрывать их всех в destroy? 
+			System.out.println(cache.isUp);
 			long downtime = 0L; // берется из бд
 			if (cache.isUp)
 				cache.applyDowntine(downtime);
@@ -157,7 +153,6 @@ public class ContentServlet extends HttpServlet {
 				} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
 
 					logger.log(Level.SEVERE, "Object getting is failed. " + e.toString());
-					e.printStackTrace();
 					try {
 						response.sendError(404);
 					} catch (IOException e1) {
@@ -167,17 +162,7 @@ public class ContentServlet extends HttpServlet {
 				}
 			}
 			}
-		} catch (CacheMetadataStoreConnectionException | CacheStartFailedException e) {
-			logger.log(Level.SEVERE, "Metadatastore connection was not opened. " + e.toString());
-			e.printStackTrace();
-			
-			try {
-				response.sendError(404);
-			} catch (IOException e1) {
-				logger.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
-			}
-		}
-		finally {
+		} finally {
 			if (cache != null)
 				cache.close();
 		}
