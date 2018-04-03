@@ -50,7 +50,7 @@ public class ContentServlet extends HttpServlet {
 		
 		try {
 			cache = cacheInstance.getCache(); // Нужно ли коллекционировать их и заккрывать их всех в destroy? 
-			System.out.println(cache.isUp);
+			System.out.println("cache is up: " + cache.isUp);
 			long downtime = 0L; // берется из бд
 			if (cache.isUp)
 				cache.applyDowntine(downtime);
@@ -76,7 +76,7 @@ public class ContentServlet extends HttpServlet {
 			response.setHeader(ContentDispositionText, respHeader);
 
 			if (requestParameters.getContentType() == null) {
-				requestParameters.contentType = -1; // Временно, чтобы работало
+				requestParameters.contentType = -1; // Временно, чтобы работало------------------------------------------------------
 			}
 
 			switch (requestParameters.getContentType()) {
@@ -141,7 +141,6 @@ public class ContentServlet extends HttpServlet {
 				try (OutputStream os = response.getOutputStream()) {
 
 					contentGetter.getObject(requestParameters, os, response, cache);
-
 					if (cache.isUp) {
 
 						CacheStatist statist = cache.getStatistics();

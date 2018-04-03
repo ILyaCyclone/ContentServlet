@@ -107,7 +107,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getConnection();
 				OraclePreparedStatement preparedStatement = (OraclePreparedStatement) connection
 						.prepareStatement(getBinaryDataByMetaIdSQL)) {
-			
+
 			Object webMetaId = queryParameters.get(DatabaseReaderParamName.webMetaId);
 			Object width = queryParameters.get(DatabaseReaderParamName.width);
 			Object height = queryParameters.get(DatabaseReaderParamName.height);
@@ -115,7 +115,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			setParameterInt(preparedStatement, "webMetaId", webMetaId);
 			setParameterStr(preparedStatement, "width", width);
 			setParameterStr(preparedStatement, "height", height);
-
+			System.out.println(3.1);
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
@@ -140,10 +140,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 						.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
 
 			Object fileVersionId = queryParameters.get(DatabaseReaderParamName.fileVersionId);
-			Object width = queryParameters.get(DatabaseReaderParamName.width).toString();
-			Object height = queryParameters.get(DatabaseReaderParamName.height).toString();
+			Object width = queryParameters.get(DatabaseReaderParamName.width);
+			Object height = queryParameters.get(DatabaseReaderParamName.height);
 
-			setParameterInt(preparedStatement, "fileVersionId", String.valueOf(fileVersionId));
+			setParameterInt(preparedStatement, "fileVersionId", fileVersionId);
 			setParameterStr(preparedStatement, "width", width);
 			setParameterStr(preparedStatement, "height", height);
 			
@@ -171,13 +171,13 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 			Object clientId = queryParameters.get(DatabaseReaderParamName.clientId);
 			Object entryIdInPhotoalbum = queryParameters.get(DatabaseReaderParamName.entryIdInPhotoalbum);
-			Object width = queryParameters.get(DatabaseReaderParamName.width).toString();
-			Object height = queryParameters.get(DatabaseReaderParamName.height).toString();
+			Object width = queryParameters.get(DatabaseReaderParamName.width);
+			Object height = queryParameters.get(DatabaseReaderParamName.height);
 
-			setParameterInt(preparedStatement, "clientId", String.valueOf(clientId));
-			setParameterInt(preparedStatement, "entryIdInPhotoalbum", String.valueOf(entryIdInPhotoalbum));
-			setParameterStr(preparedStatement, "width", width.toString());
-			setParameterStr(preparedStatement, "height", height.toString());
+			setParameterInt(preparedStatement, "clientId", clientId);
+			setParameterInt(preparedStatement, "entryIdInPhotoalbum", entryIdInPhotoalbum);
+			setParameterStr(preparedStatement, "width", width);
+			setParameterStr(preparedStatement, "height", height);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -252,7 +252,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException {
-		
 		resultSet.next();
 
 		int blobSize = resultSet.getInt(DatabaseReaderParamName.bsize);
@@ -269,7 +268,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 		response.setContentLength(blobSize);
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
-
 		System.out.println("Data from database");
 		
 		if (cache.isUp) {

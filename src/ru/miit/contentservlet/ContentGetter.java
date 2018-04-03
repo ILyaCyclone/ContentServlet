@@ -52,10 +52,8 @@ public class ContentGetter {
 					&& cache.getHashById(idInCache).equals("someHash");
 
 			if (foundInCache) {
-
 				cache.get(idInCache, os, response);
 				System.out.println("Data from cache");
-
 				// увеличение попаданий в кэш
 				cache.increaseHits();
 
@@ -70,7 +68,7 @@ public class ContentGetter {
 					queryParameters.put(RequestParameters.webMetaIdParamName, requestParameters.getWebMetaId());
 					queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
 					queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
-
+					
 					databaseReader.getBinaryDataByMetaId(queryParameters, os, response, cache, idInCache);
 
 				} else {
