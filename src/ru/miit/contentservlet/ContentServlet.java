@@ -16,11 +16,10 @@ import ru.miit.cache.Cache;
 import ru.miit.cache.CacheInstance;
 import ru.miit.cache.CacheStatist;
 import ru.miit.cacheexception.CacheGetException;
-import ru.miit.cacheexception.CacheMetadataStoreConnectionException;
 import ru.miit.cacheexception.CacheStartFailedException;
 import ru.miit.databasereader.OracleDatabaseReaderException;
 
-@WebServlet("/ContentServlet")
+@WebServlet("/ContentServlet/*")
 public class ContentServlet extends HttpServlet {
 
 	public CacheInstance cacheInstance;
@@ -50,7 +49,6 @@ public class ContentServlet extends HttpServlet {
 		
 		try {
 			cache = cacheInstance.getCache(); // Нужно ли коллекционировать их и заккрывать их всех в destroy? 
-			System.out.println("cache is up: " + cache.isUp);
 			long downtime = 0L; // берется из бд
 			if (cache.isUp)
 				cache.applyDowntine(downtime);
@@ -153,7 +151,9 @@ public class ContentServlet extends HttpServlet {
 
 					logger.log(Level.SEVERE, "Object getting is failed. " + e.toString());
 					try {
-						response.sendError(404);
+						e.printStackTrace();
+						response.sendError(404); // не выполнится из-за уже открытого стрима!
+
 					} catch (IOException e1) {
 						logger.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
 					}

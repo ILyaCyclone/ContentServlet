@@ -53,7 +53,6 @@ public class ContentGetter {
 
 			if (foundInCache) {
 				cache.get(idInCache, os, response);
-				System.out.println("Data from cache");
 				// увеличение попаданий в кэш
 				cache.increaseHits();
 

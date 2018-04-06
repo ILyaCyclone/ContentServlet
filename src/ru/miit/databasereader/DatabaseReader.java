@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 
+import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import ru.miit.cache.Cache;
 
