@@ -18,7 +18,9 @@ import ru.miit.cache.Cache;
 
 public interface DatabaseReader {
 
-	Connection getConnection() throws OracleDatabaseReaderConnectionException, NamingException;
+	Connection getOracleConnection() throws OracleDatabaseReaderConnectionException, NamingException;
+	
+	Connection getHikariConnection() throws OracleDatabaseReaderConnectionException, NamingException;
 
 	String getCodeData(final int webMetaId) throws OracleDatabaseReaderException;
 
