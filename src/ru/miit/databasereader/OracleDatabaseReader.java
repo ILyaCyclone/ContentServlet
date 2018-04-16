@@ -13,8 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -26,7 +24,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.OracleResultSet;
-import oracle.jdbc.pool.OracleDataSource;
 import ru.miit.cache.Cache;
 
 public class OracleDatabaseReader implements DatabaseReader {
@@ -309,6 +306,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
 				writeToTwoStreams(blobObject, osServlet, cacheOs);
 				cache.putAsync(idInCache, parameters);
+				System.out.println("put to cache: " + idInCache);
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());
