@@ -304,9 +304,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 			parameters.put(DatabaseReaderParamName.size, blobSize);
 			parameters.put(DatabaseReaderParamName.hash, "someHash");
 			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
+
 				writeToTwoStreams(blobObject, osServlet, cacheOs);
 				cache.putAsync(idInCache, parameters);
-				System.out.println("put to cache: " + idInCache);
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());
