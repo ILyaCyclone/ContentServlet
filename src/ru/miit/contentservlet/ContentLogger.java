@@ -22,34 +22,41 @@ public class ContentLogger {
 
 	public static void initLogManager() {
 
-		Logger rootLogger = LogManager.getLogManager().getLogger("");
-		rootLogger.removeHandler(rootLogger.getHandlers()[0]);
-		Arrays.stream(rootLogger.getHandlers()).forEach(h -> h.setLevel(Level.parse(getLevel())));
+		try {
+			LogManager.getLogManager().readConfiguration(ContentServlet.class.getResourceAsStream("logging.properties"));
+		} catch (SecurityException | IOException | NullPointerException e) {
+			e.printStackTrace();
+		}
 
-		System.out.println(getLevel());
+//		Logger rootLogger = LogManager.getLogManager().getLogger("");
+//		rootLogger.removeHandler(rootLogger.getHandlers()[0]);
+//		Arrays.stream(rootLogger.getHandlers()).forEach(h -> h.setLevel(Level.parse(getLevel())));
+//
+//		System.out.println(getLevel());
 
 	}
 
 	public static Logger getLogger(String className) {
 
-		logger = Logger.getLogger(className);
+		
+//		logger = Logger.getLogger(className);
+//
+//		if (logger != null && logger.getHandlers().length == 0) {
+//
+//			FileHandler handler = null;
+//
+//			try {
+//				handler = new FileHandler(getLogFileLocation(), 1024 * 1024, 10, true);
+//				Formatter formatter = new SimpleFormatter();
+//				handler.setFormatter(formatter);
+//			} catch (SecurityException | IOException e) {
+//				throw new RuntimeException(e);
+//			}
+//
+//			logger.addHandler(handler);
+//		}
 
-		if (logger != null && logger.getHandlers().length == 0) {
-
-			FileHandler handler = null;
-
-			try {
-				handler = new FileHandler(getLogFileLocation(), 1024 * 1024, 10, true);
-				Formatter formatter = new SimpleFormatter();
-				handler.setFormatter(formatter);
-			} catch (SecurityException | IOException e) {
-				throw new RuntimeException(e);
-			}
-
-			logger.addHandler(handler);
-		}
-
-		return logger;
+		return Logger.getLogger(className);
 
 	}
 

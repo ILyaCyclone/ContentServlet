@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,29 +27,30 @@ public class ContentServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Logger logger = ContentLogger.getLogger(ContentServlet.class.getName());
+	private Logger loggerContentServlet;
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
 
 	public void init() {
-
-//		ContentLogger.initLogManager();
-
+		
+		ContentLogger.initLogManager();
+		loggerContentServlet =  ContentLogger.getLogger(ContentServlet.class.getName());
+		
 		try {
 			cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
 
 		} catch (CacheStartFailedException e) {
-			logger.log(Level.SEVERE, "Cache didn't start. " + e.toString());
+			loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString());
 		}
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-
-		Cache cache = null;
 		
+		Cache cache = null;
+
 		try {
-			cache = cacheInstance.getCache(); // Нужно ли коллекционировать их и заккрывать их всех в destroy? 
+			cache = cacheInstance.getCache();
 			long downtime = 0L; // берется из бд
 			if (cache.isUp)
 				cache.applyDowntine(downtime);
@@ -59,11 +61,11 @@ public class ContentServlet extends HttpServlet {
 				requestParameters = new RequestParameters(request.getParameterMap());
 			} catch (NumberFormatException e) {
 
-				logger.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
+				loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
 				try {
 					response.sendError(404);
 				} catch (IOException e1) {
-					logger.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
+					loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
 				}
 			}
 
@@ -99,13 +101,13 @@ public class ContentServlet extends HttpServlet {
 
 						printWriter.println("<h3>Error</h3>");
 						printWriter.println("<p>" + e.getMessage() + "</p>");
-						logger.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString());
+						loggerContentServlet.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString());
 
 					} finally {
 						printWriter.println("</body></html>");
 					}
 				} catch (IOException e) {
-					logger.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
+					loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
 				}
 
 				break;
@@ -124,13 +126,13 @@ public class ContentServlet extends HttpServlet {
 
 						printWriter.println("<h3>Error</h3>");
 						printWriter.println("<p>" + e.getMessage() + "</p>");
-						logger.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString());
+						loggerContentServlet.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString());
 
 					} finally {
 						printWriter.println("</body></html>");
 					}
 				} catch (IOException e) {
-					logger.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
+					loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
 				}
 				break;
 			}
@@ -143,19 +145,19 @@ public class ContentServlet extends HttpServlet {
 
 						CacheStatist statist = cache.getStatistics();
 
-						System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
-								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
+//						System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
+//								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
 					}
 
 				} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
 
-					logger.log(Level.SEVERE, "Object getting is failed. " + e.toString());
+					loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());
 					try {
 						e.printStackTrace();
 						response.sendError(404); // не выполнится из-за уже открытого стрима!
 
 					} catch (IOException e1) {
-						logger.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
+						loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
 					}
 
 				}

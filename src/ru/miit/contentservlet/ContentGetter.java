@@ -21,7 +21,7 @@ import ru.miit.databasereader.OracleDatabaseReaderException;
 
 public class ContentGetter {
 
-	private final Logger logger = ContentLogger.getLogger(ContentGetter.class.getName());
+	private final Logger loggerContentLogger = ContentLogger.getLogger(ContentGetter.class.getName());
 
 	public static String getFileName(final String AURI) {
 		Pattern pattern = Pattern.compile("[^/]*[^/]");
@@ -35,7 +35,7 @@ public class ContentGetter {
 
 	public void getObject(final RequestParameters requestParameters, OutputStream os, HttpServletResponse response,
 			Cache cache) throws CacheGetException, OracleDatabaseReaderException {
-
+		
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
 		String idInCache = nameCreator.createWithParameters(requestParameters);
@@ -43,7 +43,7 @@ public class ContentGetter {
 		if (requestParameters.getWebMetaId() == null && requestParameters.getFileVersionId() == null
 				&& requestParameters.getClientId() == null && requestParameters.getEntryIdInPhotoalbum() == null) {
 
-			logger.log(Level.SEVERE, "Id of requested object does not contains required parameters. ");
+			loggerContentLogger.log(Level.SEVERE, "Id of requested object does not contains required parameters. ");
 			throw new IllegalArgumentException("Id of requested object does not contains required parameters. ");
 
 		} else {

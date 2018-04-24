@@ -13,6 +13,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -304,9 +306,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 			parameters.put(DatabaseReaderParamName.size, blobSize);
 			parameters.put(DatabaseReaderParamName.hash, "someHash");
 			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
-
-				writeToTwoStreams(blobObject, osServlet, cacheOs);
 				cache.putAsync(idInCache, parameters);
+				writeToTwoStreams(blobObject, osServlet, cacheOs);
+//				future.thenRun(() -> cache.allowAccess(idInCache));
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());
