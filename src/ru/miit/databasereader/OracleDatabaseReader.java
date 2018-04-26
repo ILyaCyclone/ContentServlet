@@ -13,15 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-
-import com.zaxxer.hikari.HikariDataSource;
 
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
@@ -55,17 +51,15 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 
 	@Override
-	public Connection getHikariConnection() throws OracleDatabaseReaderConnectionException, NamingException {
+	public Connection getHikariConnection() throws NamingException, OracleDatabaseReaderConnectionException {
 
 		Context initialContext = null;
 		try {
 			initialContext = new InitialContext();
-			try (HikariDataSource dataSource = (HikariDataSource) initialContext.lookup(HikariDATASOURCE_NAME)) {
+			DataSource dataSource = (DataSource) initialContext.lookup(HikariDATASOURCE_NAME);
+			Connection connection = (Connection) dataSource.getConnection();
+			return connection;
 
-				Connection connection = (Connection) dataSource.getConnection();// .unwrap(OracleConnection.class);
-				return connection;
-
-			}
 		} catch (NamingException | SQLException e) {
 			e.printStackTrace();
 			throw new OracleDatabaseReaderConnectionException(e.getMessage());
@@ -77,7 +71,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 		}
 
 	}
-
 	private static final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = :webMetaId ";
 
 	@Override
