@@ -5,12 +5,14 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
@@ -18,9 +20,7 @@ import ru.miit.cache.Cache;
 
 public interface DatabaseReader {
 
-	Connection getOracleConnection() throws OracleDatabaseReaderConnectionException, NamingException;
-	
-	Connection getHikariConnection() throws OracleDatabaseReaderConnectionException, NamingException;
+	DataSource getDataSource() throws NamingException;
 
 	String getCodeData(final int webMetaId) throws OracleDatabaseReaderException;
 
@@ -38,15 +38,16 @@ public interface DatabaseReader {
 			HttpServletResponse response, Cache cache, String idInCache)
 			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
 
-	void setParameterInt(OraclePreparedStatement preparedStatement, String filed, Object value) throws SQLException;
+	public void setParameterInt(PreparedStatement preparedStatement, int filed, Object value) throws SQLException;
 
-	void setParameterStr(OraclePreparedStatement preparedStatement, String filed, Object value) throws SQLException;
+	public void setParameterStr(PreparedStatement preparedStatement, int filed, Object value) throws SQLException;
 
 	void writeToStream(Blob blobData, OutputStream os) throws OracleDatabaseReaderServletOSException;
 
 	void writeToTwoStreams(Blob blobData, OutputStream os1, FileOutputStream os2)
 			throws OracleDatabaseReaderServletOSException;
-	
-	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException ;
+
+	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
+			Cache cache, String idInCache)
+			throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException;
 }

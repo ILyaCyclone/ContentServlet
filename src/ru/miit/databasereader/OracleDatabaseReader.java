@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -30,17 +31,16 @@ public class OracleDatabaseReader implements DatabaseReader {
 	private static final String HikariDATASOURCE_NAME = "java:comp/env/jdbc/OracleHikari";
 
 	@Override
-	public Connection getOracleConnection() throws OracleDatabaseReaderConnectionException, NamingException {
+	public DataSource getDataSource() throws NamingException {
 
 		Context initialContext = null;
 		try {
 			initialContext = new InitialContext();
 			DataSource dataSource = (DataSource) initialContext.lookup(DATASOURCE_NAME);
-			Connection connection = (Connection) dataSource.getConnection();// .unwrap(OracleConnection.class);
-			return connection;
-		} catch (NamingException | SQLException e) {
+			return dataSource;
+		} catch (NamingException e) {
 			e.printStackTrace();
-			throw new OracleDatabaseReaderConnectionException(e.getMessage());
+			throw new RuntimeException(e);
 		} finally {
 			if (initialContext != null) {
 				initialContext.close();
@@ -50,47 +50,24 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	}
 
-	@Override
-	public Connection getHikariConnection() throws NamingException, OracleDatabaseReaderConnectionException {
-
-		Context initialContext = null;
-		try {
-			initialContext = new InitialContext();
-			DataSource dataSource = (DataSource) initialContext.lookup(HikariDATASOURCE_NAME);
-			Connection connection = (Connection) dataSource.getConnection();
-			return connection;
-
-		} catch (NamingException | SQLException e) {
-			e.printStackTrace();
-			throw new OracleDatabaseReaderConnectionException(e.getMessage());
-		} finally {
-			if (initialContext != null) {
-				initialContext.close();
-
-			}
-		}
-
-	}
-	private static final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = :webMetaId ";
+	private static final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = ?";
 
 	@Override
 	public String getCodeData(final int webMetaId) throws OracleDatabaseReaderException {
 
 		String codeData;
 
-		try (Connection connection = getOracleConnection();
-				OracleConnection oracleConnection = connection.unwrap(OracleConnection.class);
-				OraclePreparedStatement preparedStatement = (OraclePreparedStatement) oracleConnection
-						.prepareStatement(getCodeDataSQL)) {
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(getCodeDataSQL)) {
 
-			setParameterInt(preparedStatement, "webMetaId", String.valueOf(webMetaId));
+			setParameterInt(preparedStatement, 1, String.valueOf(webMetaId));
 
 			try (ResultSet resultSet = (ResultSet) preparedStatement.executeQuery()) {
 				resultSet.next();
 				codeData = resultSet.getString(DatabaseReaderParamName.rstr);
 			}
 
-		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
+		} catch (SQLException | NamingException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 		return codeData;
@@ -103,9 +80,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		String data;
 
-		try (Connection connection = getOracleConnection();
-				OracleConnection oracleConnection = connection.unwrap(OracleConnection.class);
-				OraclePreparedStatement preparedStatement = (OraclePreparedStatement) oracleConnection
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getResTestListDataSQL);
 				OracleResultSet resultSet = (OracleResultSet) preparedStatement.executeQuery()) {
 
@@ -116,79 +92,78 @@ public class OracleDatabaseReader implements DatabaseReader {
 				}
 			}
 
-		} catch (OracleDatabaseReaderConnectionException | SQLException | NamingException e) {
+		} catch (SQLException | NamingException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 	}
 
-	private static final String getBinaryDataByMetaIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(:webMetaId, :width, :height) as wpt_t_data_img_wp))";
+	private static final String getBinaryDataByMetaIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
 	@Override
 	public void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
 
-		try (Connection connection = getOracleConnection();
-				OracleConnection oracleConnection = connection.unwrap(OracleConnection.class);
-				OraclePreparedStatement preparedStatement = (OraclePreparedStatement) oracleConnection
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByMetaIdSQL)) {
 
 			Object webMetaId = queryParameters.get(DatabaseReaderParamName.webMetaId);
 			Object width = queryParameters.get(DatabaseReaderParamName.width);
 			Object height = queryParameters.get(DatabaseReaderParamName.height);
 
-			setParameterInt(preparedStatement, "webMetaId", webMetaId);
-			setParameterStr(preparedStatement, "width", width);
-			setParameterStr(preparedStatement, "height", height);
+			int i = 1;
+			setParameterInt(preparedStatement, i++, webMetaId);
+			setParameterStr(preparedStatement, i++, width);
+			setParameterStr(preparedStatement, i++, height);
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
-		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
+		} catch (SQLException | NamingException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 
 	}
 
-	private static final String getBinaryDataByFileVersionIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(:fileVersionId, :width, :height) as wpt_t_data_img_wp))";
+	private static final String getBinaryDataByFileVersionIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
 	@Override
 	public void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
 
-		try (Connection connection = getOracleConnection();
-				OracleConnection oracleConnection = connection.unwrap(OracleConnection.class);
-				OraclePreparedStatement preparedStatement = (OraclePreparedStatement) oracleConnection
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
 
 			Object fileVersionId = queryParameters.get(DatabaseReaderParamName.fileVersionId);
 			Object width = queryParameters.get(DatabaseReaderParamName.width);
 			Object height = queryParameters.get(DatabaseReaderParamName.height);
 
-			setParameterInt(preparedStatement, "fileVersionId", fileVersionId);
-			setParameterStr(preparedStatement, "width", width);
-			setParameterStr(preparedStatement, "height", height);
+			int i = 1;
+			setParameterInt(preparedStatement, i++, fileVersionId);
+			setParameterStr(preparedStatement, i++, width);
+			setParameterStr(preparedStatement, i++, height);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
-		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
+		} catch (SQLException | NamingException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 
 	}
 
-	private final static String getBinaryDataByClientIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(:clientId, :entryIdInPhotoalbum, :width, :height) as wpt_t_data_img_wp))";
+	private final static String getBinaryDataByClientIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
 	@Override
 	public void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
 
-		try (Connection connection = getOracleConnection();
-				OracleConnection oracleConnection = connection.unwrap(OracleConnection.class);
-				OraclePreparedStatement preparedStatement = (OraclePreparedStatement) oracleConnection
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByClientIdSQL)) {
 
 			Object clientId = queryParameters.get(DatabaseReaderParamName.clientId);
@@ -196,39 +171,38 @@ public class OracleDatabaseReader implements DatabaseReader {
 			Object width = queryParameters.get(DatabaseReaderParamName.width);
 			Object height = queryParameters.get(DatabaseReaderParamName.height);
 
-			setParameterInt(preparedStatement, "clientId", clientId);
-			setParameterInt(preparedStatement, "entryIdInPhotoalbum", entryIdInPhotoalbum);
-			setParameterStr(preparedStatement, "width", width);
-			setParameterStr(preparedStatement, "height", height);
+			int i = 1;
+			setParameterInt(preparedStatement, i++, clientId);
+			setParameterInt(preparedStatement, i++, entryIdInPhotoalbum);
+			setParameterStr(preparedStatement, i++, width);
+			setParameterStr(preparedStatement, i++, height);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
-		} catch (SQLException | OracleDatabaseReaderConnectionException | NamingException e) {
+		} catch (SQLException | NamingException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 
 	}
 
 	@Override
-	public void setParameterInt(OraclePreparedStatement preparedStatement, String filed, Object value)
-			throws SQLException {
+	public void setParameterInt(PreparedStatement preparedStatement, int filed, Object value) throws SQLException {
 		if (value == null) {
-			preparedStatement.setNullAtName(filed, 0);
+			preparedStatement.setNull(filed, 0);
 		} else {
-			preparedStatement.setIntAtName(filed, Integer.parseInt(value.toString()));
+			preparedStatement.setInt(filed, Integer.parseInt(value.toString()));
 		}
 	}
 
 	@Override
-	public void setParameterStr(OraclePreparedStatement preparedStatement, String filed, Object value)
-			throws SQLException {
+	public void setParameterStr(PreparedStatement preparedStatement, int filed, Object value) throws SQLException {
 		if (value == null) {
-			preparedStatement.setNullAtName(filed, 0);
+			preparedStatement.setNull(filed, 0);
 		} else {
-			preparedStatement.setStringAtName(filed, value.toString());
+			preparedStatement.setString(filed, value.toString());
 		}
 	}
 
@@ -301,7 +275,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
 				cache.putAsync(idInCache, parameters);
 				writeToTwoStreams(blobObject, osServlet, cacheOs);
-//				future.thenRun(() -> cache.allowAccess(idInCache));
+				// future.thenRun(() -> cache.allowAccess(idInCache));
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());
