@@ -28,7 +28,8 @@ import ru.miit.cache.Cache;
 public class OracleDatabaseReader implements DatabaseReader {
 
 	private static final String DATASOURCE_NAME = "java:comp/env/jdbc/ds_basic";
-	private static final String HikariDATASOURCE_NAME = "java:comp/env/jdbc/OracleHikari";
+	
+	public boolean isUsingCache = false;
 
 	@Override
 	public DataSource getDataSource() throws NamingException {
@@ -266,7 +267,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 
-		if (cache.isUp) {
+		if (isUsingCache && cache.isUp) {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put(DatabaseReaderParamName.contentType, mimeType);
 			parameters.put(DatabaseReaderParamName.type, mimeType);

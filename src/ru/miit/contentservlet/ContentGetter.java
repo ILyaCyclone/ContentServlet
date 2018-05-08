@@ -20,6 +20,8 @@ import ru.miit.databasereader.OracleDatabaseReader;
 import ru.miit.databasereader.OracleDatabaseReaderException;
 
 public class ContentGetter {
+	
+	public boolean isUsingCache = false;
 
 	private final Logger loggerContentLogger = ContentLogger.getLogger(ContentGetter.class.getName());
 
@@ -48,7 +50,7 @@ public class ContentGetter {
 
 		} else {
 
-			boolean foundInCache = cache.isUp && cache.exists(idInCache)
+			boolean foundInCache = isUsingCache && cache.isUp && cache.exists(idInCache)
 					&& cache.getHashById(idInCache).equals("someHash");
 
 			if (foundInCache) {
@@ -96,7 +98,7 @@ public class ContentGetter {
 				}
 				
 				// увеличение промахов количество в кэш
-				if (cache.isUp)
+				if (isUsingCache && cache.isUp)
 					cache.increaseMisses();
 			}
 

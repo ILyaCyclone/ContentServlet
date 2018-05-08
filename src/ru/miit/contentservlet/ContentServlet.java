@@ -37,12 +37,12 @@ public class ContentServlet extends HttpServlet {
 		ContentLogger.initLogManager();
 		loggerContentServlet =  ContentLogger.getLogger(ContentServlet.class.getName());
 		
-		try {
-			cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
-
-		} catch (CacheStartFailedException e) {
-			loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString());
-		}
+//		try {
+//			cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
+//
+//		} catch (CacheStartFailedException e) {
+//			loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString());
+//		}
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -50,10 +50,10 @@ public class ContentServlet extends HttpServlet {
 		Cache cache = null;
 
 		try {
-			cache = cacheInstance.getCache();
-			long downtime = 0L; // берется из бд
-			if (cache.isUp)
-				cache.applyDowntine(downtime);
+//			cache = cacheInstance.getCache();
+//			long downtime = 0L; // берется из бд
+//			if (cache.isUp)
+//				cache.applyDowntine(downtime);
 
 			// Инициализация класса со значениями всех параметров
 			RequestParameters requestParameters = null;
@@ -141,13 +141,13 @@ public class ContentServlet extends HttpServlet {
 				try (OutputStream os = response.getOutputStream()) {
 
 					contentGetter.getObject(requestParameters, os, response, cache);
-					if (cache.isUp) {
-
-						CacheStatist statist = cache.getStatistics();
-
+//					if (cache.isUp) {
+//
+//						CacheStatist statist = cache.getStatistics();
+//
 //						System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
 //								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
-					}
+//					}
 
 				} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
 
