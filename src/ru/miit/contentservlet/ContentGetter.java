@@ -21,8 +21,6 @@ import ru.miit.databasereader.OracleDatabaseReaderException;
 
 public class ContentGetter {
 	
-	public boolean isUsingCache = false;
-
 	private final Logger loggerContentLogger = ContentLogger.getLogger(ContentGetter.class.getName());
 
 	public static String getFileName(final String AURI) {
@@ -50,7 +48,7 @@ public class ContentGetter {
 
 		} else {
 
-			boolean foundInCache = isUsingCache && cache.isUp && cache.exists(idInCache)
+			boolean foundInCache = ContentServlet.USE_CACHE && cache.isUp && cache.exists(idInCache)
 					&& cache.getHashById(idInCache).equals("someHash");
 
 			if (foundInCache) {
@@ -98,7 +96,7 @@ public class ContentGetter {
 				}
 				
 				// увеличение промахов количество в кэш
-				if (isUsingCache && cache.isUp)
+				if (ContentServlet.USE_CACHE && cache.isUp)
 					cache.increaseMisses();
 			}
 

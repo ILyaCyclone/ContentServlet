@@ -27,34 +27,42 @@ public class ContentServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final boolean USE_CACHE = false;
+	
+	public static int requestsNumber = 0;
+
 	private Logger loggerContentServlet;
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
 
 	public void init() {
-		
+
 		ContentLogger.initLogManager();
-		loggerContentServlet =  ContentLogger.getLogger(ContentServlet.class.getName());
-		
-//		try {
-//			cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
-//
-//		} catch (CacheStartFailedException e) {
-//			loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString());
-//		}
+		loggerContentServlet = ContentLogger.getLogger(ContentServlet.class.getName());
+
+		if (USE_CACHE) {
+			try {
+				cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
+
+			} catch (CacheStartFailedException e) {
+				loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString());
+			}
+		}
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		
+
 		Cache cache = null;
+		System.out.println("requests number: " + requestsNumber++);
 
 		try {
-//			cache = cacheInstance.getCache();
-//			long downtime = 0L; // берется из бд
-//			if (cache.isUp)
-//				cache.applyDowntine(downtime);
-
+			if (USE_CACHE) {
+				cache = cacheInstance.getCache();
+				long downtime = 0L; // берется из бд
+				if (cache.isUp)
+					cache.applyDowntine(downtime);
+			}
 			// Инициализация класса со значениями всех параметров
 			RequestParameters requestParameters = null;
 			try {
@@ -76,7 +84,8 @@ public class ContentServlet extends HttpServlet {
 			response.setHeader(ContentDispositionText, respHeader);
 
 			if (requestParameters.getContentType() == null) {
-				requestParameters.contentType = -1; // Временно, чтобы работало------------------------------------------------------
+				requestParameters.contentType = -1; // Временно, чтобы
+													// работало------------------------------------------------------
 			}
 
 			switch (requestParameters.getContentType()) {
@@ -141,14 +150,16 @@ public class ContentServlet extends HttpServlet {
 				try (OutputStream os = response.getOutputStream()) {
 
 					contentGetter.getObject(requestParameters, os, response, cache);
-//					if (cache.isUp) {
-//
-//						CacheStatist statist = cache.getStatistics();
-//
-//						System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
-//								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
-//					}
 
+					if (USE_CACHE) {
+						if (cache.isUp) {
+
+							CacheStatist statist = cache.getStatistics();
+
+							System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
+									+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
+						}
+					}
 				} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
 
 					loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());

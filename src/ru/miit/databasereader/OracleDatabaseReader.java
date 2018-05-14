@@ -24,13 +24,12 @@ import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.OracleResultSet;
 import ru.miit.cache.Cache;
+import ru.miit.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
 
 	private static final String DATASOURCE_NAME = "java:comp/env/jdbc/ds_basic";
 	
-	public boolean isUsingCache = false;
-
 	@Override
 	public DataSource getDataSource() throws NamingException {
 
@@ -267,7 +266,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 
-		if (isUsingCache && cache.isUp) {
+		if (ContentServlet.USE_CACHE && cache.isUp) {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put(DatabaseReaderParamName.contentType, mimeType);
 			parameters.put(DatabaseReaderParamName.type, mimeType);
