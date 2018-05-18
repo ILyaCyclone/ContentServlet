@@ -14,24 +14,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import oracle.jdbc.OracleConnection;
-import oracle.jdbc.OraclePreparedStatement;
-import oracle.jdbc.OracleResultSet;
 import ru.miit.cache.Cache;
+import ru.miit.contentservlet.ContentLogger;
 import ru.miit.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
+	
+	private final Logger loggerDatabaseReader = ContentLogger.getLogger(OracleDatabaseReader.class.getName());
 
 	private static final String DATASOURCE_NAME = "java:comp/env/jdbc/ds_basic";
 	
 	@Override
-	public DataSource getDataSource() throws NamingException {
+	public DataSource getDataSource() { //Обрабатывать местно
 
 		Context initialContext = null;
 		try {
@@ -39,11 +42,15 @@ public class OracleDatabaseReader implements DatabaseReader {
 			DataSource dataSource = (DataSource) initialContext.lookup(DATASOURCE_NAME);
 			return dataSource;
 		} catch (NamingException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
+			loggerDatabaseReader.log(Level.SEVERE, e.toString());
+			return null;
 		} finally {
 			if (initialContext != null) {
-				initialContext.close();
+				try {
+					initialContext.close();
+				} catch (NamingException e) {
+					loggerDatabaseReader.log(Level.WARNING, "InitialContext wasn't closed. " + e.toString());
+				}
 
 			}
 		}
@@ -67,7 +74,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				codeData = resultSet.getString(DatabaseReaderParamName.rstr);
 			}
 
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 		return codeData;
@@ -83,7 +90,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getResTestListDataSQL);
-				OracleResultSet resultSet = (OracleResultSet) preparedStatement.executeQuery()) {
+				ResultSet resultSet = (ResultSet) preparedStatement.executeQuery()) {
 
 			while (resultSet.next()) {
 				data = resultSet.getString(DatabaseReaderParamName.cnt);
@@ -92,7 +99,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				}
 			}
 
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 	}
@@ -120,7 +127,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 
@@ -150,7 +157,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 
@@ -182,7 +189,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 
 			}
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException e) {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 

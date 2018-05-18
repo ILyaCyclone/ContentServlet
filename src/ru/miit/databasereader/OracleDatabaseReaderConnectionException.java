@@ -8,7 +8,7 @@ public class OracleDatabaseReaderConnectionException extends OracleDatabaseReade
 	
     public OracleDatabaseReaderConnectionException(final String message)
     {
-        this(0, "Oracle connection is failed: " + message);
+        this(0, "Сonnection is failed: " + message);
     }
  
     public OracleDatabaseReaderConnectionException(final int errorCode, final String message)

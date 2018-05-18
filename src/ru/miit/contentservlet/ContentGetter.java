@@ -4,7 +4,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -21,7 +20,7 @@ import ru.miit.databasereader.OracleDatabaseReaderException;
 
 public class ContentGetter {
 	
-	private final Logger loggerContentLogger = ContentLogger.getLogger(ContentGetter.class.getName());
+	private final Logger loggerContentGetter = ContentLogger.getLogger(ContentGetter.class.getName());
 
 	public static String getFileName(final String AURI) {
 		Pattern pattern = Pattern.compile("[^/]*[^/]");
@@ -43,7 +42,7 @@ public class ContentGetter {
 		if (requestParameters.getWebMetaId() == null && requestParameters.getFileVersionId() == null
 				&& requestParameters.getClientId() == null && requestParameters.getEntryIdInPhotoalbum() == null) {
 
-			loggerContentLogger.log(Level.SEVERE, "Id of requested object does not contains required parameters. ");
+			loggerContentGetter.log(Level.WARNING, "Id of requested object does not contains required parameters. ");
 			throw new IllegalArgumentException("Id of requested object does not contains required parameters. ");
 
 		} else {

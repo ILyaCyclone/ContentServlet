@@ -1,9 +1,12 @@
 package ru.miit.contentservlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -15,95 +18,57 @@ import javax.naming.NamingException;
 
 public class ContentLogger {
 
-	private static final String DataSourceLogLevel = "java:comp/env/servletContentLogger/level";
-	private static final String DataSourceFileLocation = "java:comp/env/servletContentLogger/fileLocation";
+	public static Level logLevel;
+	public static String logFileName = "appLog.%g.txt";
+	public static String logFolderName;
+	public static String pattern;
+	public static int limit;
 
-	public static Logger logger;
+	public static void initLogManager(ContentServletProperties contentServletProperties) {
 
-	public static void initLogManager() {
-
-		try {
-			LogManager.getLogManager().readConfiguration(ContentServlet.class.getResourceAsStream("logging.properties"));
-		} catch (SecurityException | IOException | NullPointerException e) {
-			e.printStackTrace();
-		}
+		logLevel = contentServletProperties.getLogLevel();
+		logFolderName = contentServletProperties.getPattern();
+		File logFolder = new File(logFolderName);
+		
+		if(!logFolder.exists())
+            logFolder.mkdirs();
+		
+		pattern = logFolder + File.separator + logFileName;
+		limit = contentServletProperties.getLimit();
 
 //		Logger rootLogger = LogManager.getLogManager().getLogger("");
-//		rootLogger.removeHandler(rootLogger.getHandlers()[0]);
-//		Arrays.stream(rootLogger.getHandlers()).forEach(h -> h.setLevel(Level.parse(getLevel())));
-//
-//		System.out.println(getLevel());
+		
+		Logger mainLogger = Logger.getLogger(ContentLogger.class.getName());
+		
+		mainLogger.setLevel(logLevel);
+		
+		Handler handler;
+		try {
+			handler = new FileHandler(pattern, limit, 5, true);
+			Formatter formatter = new SimpleFormatter();
+			handler.setFormatter(formatter);
+		} catch (SecurityException | IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		mainLogger.addHandler(handler);
+		
+		//
+		// Handler[] handlers = rootLogger.getHandlers();
+		// if (handlers.length > 0 && rootLogger.getHandlers()[0] instanceof
+		// ConsoleHandler) {
+		// rootLogger.removeHandler(rootLogger.getHandlers()[0]);
+		// }
+		// Arrays.stream(rootLogger.getHandlers()).forEach(h ->
+		// h.setLevel(Level.parse(logLevel)));
 
 	}
 
 	public static Logger getLogger(String className) {
 
-		
-//		logger = Logger.getLogger(className);
-//
-//		if (logger != null && logger.getHandlers().length == 0) {
-//
-//			FileHandler handler = null;
-//
-//			try {
-//				handler = new FileHandler(getLogFileLocation(), 1024 * 1024, 10, true);
-//				Formatter formatter = new SimpleFormatter();
-//				handler.setFormatter(formatter);
-//			} catch (SecurityException | IOException e) {
-//				throw new RuntimeException(e);
-//			}
-//
-//			logger.addHandler(handler);
-//		}
+		Logger logger = Logger.getLogger(ContentLogger.class.getName() + "." + className);
 
-		return Logger.getLogger(className);
+		return logger;
 
 	}
-
-	private static String getLevel() {
-
-		Context initialContext = null;
-		String level = null;
-		try {
-			initialContext = new InitialContext();
-			level = initialContext.lookup(DataSourceLogLevel).toString();
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		} finally {
-			if (initialContext != null) {
-				try {
-					initialContext.close();
-				} catch (NamingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-
-		return level;
-
-	}
-	
-	private static String getLogFileLocation() {
-
-		Context initialContext = null;
-		String level = null;
-		try {
-			initialContext = new InitialContext();
-			level = initialContext.lookup(DataSourceFileLocation).toString();
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		} finally {
-			if (initialContext != null) {
-				try {
-					initialContext.close();
-				} catch (NamingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-
-		return level;
-
-	}
-
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -27,7 +26,7 @@ public class ContentServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final boolean USE_CACHE = false;
+	public static boolean USE_CACHE;
 	
 	public static int requestsNumber = 0;
 
@@ -38,7 +37,16 @@ public class ContentServlet extends HttpServlet {
 
 	public void init() {
 
-		ContentLogger.initLogManager();
+		ContentServletProperties contentServletProperties = null;
+		try {
+			contentServletProperties = new ContentServletProperties();
+		} catch (ContentServletPropertiesException e) {
+			throw new RuntimeException("Problems with ContentServlet config file. " + e.toString());
+		}
+		
+		USE_CACHE = contentServletProperties.isUseCache();
+		
+		ContentLogger.initLogManager(contentServletProperties);
 		loggerContentServlet = ContentLogger.getLogger(ContentServlet.class.getName());
 
 		if (USE_CACHE) {
@@ -52,9 +60,8 @@ public class ContentServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-
+		
 		Cache cache = null;
-		System.out.println("requests number: " + requestsNumber++);
 
 		try {
 			if (USE_CACHE) {
@@ -161,10 +168,8 @@ public class ContentServlet extends HttpServlet {
 						}
 					}
 				} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
-
 					loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());
 					try {
-						e.printStackTrace();
 						response.sendError(404); // не выполнится из-за уже открытого стрима!
 
 					} catch (IOException e1) {
