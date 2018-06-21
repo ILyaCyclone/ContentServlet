@@ -13,7 +13,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<servlet.version>3.1.0</servlet.version>
-		<cache.version>0.0.1-SNAPSHOT</cache.version>
 		<hikari.version>2.4.13</hikari.version>
 	</properties>
 
@@ -47,12 +46,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP-java7</artifactId>
-			<version>${hikari.version}</version>
-		</dependency>
-
 	<!-- 	<dependency>
 			<groupId>com.oracle.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
@@ -62,7 +55,7 @@
 		<dependency>
 			<groupId>ru.miit.cache</groupId>
 			<artifactId>cache</artifactId>
-			<version>${cache.version}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

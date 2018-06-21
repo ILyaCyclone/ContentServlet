@@ -3,6 +3,7 @@ package ru.miit.contentservlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,18 +20,19 @@ import ru.miit.cacheexception.CacheGetException;
 import ru.miit.cacheexception.CacheStartFailedException;
 import ru.miit.databasereader.OracleDatabaseReaderException;
 
-@WebServlet("/ContentServlet/*")
+@WebServlet({"/content/*", "/content/secure/*"})
 public class ContentServlet extends HttpServlet {
 
+	public ContentGetter contentGetter = new ContentGetter();
 	public CacheInstance cacheInstance;
 
 	private static final long serialVersionUID = 1L;
 
 	public static boolean USE_CACHE;
-	
-	public static int requestsNumber = 0;
 
 	private Logger loggerContentServlet;
+	
+	private int numOfRequests = 0;
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
@@ -43,16 +45,15 @@ public class ContentServlet extends HttpServlet {
 		} catch (ContentServletPropertiesException e) {
 			throw new RuntimeException("Problems with ContentServlet config file. " + e.toString());
 		}
-		
+
 		USE_CACHE = contentServletProperties.isUseCache();
-		
+
 		ContentLogger.initLogManager(contentServletProperties);
 		loggerContentServlet = ContentLogger.getLogger(ContentServlet.class.getName());
 
 		if (USE_CACHE) {
 			try {
 				cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
-
 			} catch (CacheStartFailedException e) {
 				loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString());
 			}
@@ -60,129 +61,120 @@ public class ContentServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		
-		Cache cache = null;
 
-		try {
-			if (USE_CACHE) {
-				cache = cacheInstance.getCache();
-				long downtime = 0L; // берется из бд
-				if (cache.isUp)
-					cache.applyDowntine(downtime);
-			}
-			// Инициализация класса со значениями всех параметров
-			RequestParameters requestParameters = null;
-			try {
-				requestParameters = new RequestParameters(request.getParameterMap());
-			} catch (NumberFormatException e) {
-
-				loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
-				try {
-					response.sendError(404);
-				} catch (IOException e1) {
-					loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
-				}
-			}
-
-			ContentGetter contentGetter = new ContentGetter();
-
-			// Задание Header
-			String respHeader = contentGetter.getHeader(request, requestParameters.getContentDisposition());
-			response.setHeader(ContentDispositionText, respHeader);
-
-			if (requestParameters.getContentType() == null) {
-				requestParameters.contentType = -1; // Временно, чтобы
-													// работало------------------------------------------------------
-			}
-
-			switch (requestParameters.getContentType()) {
-			case 1: {
-
-				response.setContentType(contentTypeHTML);
-
-				String codeData = null;
-
-				try (PrintWriter printWriter = response.getWriter()) {
-
-					printWriter.println("<html><body>");
-					try {
-
-						codeData = contentGetter.getCodeData(requestParameters.getWebMetaId());
-
-						request.setAttribute("codeData", codeData);
-
-						printWriter.println("<p>" + codeData + "</p>");
-
-					} catch (OracleDatabaseReaderException e) {
-
-						printWriter.println("<h3>Error</h3>");
-						printWriter.println("<p>" + e.getMessage() + "</p>");
-						loggerContentServlet.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString());
-
-					} finally {
-						printWriter.println("</body></html>");
-					}
-				} catch (IOException e) {
-					loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
-				}
-
-				break;
-			}
-			case 777: {
-
-				response.setContentType(contentTypeHTML);
-				try (PrintWriter printWriter = response.getWriter()) {
-
-					printWriter.println("<html><body>");
-					try {
-
-						contentGetter.getResTestListData(printWriter);
-
-					} catch (OracleDatabaseReaderException e) {
-
-						printWriter.println("<h3>Error</h3>");
-						printWriter.println("<p>" + e.getMessage() + "</p>");
-						loggerContentServlet.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString());
-
-					} finally {
-						printWriter.println("</body></html>");
-					}
-				} catch (IOException e) {
-					loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
-				}
-				break;
-			}
-			default: {
-
-				try (OutputStream os = response.getOutputStream()) {
-
-					contentGetter.getObject(requestParameters, os, response, cache);
-
-					if (USE_CACHE) {
-						if (cache.isUp) {
-
-							CacheStatist statist = cache.getStatistics();
-
-							System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
-									+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
-						}
-					}
-				} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
-					loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());
-					try {
-						response.sendError(404); // не выполнится из-за уже открытого стрима!
-
-					} catch (IOException e1) {
-						loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
-					}
-
-				}
-			}
-			}
-		} finally {
-			if (cache != null)
-				cache.close();
+		System.out.println(numOfRequests++);
+		Cache cache = cacheInstance.getCache();
+		if (USE_CACHE) {
+			cache = cacheInstance.getCache();
+			long downtime = 0L; // берется из бд
+			if (cache.isUp)
+				cache.applyDowntine(downtime);
 		}
+		// Инициализация класса со значениями всех параметров
+		RequestParameters requestParameters = null;
+		try {
+			requestParameters = new RequestParameters(request.getParameterMap());
+		} catch (NumberFormatException e) {
+
+			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
+			try {
+				response.sendError(404);
+			} catch (IOException e1) {
+				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
+			}
+		}
+
+		System.out.println("If-Modified-Since: " + request.getHeader("If-Modified-Since") + " If-None-Match: " + request.getHeader("If-None-Match") + " Last-Modified: " + request.getHeader("Last-Modified"));
+
+		// Задание Header
+		String respHeader = contentGetter.getHeader(request, requestParameters.getContentDisposition());
+		response.setHeader(ContentDispositionText, respHeader);
+
+		if (requestParameters.getContentType() == null) {
+			requestParameters.contentType = -1; // Временно, чтобы
+												// работало------------------------------------------------------
+		}
+
+		switch (requestParameters.getContentType()) {
+		case 1: {
+
+			response.setContentType(contentTypeHTML);
+
+			String codeData = null;
+
+			try (PrintWriter printWriter = response.getWriter()) {
+
+				printWriter.println("<html><body>");
+				try {
+
+					codeData = contentGetter.getCodeData(requestParameters.getWebMetaId());
+
+					request.setAttribute("codeData", codeData);
+
+					printWriter.println("<p>" + codeData + "</p>");
+
+				} catch (OracleDatabaseReaderException e) {
+
+					printWriter.println("<h3>Error</h3>");
+					printWriter.println("<p>" + e.getMessage() + "</p>");
+					loggerContentServlet.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString());
+
+				} finally {
+					printWriter.println("</body></html>");
+				}
+			} catch (IOException e) {
+				loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
+			}
+
+			break;
+		}
+		case 777: {
+
+			response.setContentType(contentTypeHTML);
+			try (PrintWriter printWriter = response.getWriter()) {
+
+				printWriter.println("<html><body>");
+				try {
+
+					contentGetter.getResTestListData(printWriter);
+
+				} catch (OracleDatabaseReaderException e) {
+
+					printWriter.println("<h3>Error</h3>");
+					printWriter.println("<p>" + e.getMessage() + "</p>");
+					loggerContentServlet.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString());
+
+				} finally {
+					printWriter.println("</body></html>");
+				}
+			} catch (IOException e) {
+				loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString());
+			}
+			break;
+		}
+		default: {
+
+			try (OutputStream os = response.getOutputStream()) {
+
+				contentGetter.getObject(requestParameters, os, response, cache);
+
+				if (USE_CACHE) {
+					if (cache.isUp) {
+
+						CacheStatist statist = cache.getStatistics();
+
+						System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
+								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
+					}
+				}
+			} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
+				loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());
+
+			}
+		}
+		}
+		
+//		cache.shutdown();
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)

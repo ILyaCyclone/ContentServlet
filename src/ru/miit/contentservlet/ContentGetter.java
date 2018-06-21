@@ -22,12 +22,14 @@ public class ContentGetter {
 	
 	private final Logger loggerContentGetter = ContentLogger.getLogger(ContentGetter.class.getName());
 
+	public static String mask = "[^/]*[^/]";
+	
 	public static String getFileName(final String AURI) {
-		Pattern pattern = Pattern.compile("[^/]*[^/]");
+		Pattern pattern = Pattern.compile(mask);
 		Matcher matcher = pattern.matcher(AURI);
-		String rS = "";
+		String rS = null;
 		while (matcher.find()) {
-			rS += matcher.group(matcher.groupCount());
+			rS = matcher.group(matcher.groupCount());
 		}
 		return rS;
 	}

@@ -268,8 +268,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		String mimeType = resultSet.getString(DatabaseReaderParamName.mime);
 
-		response.setContentType(mimeType);
+//		response.setContentType(mimeType);
 		response.setContentLength(blobSize);
+		response.setHeader("Last-Modified", lastModifiedTime.toString());
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 
@@ -281,8 +282,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			parameters.put(DatabaseReaderParamName.hash, "someHash");
 			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
 				cache.putAsync(idInCache, parameters);
-				writeToTwoStreams(blobObject, osServlet, cacheOs);
-				// future.thenRun(() -> cache.allowAccess(idInCache));
+				cache.writeToTwoStreams(idInCache, blobObject, osServlet, cacheOs);
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());
