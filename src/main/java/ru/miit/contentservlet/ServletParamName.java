@@ -2,6 +2,10 @@ package ru.miit.contentservlet;
 
 public class ServletParamName {
 
+	private ServletParamName() {
+		new AssertionError(ServletParamName.class.getName() + " shouldn't be initialised");
+	}
+
 	// Названия параметров из БД
 	// ID web метатермина версии контента
 	public static final String webMetaId = "id_wm";
@@ -26,14 +30,14 @@ public class ServletParamName {
 	public static final String height = "SHeight";
 
 	public static final String cacheID = "id";
-	
+
 	public static final String useCache = "useCache";
 
 	public static final String logger = "logger";
-	
+
 	public static final String logLevel = "logLevel";
 
 	public static final String logFolder = "logFolder";
-	
+
 	public static final String logLimit = "logLimit";
 }

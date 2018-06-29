@@ -11,30 +11,30 @@ import javax.servlet.http.HttpServletRequest;
 
 public class NameCreator {
 
-	final static public String hashAlgorithm = "MD5";
-	final static public String charset = "UTF-8";
+	final static private String HASH_ALGORITHM = "MD5";
+	final static private String CHARSET = "UTF-8";
 
 	public String createWithParameters(final RequestParameters requestParameters) {
-		String id = "";
+		StringBuilder builder = new StringBuilder();
 		if (requestParameters.getWebMetaId() != null)
-			id += "wm=" + requestParameters.getWebMetaId() + "-";
+			builder.append("wm=").append(requestParameters.getWebMetaId()).append("-");
 
 		if (requestParameters.getFileVersionId() != null)
-			id += "fw=" + requestParameters.getFileVersionId() + "-";
+			builder.append("fw=").append(requestParameters.getFileVersionId()).append("-");
 
 		if (requestParameters.getClientId() != null)
-			id += "cid=" + requestParameters.getClientId() + "-";
+			builder.append("cid=").append(requestParameters.getClientId()).append("-");
 
 		if (requestParameters.getEntryIdInPhotoalbum() != null)
-			id += "entInPhAl=" + requestParameters.getEntryIdInPhotoalbum() + "-";
+			builder.append("entInPhAl=").append(requestParameters.getEntryIdInPhotoalbum()).append("-");
 
 		if (requestParameters.getWidth() != null)
-			id += "width=" + requestParameters.getWidth() + "-";
+			builder.append("width=").append(requestParameters.getWidth()).append("-");
 
 		if (requestParameters.getHeight() != null)
-			id += "height=" + requestParameters.getHeight() + "-";
+			builder.append("height=").append(requestParameters.getHeight()).append("-");
 
-		return id;
+		return builder.toString();
 	}
 
 	public String createNameByURL(final HttpServletRequest request) {
@@ -45,15 +45,15 @@ public class NameCreator {
 	public String createNameByURLEncoder(final HttpServletRequest request) throws UnsupportedEncodingException {
 
 		String url = request.getQueryString();
-		URLEncoder.encode(url, charset);
+		URLEncoder.encode(url, CHARSET);
 
 		return url;
 	}
 
 	public String md5(final String s) {
 		try {
-			MessageDigest m = MessageDigest.getInstance(hashAlgorithm);
-			m.update(s.getBytes(charset));
+			MessageDigest m = MessageDigest.getInstance(HASH_ALGORITHM);
+			m.update(s.getBytes(CHARSET));
 			byte[] digest = m.digest();
 			BigInteger bigInt = new BigInteger(1, digest);
 			return bigInt.toString(16);

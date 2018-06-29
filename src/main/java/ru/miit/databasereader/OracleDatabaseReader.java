@@ -57,11 +57,11 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	}
 
-	private static final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = ?";
-
 	@Override
 	public String getCodeData(final int webMetaId) throws OracleDatabaseReaderException {
 
+		final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = ?";
+		
 		String codeData;
 
 		try (Connection connection = getDataSource().getConnection();
@@ -80,11 +80,11 @@ public class OracleDatabaseReader implements DatabaseReader {
 		return codeData;
 	}
 
-	private static final String getResTestListDataSQL = "select wpms_cm_wp.get_ContentURL(t.id_web_metaterm, null, 2) cnt from actual_content_version_wp t\n";
-
 	@Override
 	public void getResTestListData(PrintWriter printWriter) throws OracleDatabaseReaderException {
 
+		final String getResTestListDataSQL = "select wpms_cm_wp.get_ContentURL(t.id_web_metaterm, null, 2) cnt from actual_content_version_wp t\n";
+		
 		String data;
 
 		try (Connection connection = getDataSource().getConnection();
@@ -103,12 +103,12 @@ public class OracleDatabaseReader implements DatabaseReader {
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 	}
-
-	private static final String getBinaryDataByMetaIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
-
+	
 	@Override
 	public void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
+		
+		final String getBinaryDataByMetaIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
@@ -133,12 +133,12 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	}
 
-	private static final String getBinaryDataByFileVersionIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
-
 	@Override
 	public void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
 
+		final String getBinaryDataByFileVersionIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+		
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
@@ -163,12 +163,12 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	}
 
-	private final static String getBinaryDataByClientIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
-
 	@Override
 	public void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
 
+		final String getBinaryDataByClientIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+		
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByClientIdSQL)) {
