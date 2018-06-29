@@ -1,7 +1,7 @@
 Для запуска приложения необходимо в JNDI свойство "contentServlet/configFileLocation", которое указывает на нахождение конфигурационного файла для ContentServlet.
 Также потребуется "jdbc/ds_basic" для подключения к бд.
 
-Пример настройки (в файле context.xml для tomcat) для tomcat и oracle:
+Пример настройки для tomcat (в файле context.xml) и oracle:
 
 	<Environment type="java.lang.String"
 		value="C:\Users\anotherUser\Desktop\cache\ContentServletConfig.xml"
