@@ -74,11 +74,7 @@ public class ContentServlet extends HttpServlet {
 		} catch (NumberFormatException e) {
 
 			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
-			try {
-				response.sendError(404);
-			} catch (IOException e1) {
-				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
-			}
+
 		}
 
 		// Задание Header

@@ -21,7 +21,7 @@ public class ContentServletProperties {
 
 //	Logger rootLogger = LogManager.getLogManager().getLogger(""); // Это корневой логгер, самый главный. Сделан по причине еще отсуствия логгера приложения, но необходимости логировать ошибки при инициализации параметров
 	
-	public final static String CONFIGLOCATION_NAME = "java:comp/env/contentServlet/configFileileLocation";
+	public final static String CONFIGLOCATION_NAME = "java:comp/env/contentServlet/configFileLocation";
 	
 	private final static Level defaultLogLevel = Level.WARNING;
 	private final static int defaultLogLimit = 1000000;
