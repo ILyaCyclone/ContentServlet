@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import ru.miit.cache.Cache;
 import ru.miit.cache.CacheInstance;
 import ru.miit.cache.CacheStatist;
-import ru.miit.cacheexception.CacheGetException;
-import ru.miit.cacheexception.CacheStartFailedException;
+import ru.miit.cache.cacheexception.CacheGetException;
+import ru.miit.cache.cacheexception.CacheStartFailedException;
 import ru.miit.databasereader.OracleDatabaseReaderException;
 
 @WebServlet({"/content/*", "/content/secure/*"})

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ru.miit.cache.Cache;
-import ru.miit.cacheexception.CacheGetException;
+import ru.miit.cache.cacheexception.CacheGetException;
 import ru.miit.databasereader.DatabaseReader;
 import ru.miit.databasereader.OracleDatabaseReader;
 import ru.miit.databasereader.OracleDatabaseReaderException;
