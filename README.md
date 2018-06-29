@@ -14,3 +14,15 @@
 		connectionProperties="oracle.net.READ_TIMEOUT=5000;"
 		password="somePassword" username="someUsername" maxWaitMillis="10000"
 		maxIdle="300" auth="Container" />
+
+Пока что конфигурационный файл включание в себя функцию включения/выключения кэша, тэг "useCache" и настройки логгирования:
+
+	<ContentServlet>
+		<useCache>false</useCache>
+	
+		<logger>
+			<logLevel>WARNING</logLevel>
+			<logFolder>C:\Users\anotherUser\Desktop\cache\log\appLog</logFolder>
+			<logLimit>1000000</logLimit>
+		</logger>
+	</ContentServlet>
