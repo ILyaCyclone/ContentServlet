@@ -268,7 +268,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		String mimeType = resultSet.getString(DatabaseReaderParamName.mime);
 
-//		response.setContentType(mimeType);
+		response.setContentType(mimeType);
 		response.setContentLength(blobSize);
 		response.setHeader("Last-Modified", lastModifiedTime.toString());
 

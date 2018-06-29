@@ -31,8 +31,6 @@ public class ContentServlet extends HttpServlet {
 	public static boolean USE_CACHE;
 
 	private Logger loggerContentServlet;
-	
-	private int numOfRequests = 0;
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
@@ -62,8 +60,7 @@ public class ContentServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 
-		System.out.println(numOfRequests++);
-		Cache cache = cacheInstance.getCache();
+		Cache cache = null;
 		if (USE_CACHE) {
 			cache = cacheInstance.getCache();
 			long downtime = 0L; // берется из бд
@@ -84,15 +81,13 @@ public class ContentServlet extends HttpServlet {
 			}
 		}
 
-		System.out.println("If-Modified-Since: " + request.getHeader("If-Modified-Since") + " If-None-Match: " + request.getHeader("If-None-Match") + " Last-Modified: " + request.getHeader("Last-Modified"));
-
 		// Задание Header
 		String respHeader = contentGetter.getHeader(request, requestParameters.getContentDisposition());
 		response.setHeader(ContentDispositionText, respHeader);
 
+		// Временно чтобы работало
 		if (requestParameters.getContentType() == null) {
-			requestParameters.contentType = -1; // Временно, чтобы
-												// работало------------------------------------------------------
+			requestParameters.contentType = -1; 
 		}
 
 		switch (requestParameters.getContentType()) {
