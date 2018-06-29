@@ -16,6 +16,9 @@
 		maxIdle="300" auth="Container" />
 
 Пока что конфигурационный файл включание в себя функцию включения/выключения кэша, тэг "useCache" и настройки логгирования:
+logLevel - уровень логгирования;
+logFolder - местонахождение файла лога;
+logLimit - максимальный размер файла лога;
 
 	<ContentServlet>
 		<useCache>false</useCache>
@@ -26,3 +29,5 @@
 			<logLimit>1000000</logLimit>
 		</logger>
 	</ContentServlet>
+
+Логирование происходит с помощью инструмента java.util.logging.
