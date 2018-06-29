@@ -10,7 +10,7 @@
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>tomcat</role-name>
-		</auth-constraint>
+		</auth-constraint> 
 
 		<user-data-constraint>
 			<!-- transport-guarantee can be CONFIDENTIAL, INTEGRAL, or NONE -->
