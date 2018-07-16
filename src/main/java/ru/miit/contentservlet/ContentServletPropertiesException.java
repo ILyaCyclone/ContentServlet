@@ -1,6 +1,6 @@
 package ru.miit.contentservlet;
 
-public class ContentServletPropertiesException extends Exception {
+class ContentServletPropertiesException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

@@ -1,4 +1,4 @@
-package ru.miit.databasereader;
+package ru.miit.contentservlet.databasereader;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 

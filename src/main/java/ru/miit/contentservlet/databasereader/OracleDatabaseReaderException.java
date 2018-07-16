@@ -1,4 +1,4 @@
-package ru.miit.databasereader;
+package ru.miit.contentservlet.databasereader;
 
 public class OracleDatabaseReaderException extends Exception {
 

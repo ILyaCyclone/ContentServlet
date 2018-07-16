@@ -1,6 +1,6 @@
-package ru.miit.databasereader;
+package ru.miit.contentservlet.databasereader;
 
-public class OracleDatabaseReaderConnectionException extends OracleDatabaseReaderException{
+class OracleDatabaseReaderConnectionException extends OracleDatabaseReaderException{
 	
 	private static final long serialVersionUID = 1L;
 

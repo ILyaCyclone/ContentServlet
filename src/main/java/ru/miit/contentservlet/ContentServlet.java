@@ -3,7 +3,6 @@ package ru.miit.contentservlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,13 +17,13 @@ import ru.miit.cache.CacheInstance;
 import ru.miit.cache.CacheStatist;
 import ru.miit.cache.cacheexception.CacheGetException;
 import ru.miit.cache.cacheexception.CacheStartFailedException;
-import ru.miit.databasereader.OracleDatabaseReaderException;
+import ru.miit.contentservlet.databasereader.OracleDatabaseReaderException;
 
 @WebServlet({"/content/*", "/content/secure/*"})
 public class ContentServlet extends HttpServlet {
 
-	public ContentGetter contentGetter = new ContentGetter();
-	public CacheInstance cacheInstance;
+	private ContentGetter contentGetter = new ContentGetter();
+	private CacheInstance cacheInstance;
 
 	private static final long serialVersionUID = 1L;
 
@@ -69,28 +68,29 @@ public class ContentServlet extends HttpServlet {
 		}
 		// Инициализация класса со значениями всех параметров
 		RequestParameters requestParameters = null;
-		try {
+//		try {
 			requestParameters = new RequestParameters(request.getParameterMap());
-		} catch (NumberFormatException e) {
-
-			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
-			try {
-				response.sendError(404);
-			} catch (IOException e1) {
-				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
-			}
-		}
+//		} catch (NumberFormatException e) {
+//
+//			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
+//			try {
+//				response.sendError(404);
+//			} catch (IOException e1) {
+//				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
+//			}
+//		}
 
 		// Задание Header
 		String respHeader = contentGetter.getHeader(request, requestParameters.getContentDisposition());
 		response.setHeader(ContentDispositionText, respHeader);
 
 		// Временно чтобы работало
-		if (requestParameters.getContentType() == null) {
-			requestParameters.contentType = -1; 
+		Integer contentType = requestParameters.getContentType();
+		if (contentType == null) {
+			contentType = -1; 
 		}
 
-		switch (requestParameters.getContentType()) {
+		switch (contentType) {
 		case 1: {
 
 			response.setContentType(contentTypeHTML);

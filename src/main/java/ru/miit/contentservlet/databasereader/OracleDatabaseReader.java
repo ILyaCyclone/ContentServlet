@@ -1,4 +1,4 @@
-package ru.miit.databasereader;
+package ru.miit.contentservlet.databasereader;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

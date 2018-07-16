@@ -2,17 +2,17 @@ package ru.miit.contentservlet;
 
 import java.util.Map;
 
-public class RequestParameters {
+class RequestParameters {
 
-	public Integer contentDisposition;
-	public Integer contentType;
+	private Integer contentDisposition;
+	private Integer contentType;
 	
-	public Integer webMetaId;
-	public Integer fileVersionId;
-	public Integer clientId;
-	public Integer entryIdInPhotoalbum;
-	public String width;
-	public String height;
+	private Integer webMetaId;
+	private Integer fileVersionId;
+	private Integer clientId;
+	private Integer entryIdInPhotoalbum;
+	private String width;
+	private String height;
 	
 	public static final String webMetaIdParamName = "webMetaId";
 	public static final String fileVersionIdParamName = "fileVersionId";
@@ -22,7 +22,7 @@ public class RequestParameters {
 	public static final String heightParamName = "height";
 	
 	
-	public RequestParameters(Map<String, String[]> parametersMap) throws NumberFormatException {
+	public RequestParameters(Map<String, String[]> parametersMap) {
 
 		contentDisposition = getIntValue(parametersMap, ServletParamName.contentDisposition);
 		contentType = getIntValue(parametersMap, ServletParamName.contentType);
@@ -79,11 +79,15 @@ public class RequestParameters {
 		return value;
 	}
 
-	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName) throws NumberFormatException {
+	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName) {
 
 		Integer value = null;
 		if (parametersMap.containsKey(parameterName)) {
-			value = Integer.parseInt(parametersMap.get(parameterName)[0]);
+			try {
+				value = Integer.parseInt(parametersMap.get(parameterName)[0]);
+			} catch (NumberFormatException e) {
+				value = null;
+			}
 		}
 
 		return value;

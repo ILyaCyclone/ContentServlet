@@ -14,14 +14,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import ru.miit.cache.Cache;
 import ru.miit.cache.cacheexception.CacheGetException;
-import ru.miit.databasereader.DatabaseReader;
-import ru.miit.databasereader.OracleDatabaseReader;
-import ru.miit.databasereader.OracleDatabaseReaderException;
+import ru.miit.contentservlet.databasereader.DatabaseReader;
+import ru.miit.contentservlet.databasereader.OracleDatabaseReader;
+import ru.miit.contentservlet.databasereader.OracleDatabaseReaderException;
 
 public class ContentGetter {
 	
 	private final Logger loggerContentGetter = ContentLogger.getLogger(ContentGetter.class.getName());
-
+ 
 	public static String mask = "[^/]*[^/]";
 	
 	public static String getFileName(final String AURI) {
@@ -63,7 +63,7 @@ public class ContentGetter {
 
 				DatabaseReader databaseReader = new OracleDatabaseReader();
 
-				if (requestParameters.webMetaId != null) {
+				if (requestParameters.getWebMetaId() != null) {
 
 					queryParameters.put(RequestParameters.webMetaIdParamName, requestParameters.getWebMetaId());
 					queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
@@ -72,7 +72,7 @@ public class ContentGetter {
 					databaseReader.getBinaryDataByMetaId(queryParameters, os, response, cache, idInCache);
 
 				} else {
-					if (requestParameters.fileVersionId != null) {
+					if (requestParameters.getFileVersionId() != null) {
 
 						queryParameters.put(RequestParameters.fileVersionIdParamName, requestParameters.getFileVersionId());
 						queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
@@ -82,7 +82,7 @@ public class ContentGetter {
 
 					} else {
 
-						if (requestParameters.clientId != null || requestParameters.entryIdInPhotoalbum != null) {
+						if (requestParameters.getClientId() != null || requestParameters.getEntryIdInPhotoalbum() != null) {
 
 							queryParameters.put(RequestParameters.clientIdParamName, requestParameters.getClientId());
 							queryParameters.put(RequestParameters.entryIdInPhotoalbumParamName,

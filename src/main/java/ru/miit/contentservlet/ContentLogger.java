@@ -2,27 +2,20 @@ package ru.miit.contentservlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 public class ContentLogger {
 
-	public static Level logLevel;
-	public static String logFileName = "appLog.%g.txt";
-	public static String logFolderName;
-	public static String pattern;
-	public static int limit;
+	private static Level logLevel;
+	private static String logFileName = "appLog.%g.txt";
+	private static String logFolderName;
+	private static String pattern;
+	private static int limit;
 
 	public static void initLogManager(ContentServletProperties contentServletProperties) {
 

@@ -1,6 +1,6 @@
 package ru.miit.contentservlet;
 
-public class ServletParamName {
+class ServletParamName {
 
 	private ServletParamName() {
 		new AssertionError(ServletParamName.class.getName() + " shouldn't be initialised");

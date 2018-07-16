@@ -9,7 +9,7 @@ import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class NameCreator {
+class NameCreator {
 
 	final static private String HASH_ALGORITHM = "MD5";
 	final static private String CHARSET = "UTF-8";
@@ -17,23 +17,23 @@ public class NameCreator {
 	public String createWithParameters(final RequestParameters requestParameters) {
 		StringBuilder builder = new StringBuilder();
 		if (requestParameters.getWebMetaId() != null)
-			builder.append("wm=").append(requestParameters.getWebMetaId()).append("-");
+			builder.append(String.format("wm=%s-", requestParameters.getWebMetaId()));
 
 		if (requestParameters.getFileVersionId() != null)
-			builder.append("fw=").append(requestParameters.getFileVersionId()).append("-");
+			builder.append(String.format("fw=%s-", requestParameters.getFileVersionId()));
 
 		if (requestParameters.getClientId() != null)
-			builder.append("cid=").append(requestParameters.getClientId()).append("-");
-
+			builder.append(String.format("cid=%s-", requestParameters.getClientId()));
+		
 		if (requestParameters.getEntryIdInPhotoalbum() != null)
-			builder.append("entInPhAl=").append(requestParameters.getEntryIdInPhotoalbum()).append("-");
-
+			builder.append(String.format("entInPhAl=%s-", requestParameters.getEntryIdInPhotoalbum()));
+		
 		if (requestParameters.getWidth() != null)
-			builder.append("width=").append(requestParameters.getWidth()).append("-");
-
+			builder.append(String.format("width=%s-", requestParameters.getWidth()));
+		
 		if (requestParameters.getHeight() != null)
-			builder.append("height=").append(requestParameters.getHeight()).append("-");
-
+			builder.append(String.format("height=%s-", requestParameters.getHeight()));
+		
 		return builder.toString();
 	}
 
