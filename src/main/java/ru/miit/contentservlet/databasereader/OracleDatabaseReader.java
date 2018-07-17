@@ -214,7 +214,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 
 	@Override
-	public void writeToStream(Blob blobData, OutputStream os) throws OracleDatabaseReaderServletOSException {
+	public void writeToStream(Blob blobData, OutputStream os) throws DatabaseReaderWriteToStreamException {
 
 		int length;
 		int bufSize = 4096;
@@ -225,14 +225,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 			os.flush();
 		} catch (IOException | SQLException e) {
-			throw new OracleDatabaseReaderServletOSException(e.getMessage());
+			throw new DatabaseReaderWriteToStreamException(e.getMessage());
 		}
 
 	}
 
 	@Override
 	public synchronized void writeToTwoStreams(Blob blobData, OutputStream os1, FileOutputStream os2)
-			throws OracleDatabaseReaderServletOSException {
+			throws DatabaseReaderWriteToStreamException {
 
 		int length;
 		int bufSize = 4096;
@@ -247,7 +247,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			os1.flush();
 			os2.flush();
 		} catch (IOException | SQLException e) {
-			throw new OracleDatabaseReaderServletOSException(e.getMessage());
+			throw new DatabaseReaderWriteToStreamException(e.getMessage());
 		}
 
 	}
@@ -255,7 +255,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
 			Cache cache, String idInCache)
-			throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException {
+			throws SQLException, OracleDatabaseReaderException {
 		resultSet.next();
 
 		int blobSize = resultSet.getInt(DatabaseReaderParamName.bsize);
@@ -291,7 +291,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 		} else {
 			try {
 				writeToStream(blobObject, osServlet);
-			} catch (OracleDatabaseReaderServletOSException e) {
+			} catch (DatabaseReaderWriteToStreamException e) {
 				throw new OracleDatabaseReaderException(e.getMessage());
 			}
 		}

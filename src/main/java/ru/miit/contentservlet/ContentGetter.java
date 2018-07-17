@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import ru.miit.cache.Cache;
 import ru.miit.cache.cacheexception.CacheGetException;
 import ru.miit.contentservlet.databasereader.DatabaseReader;
+import ru.miit.contentservlet.databasereader.DatabaseReaderException;
 import ru.miit.contentservlet.databasereader.OracleDatabaseReader;
 import ru.miit.contentservlet.databasereader.OracleDatabaseReaderException;
 
@@ -35,7 +36,7 @@ public class ContentGetter {
 	}
 
 	public void getObject(final RequestParameters requestParameters, OutputStream os, HttpServletResponse response,
-			Cache cache) throws CacheGetException, OracleDatabaseReaderException {
+			Cache cache) throws CacheGetException, DatabaseReaderException {
 		
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
@@ -124,7 +125,7 @@ public class ContentGetter {
 
 	}
 
-	public String getCodeData(final int WebMetaId) throws OracleDatabaseReaderException {
+	public String getCodeData(final int WebMetaId) throws DatabaseReaderException {
 
 		String answer = null;
 
@@ -135,7 +136,7 @@ public class ContentGetter {
 
 	}
 
-	public void getResTestListData(PrintWriter printWriter) throws OracleDatabaseReaderException {
+	public void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException {
 
 		DatabaseReader databaseReader = new OracleDatabaseReader();
 

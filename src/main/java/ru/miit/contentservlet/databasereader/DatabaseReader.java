@@ -18,32 +18,32 @@ public interface DatabaseReader {
 
 	DataSource getDataSource();
 
-	String getCodeData(final int webMetaId) throws OracleDatabaseReaderException;
+	String getCodeData(final int webMetaId) throws DatabaseReaderException;
 
-	void getResTestListData(PrintWriter printWriter) throws OracleDatabaseReaderException;
+	void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException;
 
 	void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
-			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
+			throws DatabaseReaderException;
 
 	void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
-			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
+			throws DatabaseReaderException;
 
 	void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
-			throws OracleDatabaseReaderException, OracleDatabaseReaderServletOSException;
+			throws DatabaseReaderException;
 
 	public void setParameterInt(PreparedStatement preparedStatement, int filed, Object value) throws SQLException;
 
 	public void setParameterStr(PreparedStatement preparedStatement, int filed, Object value) throws SQLException;
 
-	void writeToStream(Blob blobData, OutputStream os) throws OracleDatabaseReaderServletOSException;
+	void writeToStream(Blob blobData, OutputStream os) throws DatabaseReaderWriteToStreamException;
 
 	void writeToTwoStreams(Blob blobData, OutputStream os1, FileOutputStream os2)
-			throws OracleDatabaseReaderServletOSException;
+			throws DatabaseReaderWriteToStreamException;
 
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
 			Cache cache, String idInCache)
-			throws SQLException, OracleDatabaseReaderServletOSException, OracleDatabaseReaderException;
+			throws SQLException, DatabaseReaderException;
 }

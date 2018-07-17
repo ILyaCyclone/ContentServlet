@@ -1,17 +1,17 @@
 package ru.miit.contentservlet.databasereader;
 
-public class OracleDatabaseReaderException extends DatabaseReaderException {
+public class DatabaseReaderException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
 	private int errorCode;
 	
-    public OracleDatabaseReaderException(final String message)
+    public DatabaseReaderException(final String message)
     {
         this(0, "Problems with fetching an object from DB: " + message);
     }
  
-    public OracleDatabaseReaderException(final int errorCode, final String message)
+    public DatabaseReaderException(final int errorCode, final String message)
     {
         super(message);
 

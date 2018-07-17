@@ -17,6 +17,7 @@ import ru.miit.cache.CacheInstance;
 import ru.miit.cache.CacheStatist;
 import ru.miit.cache.cacheexception.CacheGetException;
 import ru.miit.cache.cacheexception.CacheStartFailedException;
+import ru.miit.contentservlet.databasereader.DatabaseReaderException;
 import ru.miit.contentservlet.databasereader.OracleDatabaseReaderException;
 
 @WebServlet({"/content/*", "/content/secure/*"})
@@ -108,7 +109,7 @@ public class ContentServlet extends HttpServlet {
 
 					printWriter.println("<p>" + codeData + "</p>");
 
-				} catch (OracleDatabaseReaderException e) {
+				} catch (DatabaseReaderException e) {
 
 					printWriter.println("<h3>Error</h3>");
 					printWriter.println("<p>" + e.getMessage() + "</p>");
@@ -133,7 +134,7 @@ public class ContentServlet extends HttpServlet {
 
 					contentGetter.getResTestListData(printWriter);
 
-				} catch (OracleDatabaseReaderException e) {
+				} catch (DatabaseReaderException e) {
 
 					printWriter.println("<h3>Error</h3>");
 					printWriter.println("<p>" + e.getMessage() + "</p>");
@@ -162,7 +163,7 @@ public class ContentServlet extends HttpServlet {
 								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
 					}
 				}
-			} catch (CacheGetException | OracleDatabaseReaderException | IOException e) {
+			} catch (CacheGetException | DatabaseReaderException | IOException e) {
 				loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());
 
 			}
