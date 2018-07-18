@@ -2,8 +2,6 @@ package ru.miit.contentservlet;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -14,19 +12,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import ru.miit.cache.Cache;
 import ru.miit.cache.cacheexception.CacheGetException;
+import ru.miit.contentservlet.databasereader.DatabaseQueryParameters;
 import ru.miit.contentservlet.databasereader.DatabaseReader;
 import ru.miit.contentservlet.databasereader.DatabaseReaderException;
+import ru.miit.contentservlet.databasereader.DatabaseReaderNoDataException;
 import ru.miit.contentservlet.databasereader.OracleDatabaseReader;
-import ru.miit.contentservlet.databasereader.OracleDatabaseReaderException;
 
 public class ContentGetter {
 	
 	private final Logger loggerContentGetter = ContentLogger.getLogger(ContentGetter.class.getName());
  
-	public static String mask = "[^/]*[^/]";
+	private DatabaseReader databaseReader = new OracleDatabaseReader();
+	
+	private final static String MASK = "[^/]*[^/]";
 	
 	public static String getFileName(final String AURI) {
-		Pattern pattern = Pattern.compile(mask);
+		Pattern pattern = Pattern.compile(MASK);
 		Matcher matcher = pattern.matcher(AURI);
 		String rS = null;
 		while (matcher.find()) {
@@ -36,7 +37,7 @@ public class ContentGetter {
 	}
 
 	public void getObject(final RequestParameters requestParameters, OutputStream os, HttpServletResponse response,
-			Cache cache) throws CacheGetException, DatabaseReaderException {
+			Cache cache) throws CacheGetException, DatabaseReaderException, DatabaseReaderNoDataException {
 		
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
@@ -59,37 +60,22 @@ public class ContentGetter {
 				cache.increaseHits();
 
 			} else {
+				
+				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(), requestParameters.getFileVersionId(), requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(), requestParameters.getWidth(), requestParameters.getHeight());
 
-				Map<String, Object> queryParameters = new HashMap<>();
-
-				DatabaseReader databaseReader = new OracleDatabaseReader();
-
-				if (requestParameters.getWebMetaId() != null) {
-
-					queryParameters.put(RequestParameters.webMetaIdParamName, requestParameters.getWebMetaId());
-					queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
-					queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
+				if (queryParameters.getWebMetaId() != null) {
 					
 					databaseReader.getBinaryDataByMetaId(queryParameters, os, response, cache, idInCache);
 
 				} else {
-					if (requestParameters.getFileVersionId() != null) {
-
-						queryParameters.put(RequestParameters.fileVersionIdParamName, requestParameters.getFileVersionId());
-						queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
-						queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
+					
+					if (queryParameters.getFileVersionId() != null) {
 
 						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, cache, idInCache);
 
 					} else {
 
-						if (requestParameters.getClientId() != null || requestParameters.getEntryIdInPhotoalbum() != null) {
-
-							queryParameters.put(RequestParameters.clientIdParamName, requestParameters.getClientId());
-							queryParameters.put(RequestParameters.entryIdInPhotoalbumParamName,
-									requestParameters.getEntryIdInPhotoalbum());
-							queryParameters.put(RequestParameters.widthParamName, requestParameters.getWidth());
-							queryParameters.put(RequestParameters.heightParamName, requestParameters.getHeight());
+						if (queryParameters.getClientId() != null || requestParameters.getEntryIdInPhotoalbum() != null) {
 
 							databaseReader.getBinaryDataByClientId(queryParameters, os, response, cache, idInCache);
 

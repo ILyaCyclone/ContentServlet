@@ -22,21 +22,21 @@ public interface DatabaseReader {
 
 	void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException;
 
-	void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
+	void getBinaryDataByMetaId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
-			throws DatabaseReaderException;
+			throws DatabaseReaderException, DatabaseReaderNoDataException;
 
-	void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
+	void getBinaryDataByFileVersionId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
-			throws DatabaseReaderException;
+			throws DatabaseReaderException, DatabaseReaderNoDataException;
 
-	void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
+	void getBinaryDataByClientId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
-			throws DatabaseReaderException;
+			throws DatabaseReaderException, DatabaseReaderNoDataException;
 
-	public void setParameterInt(PreparedStatement preparedStatement, int filed, Object value) throws SQLException;
+	public void setParameterInt(PreparedStatement preparedStatement, int filed, Integer value) throws SQLException;
 
-	public void setParameterStr(PreparedStatement preparedStatement, int filed, Object value) throws SQLException;
+	public void setParameterStr(PreparedStatement preparedStatement, int filed, String value) throws SQLException;
 
 	void writeToStream(Blob blobData, OutputStream os) throws DatabaseReaderWriteToStreamException;
 

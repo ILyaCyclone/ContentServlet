@@ -18,7 +18,7 @@ import ru.miit.cache.CacheStatist;
 import ru.miit.cache.cacheexception.CacheGetException;
 import ru.miit.cache.cacheexception.CacheStartFailedException;
 import ru.miit.contentservlet.databasereader.DatabaseReaderException;
-import ru.miit.contentservlet.databasereader.OracleDatabaseReaderException;
+import ru.miit.contentservlet.databasereader.DatabaseReaderNoDataException;
 
 @WebServlet({"/content/*", "/content/secure/*"})
 public class ContentServlet extends HttpServlet {
@@ -69,17 +69,18 @@ public class ContentServlet extends HttpServlet {
 		}
 		// Инициализация класса со значениями всех параметров
 		RequestParameters requestParameters = null;
-//		try {
+		try {
 			requestParameters = new RequestParameters(request.getParameterMap());
-//		} catch (NumberFormatException e) {
-//
-//			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
-//			try {
-//				response.sendError(404);
-//			} catch (IOException e1) {
-//				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
-//			}
-//		}
+		} catch (NumberFormatException e) {
+
+			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString());
+			try {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			} catch (IOException e1) {
+				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString());
+			}
+			return;
+		}
 
 		// Задание Header
 		String respHeader = contentGetter.getHeader(request, requestParameters.getContentDisposition());
@@ -165,7 +166,12 @@ public class ContentServlet extends HttpServlet {
 				}
 			} catch (CacheGetException | DatabaseReaderException | IOException e) {
 				loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString());
-
+			} catch (DatabaseReaderNoDataException e) {
+				
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND); //Не работает, потом уточнить как лучше поступить. Возможно, стоит передвать response в getObject().
+				
+				loggerContentServlet.log(Level.SEVERE, e.toString());
+				return;
 			}
 		}
 		}

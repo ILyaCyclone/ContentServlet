@@ -22,7 +22,7 @@ class RequestParameters {
 	public static final String heightParamName = "height";
 	
 	
-	public RequestParameters(Map<String, String[]> parametersMap) {
+	public RequestParameters(Map<String, String[]> parametersMap) throws NumberFormatException {
 
 		contentDisposition = getIntValue(parametersMap, ServletParamName.contentDisposition);
 		contentType = getIntValue(parametersMap, ServletParamName.contentType);
@@ -79,15 +79,13 @@ class RequestParameters {
 		return value;
 	}
 
-	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName) {
+	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName) throws NumberFormatException {
 
 		Integer value = null;
 		if (parametersMap.containsKey(parameterName)) {
-			try {
-				value = Integer.parseInt(parametersMap.get(parameterName)[0]);
-			} catch (NumberFormatException e) {
-				value = null;
-			}
+
+			value = Integer.parseInt(parametersMap.get(parameterName)[0]);
+
 		}
 
 		return value;

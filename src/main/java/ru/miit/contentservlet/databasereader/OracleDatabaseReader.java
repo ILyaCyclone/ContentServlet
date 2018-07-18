@@ -67,7 +67,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(getCodeDataSQL)) {
 
-			setParameterInt(preparedStatement, 1, String.valueOf(webMetaId));
+			setParameterInt(preparedStatement, 1, webMetaId);
 
 			try (ResultSet resultSet = (ResultSet) preparedStatement.executeQuery()) {
 				resultSet.next();
@@ -105,8 +105,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 	
 	@Override
-	public void getBinaryDataByMetaId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
+	public void getBinaryDataByMetaId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
+			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 		
 		final String getBinaryDataByMetaIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
@@ -114,28 +114,30 @@ public class OracleDatabaseReader implements DatabaseReader {
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByMetaIdSQL)) {
 
-			Object webMetaId = queryParameters.get(DatabaseReaderParamName.webMetaId);
-			Object width = queryParameters.get(DatabaseReaderParamName.width);
-			Object height = queryParameters.get(DatabaseReaderParamName.height);
-
 			int i = 1;
-			setParameterInt(preparedStatement, i++, webMetaId);
-			setParameterStr(preparedStatement, i++, width);
-			setParameterStr(preparedStatement, i++, height);
+			
+			setParameterInt(preparedStatement, i++, queryParameters.getWebMetaId());
+			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
+			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
+				if (!resultSet.isBeforeFirst()) {
+					throw new DatabaseReaderNoDataException("No content found for these parameters");
+				} else {
+					fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
+				}
 
 			}
 		} catch (SQLException e) {
+			e.printStackTrace();
 			throw new OracleDatabaseReaderException(e.getMessage());
 		}
 
 	}
 
 	@Override
-	public void getBinaryDataByFileVersionId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
+	public void getBinaryDataByFileVersionId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
+			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 
 		final String getBinaryDataByFileVersionIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 		
@@ -143,18 +145,18 @@ public class OracleDatabaseReader implements DatabaseReader {
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
 
-			Object fileVersionId = queryParameters.get(DatabaseReaderParamName.fileVersionId);
-			Object width = queryParameters.get(DatabaseReaderParamName.width);
-			Object height = queryParameters.get(DatabaseReaderParamName.height);
-
 			int i = 1;
-			setParameterInt(preparedStatement, i++, fileVersionId);
-			setParameterStr(preparedStatement, i++, width);
-			setParameterStr(preparedStatement, i++, height);
+			setParameterInt(preparedStatement, i++, queryParameters.getFileVersionId());
+			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
+			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
+				
+				if (!resultSet.isBeforeFirst()) {
+					throw new DatabaseReaderNoDataException("No content found for these parameters");
+				} else {
+					fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
+				}
 
 			}
 		} catch (SQLException e) {
@@ -164,8 +166,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 
 	@Override
-	public void getBinaryDataByClientId(Map<String, Object> queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException {
+	public void getBinaryDataByClientId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
+			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 
 		final String getBinaryDataByClientIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 		
@@ -173,20 +175,19 @@ public class OracleDatabaseReader implements DatabaseReader {
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByClientIdSQL)) {
 
-			Object clientId = queryParameters.get(DatabaseReaderParamName.clientId);
-			Object entryIdInPhotoalbum = queryParameters.get(DatabaseReaderParamName.entryIdInPhotoalbum);
-			Object width = queryParameters.get(DatabaseReaderParamName.width);
-			Object height = queryParameters.get(DatabaseReaderParamName.height);
-
 			int i = 1;
-			setParameterInt(preparedStatement, i++, clientId);
-			setParameterInt(preparedStatement, i++, entryIdInPhotoalbum);
-			setParameterStr(preparedStatement, i++, width);
-			setParameterStr(preparedStatement, i++, height);
+			setParameterInt(preparedStatement, i++, queryParameters.getClientId());
+			setParameterInt(preparedStatement, i++, queryParameters.getEntryIdInPhotoalbum());
+			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
+			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
+				if (!resultSet.isBeforeFirst()) {
+					throw new DatabaseReaderNoDataException("No content found for these parameters");
+				} else {
+					fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
+				}
 
 			}
 		} catch (SQLException e) {
@@ -196,20 +197,20 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 
 	@Override
-	public void setParameterInt(PreparedStatement preparedStatement, int filed, Object value) throws SQLException {
+	public void setParameterInt(PreparedStatement preparedStatement, int field, Integer value) throws SQLException {
 		if (value == null) {
-			preparedStatement.setNull(filed, 0);
+			preparedStatement.setNull(field, 0);
 		} else {
-			preparedStatement.setInt(filed, Integer.parseInt(value.toString()));
+			preparedStatement.setInt(field, value);
 		}
 	}
 
 	@Override
-	public void setParameterStr(PreparedStatement preparedStatement, int filed, Object value) throws SQLException {
+	public void setParameterStr(PreparedStatement preparedStatement, int field, String value) throws SQLException {
 		if (value == null) {
-			preparedStatement.setNull(filed, 0);
+			preparedStatement.setNull(field, 0);
 		} else {
-			preparedStatement.setString(filed, value.toString());
+			preparedStatement.setString(field, value);
 		}
 	}
 
