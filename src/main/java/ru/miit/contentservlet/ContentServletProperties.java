@@ -42,7 +42,7 @@ class ContentServletProperties {
 			db = dbf.newDocumentBuilder();
 			document = db.parse(xmlFile);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new ContentServletPropertiesException(e.getMessage());
+			throw new ContentServletPropertiesException(e.getMessage(), e);
 		}
 
 		document.getDocumentElement().normalize();
@@ -73,7 +73,7 @@ class ContentServletProperties {
 			logFolder = element.getElementsByTagName(ServletParamName.logFolder).item(0).getTextContent().toString();
 		} catch (NullPointerException e) {
 //			rootLogger.log(Level.SEVERE, "logFolder is null. Check config file. ");
-			throw new ContentServletPropertiesException("logFolder is null. Check config file. ");
+			throw new ContentServletPropertiesException("logFolder is null. Check config file. ", e);
 		}
 		
 		

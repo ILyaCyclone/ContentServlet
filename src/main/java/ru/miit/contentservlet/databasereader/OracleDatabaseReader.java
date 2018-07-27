@@ -43,14 +43,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 			DataSource dataSource = (DataSource) initialContext.lookup(DATASOURCE_NAME);
 			return dataSource;
 		} catch (NamingException e) {
-			loggerDatabaseReader.log(Level.SEVERE, e.toString());
+			loggerDatabaseReader.log(Level.SEVERE, e.toString(), e);
 			return null;
 		} finally {
 			if (initialContext != null) {
 				try {
 					initialContext.close();
 				} catch (NamingException e) {
-					loggerDatabaseReader.log(Level.WARNING, "InitialContext wasn't closed. " + e.toString());
+					loggerDatabaseReader.log(Level.WARNING, "InitialContext wasn't closed. " + e.toString(), e);
 				}
 
 			}
@@ -76,7 +76,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 
 		} catch (SQLException e) {
-			throw new OracleDatabaseReaderException(e.getMessage());
+			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 		return codeData;
 	}
@@ -101,7 +101,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 
 		} catch (SQLException e) {
-			throw new OracleDatabaseReaderException(e.getMessage());
+			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 	}
 	
@@ -123,7 +123,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (!resultSet.isBeforeFirst()) {
-					throw new DatabaseReaderNoDataException("No content found for these parameters");
+					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
 					fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 				}
@@ -131,7 +131,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new OracleDatabaseReaderException(e.getMessage());
+			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 
 	}
@@ -154,14 +154,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 				
 				if (!resultSet.isBeforeFirst()) {
-					throw new DatabaseReaderNoDataException("No content found for these parameters");
+					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
 					fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 				}
 
 			}
 		} catch (SQLException e) {
-			throw new OracleDatabaseReaderException(e.getMessage());
+			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 
 	}
@@ -185,14 +185,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (!resultSet.isBeforeFirst()) {
-					throw new DatabaseReaderNoDataException("No content found for these parameters");
+					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
 					fetchDataFromResultSet(resultSet, osServlet, response, cache, idInCache);
 				}
 
 			}
 		} catch (SQLException e) {
-			throw new OracleDatabaseReaderException(e.getMessage());
+			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 
 	}
@@ -227,7 +227,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 			os.flush();
 		} catch (IOException | SQLException e) {
-			throw new DatabaseReaderWriteToStreamException(e.getMessage());
+			throw new DatabaseReaderWriteToStreamException(e.getMessage(), e);
 		}
 
 	}
@@ -249,7 +249,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			os1.flush();
 			os2.flush();
 		} catch (IOException | SQLException e) {
-			throw new DatabaseReaderWriteToStreamException(e.getMessage());
+			throw new DatabaseReaderWriteToStreamException(e.getMessage(), e);
 		}
 
 	}
@@ -287,14 +287,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 				cache.writeToTwoStreams(idInCache, blobObject, osServlet, cacheOs);
 
 			} catch (IOException e) {
-				throw new OracleDatabaseReaderException(e.getMessage());
+				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}
 
 		} else {
 			try {
 				writeToStream(blobObject, osServlet);
 			} catch (DatabaseReaderWriteToStreamException e) {
-				throw new OracleDatabaseReaderException(e.getMessage());
+				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}
 		}
 
