@@ -17,6 +17,10 @@ public class DatabaseReaderWriteToStreamException extends DatabaseReaderExceptio
 
         this.errorCode = errorCode;
     }
+    
+    public DatabaseReaderWriteToStreamException(String message, Throwable cause) {
+        super(message, cause);
+    }
  
     public int getErrorCode()
     {

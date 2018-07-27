@@ -17,6 +17,10 @@ public class DatabaseReaderException extends Exception {
 
         this.errorCode = errorCode;
     }
+    
+    public DatabaseReaderException(String message, Throwable cause) {
+        super(message, cause);
+    }
  
     public int getErrorCode()
     {

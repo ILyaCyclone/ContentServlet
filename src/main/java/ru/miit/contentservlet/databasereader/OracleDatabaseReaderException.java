@@ -17,6 +17,10 @@ public class OracleDatabaseReaderException extends DatabaseReaderException {
 
         this.errorCode = errorCode;
     }
+    
+    public OracleDatabaseReaderException(String message, Throwable cause) {
+        super(message, cause);
+    }
  
     public int getErrorCode()
     {

@@ -17,6 +17,11 @@ class ContentServletPropertiesException extends Exception {
 
         this.errorCode = errorCode;
     }
+    
+    public ContentServletPropertiesException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
  
     public int getErrorCode()
     {

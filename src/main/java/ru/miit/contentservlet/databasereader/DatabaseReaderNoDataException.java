@@ -17,6 +17,10 @@ public class DatabaseReaderNoDataException extends Exception {
 
         this.errorCode = errorCode;
     }
+    
+    public DatabaseReaderNoDataException(String message, Throwable cause) {
+        super(message, cause);
+    }
  
     public int getErrorCode()
     {
