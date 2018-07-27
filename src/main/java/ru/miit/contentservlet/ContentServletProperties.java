@@ -18,7 +18,9 @@ class ContentServletProperties {
 
 //	Logger rootLogger = LogManager.getLogManager().getLogger(""); // Это корневой логгер, самый главный. Сделан по причине еще отсуствия логгера приложения, но необходимости логировать ошибки при инициализации параметров
 	
-	private final static String CONFIGLOCATION_NAME = "java:comp/env/contentServlet/configFileLocation";
+//	private final static String CONFIGLOCATION_NAME = "java:comp/env/contentServlet/configFileLocation";
+	
+	private final static String CONFIG_FILE_NAME = "config.xml";
 	
 	private final static Level defaultLogLevel = Level.WARNING;
 	private final static int defaultLogLimit = 1000000;
@@ -31,7 +33,8 @@ class ContentServletProperties {
 
 	public ContentServletProperties() throws ContentServletPropertiesException {
 
-		File xmlFile = new File(getContentServletFileLocation());
+		System.out.println(Thread.currentThread().getContextClassLoader().getResource(CONFIG_FILE_NAME).getPath());
+		File xmlFile = new File(Thread.currentThread().getContextClassLoader().getResource(CONFIG_FILE_NAME).getPath());
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
 		Document document = null;
@@ -99,28 +102,28 @@ class ContentServletProperties {
 		return logLimit;
 	}
 
-	private String getContentServletFileLocation() {
-
-		Context initialContext = null;
-
-		String configFileLocation = null;
-		try {
-			initialContext = new InitialContext();
-			configFileLocation = (String) initialContext.lookup(CONFIGLOCATION_NAME);
-			return configFileLocation;
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		} finally {
-			if (initialContext != null) {
-				try {
-					initialContext.close();
-				} catch (NamingException e) {
-					throw new RuntimeException(e);
-				}
-
-			}
-		}
-
-	}
+//	private String getContentServletFileLocation() {
+//
+//		Context initialContext = null;
+//
+//		String configFileLocation = null;
+//		try {
+//			initialContext = new InitialContext();
+//			configFileLocation = (String) initialContext.lookup(CONFIGLOCATION_NAME);
+//			return configFileLocation;
+//		} catch (NamingException e) {
+//			throw new RuntimeException(e);
+//		} finally {
+//			if (initialContext != null) {
+//				try {
+//					initialContext.close();
+//				} catch (NamingException e) {
+//					throw new RuntimeException(e);
+//				}
+//
+//			}
+//		}
+//
+//	}
 
 }
