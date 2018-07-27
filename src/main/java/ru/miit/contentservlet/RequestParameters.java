@@ -33,7 +33,7 @@ class RequestParameters {
 		entryIdInPhotoalbum = getIntValue(parametersMap,ServletParamName.entryIdInPhotoalbum);
 		width = getStringValue(parametersMap, ServletParamName.width);
 		height = getStringValue(parametersMap, ServletParamName.height);
-
+		
 	}
 	
 	

@@ -20,7 +20,7 @@ import ru.miit.cache.cacheexception.CacheStartFailedException;
 import ru.miit.contentservlet.databasereader.DatabaseReaderException;
 import ru.miit.contentservlet.databasereader.DatabaseReaderNoDataException;
 
-@WebServlet({"/content/*", "/content/secure/*"})
+@WebServlet({"/*", "/secure/*"})
 public class ContentServlet extends HttpServlet {
 
 	private ContentGetter contentGetter = new ContentGetter();
@@ -36,12 +36,12 @@ public class ContentServlet extends HttpServlet {
 	private final static String ContentDispositionText = "Content-Disposition";
 
 	public void init() {
-
+		
 		ContentServletProperties contentServletProperties = null;
 		try {
 			contentServletProperties = new ContentServletProperties();
 		} catch (ContentServletPropertiesException e) {
-			throw new RuntimeException("Problems with ContentServlet config file. " + e.toString());
+			throw new RuntimeException("Problems with ContentServlet config file. " + e.toString(), e);
 		}
 
 		USE_CACHE = contentServletProperties.isUseCache();
@@ -67,6 +67,7 @@ public class ContentServlet extends HttpServlet {
 			if (cache.isUp)
 				cache.applyDowntine(downtime);
 		}
+		
 		// Инициализация класса со значениями всех параметров
 		RequestParameters requestParameters = null;
 		try {

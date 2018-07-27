@@ -1,6 +1,7 @@
 package ru.miit.contentservlet.databasereader;
 
 import java.io.FileOutputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +32,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	
 	private final Logger loggerDatabaseReader = ContentLogger.getLogger(OracleDatabaseReader.class.getName());
 
-	private static final String DATASOURCE_NAME = "java:comp/env/jdbc/ds_basic";
+	private static final String DATASOURCE_NAME = "jdbc/ds_basic";
 	
 	@Override
 	public DataSource getDataSource() { //Обрабатывать местно

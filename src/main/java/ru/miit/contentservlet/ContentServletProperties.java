@@ -20,7 +20,7 @@ class ContentServletProperties {
 	
 //	private final static String CONFIGLOCATION_NAME = "java:comp/env/contentServlet/configFileLocation";
 	
-	private final static String CONFIG_FILE_NAME = "config.xml";
+	private final static String CONFIG_FILE_NAME = "ru.miit.content.config.xml";
 	
 	private final static Level defaultLogLevel = Level.WARNING;
 	private final static int defaultLogLimit = 1000000;
