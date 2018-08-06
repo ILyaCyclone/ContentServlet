@@ -13,7 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<servlet.version>3.1.0</servlet.version>
-		<hikari.version>2.4.13</hikari.version>
+		<ojdbc.version>12.2.0.1</ojdbc.version>
 	</properties>
 
 	<repositories>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
-			<version>12.2.0.1</version>
+			<version>${ojdbc.version}</version>
 		</dependency>
 
 		<dependency>
