@@ -30,13 +30,13 @@ public class ContentServlet extends HttpServlet {
 
 	public static boolean USE_CACHE;
 
-	private Logger logger = Logger.getLogger(ContentServlet.class.getName());;
+	private Logger logger = Logger.getLogger(ContentServlet.class.getName());
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
 
 	public void init() {
-		//df]gjfdkg
+
 		ContentServletProperties contentServletProperties = null;
 		try {
 			contentServletProperties = new ContentServletProperties();
