@@ -20,7 +20,7 @@ import ru.unisuite.contentservlet.databasereader.OracleDatabaseReader;
 
 public class ContentGetter {
 	
-	private final Logger loggerContentGetter = Logger.getLogger(ContentGetter.class.getName());
+	private final Logger logger = Logger.getLogger(ContentGetter.class.getName());
  
 	private DatabaseReader databaseReader = new OracleDatabaseReader();
 	
@@ -46,7 +46,7 @@ public class ContentGetter {
 		if (requestParameters.getWebMetaId() == null && requestParameters.getFileVersionId() == null
 				&& requestParameters.getClientId() == null && requestParameters.getEntryIdInPhotoalbum() == null) {
 
-			loggerContentGetter.log(Level.WARNING, "Id of requested object does not contains required parameters. ");
+			logger.log(Level.WARNING, "Id of requested object does not contains required parameters. ");
 			throw new IllegalArgumentException("Id of requested object does not contains required parameters. ");
 
 		} else {
