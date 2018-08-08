@@ -25,12 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import ru.unisuite.cache.Cache;
-import ru.unisuite.contentservlet.ContentLogger;
 import ru.unisuite.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
 	
-	private final Logger loggerDatabaseReader = ContentLogger.getLogger(OracleDatabaseReader.class.getName());
+	private final Logger logger = Logger.getLogger(OracleDatabaseReader.class.getName());
 
 	private static final String DATASOURCE_NAME = "jdbc/ds_basic";
 	
@@ -43,14 +42,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 			DataSource dataSource = (DataSource) initialContext.lookup(DATASOURCE_NAME);
 			return dataSource;
 		} catch (NamingException e) {
-			loggerDatabaseReader.log(Level.SEVERE, e.toString(), e);
+			logger.log(Level.SEVERE, e.toString(), e);
 			return null;
 		} finally {
 			if (initialContext != null) {
 				try {
 					initialContext.close();
 				} catch (NamingException e) {
-					loggerDatabaseReader.log(Level.WARNING, "InitialContext wasn't closed. " + e.toString(), e);
+					logger.log(Level.WARNING, "InitialContext wasn't closed. " + e.toString(), e);
 				}
 
 			}

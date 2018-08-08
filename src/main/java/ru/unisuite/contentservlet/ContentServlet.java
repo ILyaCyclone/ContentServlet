@@ -20,7 +20,7 @@ import ru.unisuite.cache.cacheexception.CacheStartFailedException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 
-@WebServlet({"/*", "/secure/*"})
+@WebServlet({"content/*", "content/secure/*"})
 public class ContentServlet extends HttpServlet {
 
 	private ContentGetter contentGetter = new ContentGetter();
@@ -30,7 +30,7 @@ public class ContentServlet extends HttpServlet {
 
 	public static boolean USE_CACHE;
 
-	private Logger loggerContentServlet;
+	private Logger logger = Logger.getLogger(ContentServlet.class.getName());;
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
@@ -46,14 +46,11 @@ public class ContentServlet extends HttpServlet {
 
 		USE_CACHE = contentServletProperties.isUseCache();
 
-		ContentLogger.initLogManager(contentServletProperties);
-		loggerContentServlet = ContentLogger.getLogger(ContentServlet.class.getName());
-
 		if (USE_CACHE) {
 			try {
 				cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
 			} catch (CacheStartFailedException e) {
-				loggerContentServlet.log(Level.SEVERE, "Cache didn't start. " + e.toString(), e);
+				logger.log(Level.SEVERE, "Cache didn't start. " + e.toString(), e);
 			}
 		}
 	}
@@ -74,11 +71,11 @@ public class ContentServlet extends HttpServlet {
 			requestParameters = new RequestParameters(request.getParameterMap());
 		} catch (NumberFormatException e) {
 
-			loggerContentServlet.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString(), e);
+			logger.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString(), e);
 			try {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			} catch (IOException e1) {
-				loggerContentServlet.log(Level.SEVERE, "Error did not show to client. " + e1.toString(), e);
+				logger.log(Level.SEVERE, "Error did not show to client. " + e1.toString(), e);
 			}
 			return;
 		}
@@ -115,13 +112,13 @@ public class ContentServlet extends HttpServlet {
 
 					printWriter.println("<h3>Error</h3>");
 					printWriter.println("<p>" + e.getMessage() + "</p>");
-					loggerContentServlet.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString(), e);
+					logger.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString(), e);
 
 				} finally {
 					printWriter.println("</body></html>");
 				}
 			} catch (IOException e) {
-				loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString(), e);
+				logger.log(Level.SEVERE, "PrintWriter did not created. " + e.toString(), e);
 			}
 
 			break;
@@ -140,13 +137,13 @@ public class ContentServlet extends HttpServlet {
 
 					printWriter.println("<h3>Error</h3>");
 					printWriter.println("<p>" + e.getMessage() + "</p>");
-					loggerContentServlet.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString(), e);
+					logger.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString(), e);
 
 				} finally {
 					printWriter.println("</body></html>");
 				}
 			} catch (IOException e) {
-				loggerContentServlet.log(Level.SEVERE, "PrintWriter did not created. " + e.toString(), e);
+				logger.log(Level.SEVERE, "PrintWriter did not created. " + e.toString(), e);
 			}
 			break;
 		}
@@ -166,12 +163,12 @@ public class ContentServlet extends HttpServlet {
 					}
 				}
 			} catch (CacheGetException | DatabaseReaderException | IOException e) {
-				loggerContentServlet.log(Level.SEVERE, "Object getting is failed. " + e.toString(), e);
+				logger.log(Level.SEVERE, "Object getting is failed. " + e.toString(), e);
 			} catch (DatabaseReaderNoDataException e) {
 				
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND); //Не работает, потом уточнить как лучше поступить. Возможно, стоит передвать response в getObject().
 				
-				loggerContentServlet.log(Level.SEVERE, e.toString(), e);
+				logger.log(Level.SEVERE, e.toString(), e);
 				return;
 			}
 		}
