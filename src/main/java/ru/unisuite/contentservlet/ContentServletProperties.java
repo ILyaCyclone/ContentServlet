@@ -15,26 +15,14 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 class ContentServletProperties {
-
-//	Logger rootLogger = LogManager.getLogManager().getLogger(""); // Это корневой логгер, самый главный. Сделан по причине еще отсуствия логгера приложения, но необходимости логировать ошибки при инициализации параметров
 	
-//	private final static String CONFIGLOCATION_NAME = "java:comp/env/contentServlet/configFileLocation";
-	
-	private final static String CONFIG_FILE_NAME = "ru.miit.content.config.xml";
-	
-	private final static Level defaultLogLevel = Level.WARNING;
-	private final static int defaultLogLimit = 1000000;
+	private final static String CONFIG_FILE_NAME = "ContentServletConfig.xml";
 
 	private boolean useCache;
 
-	private Level logLevel;
-	private String logFolder;
-	private Integer logLimit;
-
 	public ContentServletProperties() throws ContentServletPropertiesException {
 
-		System.out.println(Thread.currentThread().getContextClassLoader().getResource(CONFIG_FILE_NAME).getPath());
-		File xmlFile = new File(Thread.currentThread().getContextClassLoader().getResource(CONFIG_FILE_NAME).getPath());
+		File xmlFile = new File(this.getClass().getClassLoader().getResource(CONFIG_FILE_NAME).getFile());
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
 		Document document = null;
@@ -59,71 +47,10 @@ class ContentServletProperties {
 
 		this.useCache = useCache;
 
-		Element element = (Element) document.getDocumentElement().getElementsByTagName(ServletParamName.logger).item(0);
-		
-		try {
-			String logLevelString = element.getElementsByTagName(ServletParamName.logLevel).item(0).getTextContent().toString();
-			logLevel = Level.parse(logLevelString);
-		} catch (NullPointerException | IllegalArgumentException e) {
-//			rootLogger.log(Level.WARNING, " Problems with logLevel initialization. Check configFile. By default logLevel value was set to WARNING. ");
-			logLevel = defaultLogLevel;
-		}
-		
-		try {
-			logFolder = element.getElementsByTagName(ServletParamName.logFolder).item(0).getTextContent().toString();
-		} catch (NullPointerException e) {
-//			rootLogger.log(Level.SEVERE, "logFolder is null. Check config file. ");
-			throw new ContentServletPropertiesException("logFolder is null. Check config file. ", e);
-		}
-		
-		
-		try {
-			logLimit = Integer.parseInt(element.getElementsByTagName(ServletParamName.logLimit).item(0).getTextContent().toString());
-		} catch (NullPointerException | IllegalArgumentException e) {
-//			rootLogger.log(Level.WARNING, " Problems with logLimit initialization. Check config file. By default logLimit value was set to 1000000. ");
-			logLimit = defaultLogLimit;
-		}
-
 	}
 
 	public boolean isUseCache() {
 		return useCache;
 	}
-
-	public Level getLogLevel() {
-		return logLevel;
-	}
-
-	public String getPattern() {
-		return logFolder;
-	}
-
-	public Integer getLimit() {
-		return logLimit;
-	}
-
-//	private String getContentServletFileLocation() {
-//
-//		Context initialContext = null;
-//
-//		String configFileLocation = null;
-//		try {
-//			initialContext = new InitialContext();
-//			configFileLocation = (String) initialContext.lookup(CONFIGLOCATION_NAME);
-//			return configFileLocation;
-//		} catch (NamingException e) {
-//			throw new RuntimeException(e);
-//		} finally {
-//			if (initialContext != null) {
-//				try {
-//					initialContext.close();
-//				} catch (NamingException e) {
-//					throw new RuntimeException(e);
-//				}
-//
-//			}
-//		}
-//
-//	}
 
 }
