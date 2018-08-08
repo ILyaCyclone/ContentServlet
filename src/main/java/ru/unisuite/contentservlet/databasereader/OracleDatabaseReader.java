@@ -1,4 +1,4 @@
-package ru.miit.contentservlet.databasereader;
+package ru.unisuite.contentservlet.databasereader;
 
 import java.io.FileOutputStream;
 
@@ -24,9 +24,9 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import ru.miit.cache.Cache;
-import ru.miit.contentservlet.ContentLogger;
-import ru.miit.contentservlet.ContentServlet;
+import ru.unisuite.cache.Cache;
+import ru.unisuite.contentservlet.ContentLogger;
+import ru.unisuite.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
 	

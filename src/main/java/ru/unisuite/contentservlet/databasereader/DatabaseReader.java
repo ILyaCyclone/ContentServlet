@@ -1,4 +1,4 @@
-package ru.miit.contentservlet.databasereader;
+package ru.unisuite.contentservlet.databasereader;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -12,7 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import ru.miit.cache.Cache;
+import ru.unisuite.cache.Cache;
 
 public interface DatabaseReader {
 

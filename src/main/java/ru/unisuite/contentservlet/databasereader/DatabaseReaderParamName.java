@@ -1,4 +1,4 @@
-package ru.miit.contentservlet.databasereader;
+package ru.unisuite.contentservlet.databasereader;
 
 class DatabaseReaderParamName {
 

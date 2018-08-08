@@ -1,24 +1,24 @@
-package ru.miit.contentservlet.databasereader;
+package ru.unisuite.contentservlet.databasereader;
 
-public class OracleDatabaseReaderException extends DatabaseReaderException {
+public class DatabaseReaderNoDataException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
 	private int errorCode;
 	
-    public OracleDatabaseReaderException(final String message)
+    public DatabaseReaderNoDataException(final String message)
     {
         this(0, "Problems with fetching an object from DB: " + message);
     }
  
-    public OracleDatabaseReaderException(final int errorCode, final String message)
+    public DatabaseReaderNoDataException(final int errorCode, final String message)
     {
         super(message);
 
         this.errorCode = errorCode;
     }
     
-    public OracleDatabaseReaderException(String message, Throwable cause) {
+    public DatabaseReaderNoDataException(String message, Throwable cause) {
         super(message, cause);
     }
  

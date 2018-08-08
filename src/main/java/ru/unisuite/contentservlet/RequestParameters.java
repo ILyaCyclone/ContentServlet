@@ -1,4 +1,4 @@
-package ru.miit.contentservlet;
+package ru.unisuite.contentservlet;
 
 import java.util.Map;
 

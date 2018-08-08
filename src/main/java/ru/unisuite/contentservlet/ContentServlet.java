@@ -1,4 +1,4 @@
-package ru.miit.contentservlet;
+package ru.unisuite.contentservlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,13 +12,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ru.miit.cache.Cache;
-import ru.miit.cache.CacheInstance;
-import ru.miit.cache.CacheStatist;
-import ru.miit.cache.cacheexception.CacheGetException;
-import ru.miit.cache.cacheexception.CacheStartFailedException;
-import ru.miit.contentservlet.databasereader.DatabaseReaderException;
-import ru.miit.contentservlet.databasereader.DatabaseReaderNoDataException;
+import ru.unisuite.cache.Cache;
+import ru.unisuite.cache.CacheInstance;
+import ru.unisuite.cache.CacheStatist;
+import ru.unisuite.cache.cacheexception.CacheGetException;
+import ru.unisuite.cache.cacheexception.CacheStartFailedException;
+import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
+import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 
 @WebServlet({"/*", "/secure/*"})
 public class ContentServlet extends HttpServlet {
@@ -36,7 +36,7 @@ public class ContentServlet extends HttpServlet {
 	private final static String ContentDispositionText = "Content-Disposition";
 
 	public void init() {
-		
+		//df]gjfdkg
 		ContentServletProperties contentServletProperties = null;
 		try {
 			contentServletProperties = new ContentServletProperties();

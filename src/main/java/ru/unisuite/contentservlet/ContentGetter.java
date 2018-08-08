@@ -1,4 +1,4 @@
-package ru.miit.contentservlet;
+package ru.unisuite.contentservlet;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ru.miit.cache.Cache;
-import ru.miit.cache.cacheexception.CacheGetException;
-import ru.miit.contentservlet.databasereader.DatabaseQueryParameters;
-import ru.miit.contentservlet.databasereader.DatabaseReader;
-import ru.miit.contentservlet.databasereader.DatabaseReaderException;
-import ru.miit.contentservlet.databasereader.DatabaseReaderNoDataException;
-import ru.miit.contentservlet.databasereader.OracleDatabaseReader;
+import ru.unisuite.cache.Cache;
+import ru.unisuite.cache.cacheexception.CacheGetException;
+import ru.unisuite.contentservlet.databasereader.DatabaseQueryParameters;
+import ru.unisuite.contentservlet.databasereader.DatabaseReader;
+import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
+import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
+import ru.unisuite.contentservlet.databasereader.OracleDatabaseReader;
 
 public class ContentGetter {
 	
