@@ -43,7 +43,7 @@ public class ContentGetter {
 		NameCreator nameCreator = new NameCreator();
 		String idInCache = nameCreator.createWithParameters(requestParameters);
 
-		if (requestParameters.getWebMetaId() == null && requestParameters.getFileVersionId() == null
+		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null &&requestParameters.getFileVersionId() == null
 				&& requestParameters.getClientId() == null && requestParameters.getEntryIdInPhotoalbum() == null) {
 
 			logger.log(Level.WARNING, "Id of requested object does not contains required parameters. ");
@@ -61,11 +61,11 @@ public class ContentGetter {
 
 			} else {
 				
-				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(), requestParameters.getFileVersionId(), requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(), requestParameters.getWidth(), requestParameters.getHeight());
+				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(), requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(), requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(), requestParameters.getWidth(), requestParameters.getHeight());
 
-				if (queryParameters.getWebMetaId() != null) {
+				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaId() != null) {
 					
-					databaseReader.getBinaryDataByMetaId(queryParameters, os, response, cache, idInCache);
+					databaseReader.getBinaryDataByMeta(queryParameters, os, response, cache, idInCache);
 
 				} else {
 					

@@ -8,6 +8,7 @@ class RequestParameters {
 	private Integer contentType;
 	
 	private Integer webMetaId;
+	private String webMetaAlias;
 	private Integer fileVersionId;
 	private Integer clientId;
 	private Integer entryIdInPhotoalbum;
@@ -15,6 +16,7 @@ class RequestParameters {
 	private String height;
 	
 	public static final String webMetaIdParamName = "webMetaId";
+	public static final String webMetaAliasParamName = "webMetaAlias";
 	public static final String fileVersionIdParamName = "fileVersionId";
 	public static final String clientIdParamName = "clientId";
 	public static final String entryIdInPhotoalbumParamName = "entryIdInPhotoalbum";
@@ -28,6 +30,7 @@ class RequestParameters {
 		contentType = getIntValue(parametersMap, ServletParamName.contentType);
 	
 		webMetaId = getIntValue(parametersMap, ServletParamName.webMetaId);
+		webMetaAlias = getStringValue(parametersMap, ServletParamName.webMetaAlias);
 		fileVersionId = getIntValue(parametersMap, ServletParamName.fileVersionId);
 		clientId = getIntValue(parametersMap, ServletParamName.clientId);
 		entryIdInPhotoalbum = getIntValue(parametersMap,ServletParamName.entryIdInPhotoalbum);
@@ -44,7 +47,11 @@ class RequestParameters {
 	public Integer getContentType() {
 		return contentType;
 	}
-
+	
+	public String getWebMetaAlias() {
+		return webMetaAlias;
+	}
+	
 	public Integer getWebMetaId() {
 		return webMetaId;
 	}

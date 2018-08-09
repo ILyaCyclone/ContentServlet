@@ -105,20 +105,21 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 	
 	@Override
-	public void getBinaryDataByMetaId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
+	public void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 		
-		final String getBinaryDataByMetaIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+		final String getBinaryDataByMetaSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?, A_alias => ?) as wpt_t_data_img_wp))";
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
-						.prepareStatement(getBinaryDataByMetaIdSQL)) {
+						.prepareStatement(getBinaryDataByMetaSQL)) {
 
 			int i = 1;
 			
 			setParameterInt(preparedStatement, i++, queryParameters.getWebMetaId());
 			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
 			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
+			setParameterStr(preparedStatement, i++, queryParameters.getWebMetaAlias());
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (!resultSet.isBeforeFirst()) {

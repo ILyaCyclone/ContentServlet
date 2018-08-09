@@ -22,7 +22,7 @@ public interface DatabaseReader {
 
 	void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException;
 
-	void getBinaryDataByMetaId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
+	void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache cache, String idInCache)
 			throws DatabaseReaderException, DatabaseReaderNoDataException;
 

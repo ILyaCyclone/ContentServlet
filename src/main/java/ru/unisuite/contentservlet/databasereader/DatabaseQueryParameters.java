@@ -3,6 +3,7 @@ package ru.unisuite.contentservlet.databasereader;
 public class DatabaseQueryParameters {
 
 	private Integer webMetaId;
+	private String webMetaAlias;
 	private Integer fileVersionId;
 	private Integer clientId;
 	private Integer entryIdInPhotoalbum;
@@ -10,10 +11,11 @@ public class DatabaseQueryParameters {
 	private String width;
 	private String height;
 
-	public DatabaseQueryParameters(Integer webMetaId, Integer fileVersionId, Integer clientId,
+	public DatabaseQueryParameters(Integer webMetaId, String webMetaAlias, Integer fileVersionId, Integer clientId,
 			Integer entryIdInPhotoalbum, String width, String height) {
 
 		this.webMetaId = webMetaId;
+		this.webMetaAlias = webMetaAlias;
 		this.fileVersionId = fileVersionId;
 		this.clientId = clientId;
 		this.entryIdInPhotoalbum = entryIdInPhotoalbum;
@@ -24,6 +26,10 @@ public class DatabaseQueryParameters {
 
 	public Integer getWebMetaId() {
 		return webMetaId;
+	}
+	
+	public String getWebMetaAlias() {
+		return webMetaAlias;
 	}
 
 	public Integer getFileVersionId() {

@@ -20,7 +20,7 @@ import ru.unisuite.cache.cacheexception.CacheStartFailedException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 
-@WebServlet({"content/*", "content/secure/*"})
+@WebServlet({"/*", "/secure/*"})
 public class ContentServlet extends HttpServlet {
 
 	private ContentGetter contentGetter = new ContentGetter();

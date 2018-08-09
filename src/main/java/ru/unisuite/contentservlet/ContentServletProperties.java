@@ -28,7 +28,7 @@ class ContentServletProperties {
 	private void initFromProperties() throws ContentServletPropertiesException {
 
 		String filename = "content.properties";
-		try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(filename);) {
+		try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(filename)) {
 
 			if (input == null) {
 				String errorMessage = "Unable to load " + filename;

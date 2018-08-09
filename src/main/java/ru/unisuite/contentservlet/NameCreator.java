@@ -18,6 +18,9 @@ class NameCreator {
 		StringBuilder builder = new StringBuilder();
 		if (requestParameters.getWebMetaId() != null)
 			builder.append(String.format("wm=%s-", requestParameters.getWebMetaId()));
+		
+		if (requestParameters.getWebMetaAlias() != null)
+			builder.append(String.format("wmAlias=%s-", requestParameters.getWebMetaAlias()));
 
 		if (requestParameters.getFileVersionId() != null)
 			builder.append(String.format("fw=%s-", requestParameters.getFileVersionId()));

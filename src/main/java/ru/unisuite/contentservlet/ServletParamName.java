@@ -9,6 +9,8 @@ class ServletParamName {
 	// Названия параметров из БД
 	// ID web метатермина версии контента
 	public static final String webMetaId = "id_wm";
+	
+	public static final String webMetaAlias = "alias_wm";
 	/*
 	 * Content-Disposition контента 1 - attachment 2 - inline null - null
 	 */
