@@ -163,10 +163,24 @@ public class ContentServlet extends HttpServlet {
 					}
 				}
 			} catch (CacheGetException | DatabaseReaderException | IOException e) {
+				
+				try {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				} catch (IOException e1) {
+					logger.log(Level.SEVERE, e1.toString(), e1);
+				}
+
 				logger.log(Level.SEVERE, "Object getting is failed. " + e.toString(), e);
+				
+				return;
+				
 			} catch (DatabaseReaderNoDataException e) {
 				
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND); //Не работает, потом уточнить как лучше поступить. Возможно, стоит передвать response в getObject().
+				try {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				} catch (IOException e1) {
+					logger.log(Level.WARNING, e1.toString(), e1);
+				} 
 				
 				logger.log(Level.SEVERE, e.toString(), e);
 				return;

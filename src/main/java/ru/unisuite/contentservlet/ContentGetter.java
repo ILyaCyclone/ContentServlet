@@ -63,7 +63,7 @@ public class ContentGetter {
 				
 				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(), requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(), requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(), requestParameters.getWidth(), requestParameters.getHeight());
 
-				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaId() != null) {
+				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaAlias() != null) {
 					
 					databaseReader.getBinaryDataByMeta(queryParameters, os, response, cache, idInCache);
 

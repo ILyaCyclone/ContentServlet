@@ -130,7 +130,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 
