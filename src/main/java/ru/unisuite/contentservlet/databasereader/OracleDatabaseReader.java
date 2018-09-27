@@ -15,8 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -24,32 +22,42 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.unisuite.cache.Cache;
 import ru.unisuite.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
 	
-	private final Logger logger = Logger.getLogger(OracleDatabaseReader.class.getName());
+	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
 
-	private static final String DATASOURCE_NAME = "jdbc/ds_basic";
+	private static final String DATASOURCE_NAME = "jdbc/ds_basic_wrapper";
 	
 	@Override
 	public DataSource getDataSource() { //Обрабатывать местно
 
+		try {
+			Class.forName("ru.unisuite.jdbc.wrapper.MyDriverWrapper");
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		Context initialContext = null;
 		try {
 			initialContext = new InitialContext();
 			DataSource dataSource = (DataSource) initialContext.lookup(DATASOURCE_NAME);
 			return dataSource;
 		} catch (NamingException e) {
-			logger.log(Level.SEVERE, e.toString(), e);
+			logger.error(e.toString(), e);
 			return null;
 		} finally {
 			if (initialContext != null) {
 				try {
 					initialContext.close();
 				} catch (NamingException e) {
-					logger.log(Level.WARNING, "InitialContext wasn't closed. " + e.toString(), e);
+					logger.warn("InitialContext wasn't closed. " + e.toString(), e);
 				}
 
 			}

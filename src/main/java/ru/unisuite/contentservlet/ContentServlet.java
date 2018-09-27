@@ -3,14 +3,14 @@ package ru.unisuite.contentservlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.unisuite.cache.Cache;
 import ru.unisuite.cache.CacheInstance;
@@ -30,7 +30,7 @@ public class ContentServlet extends HttpServlet {
 
 	public static boolean USE_CACHE;
 
-	private Logger logger = Logger.getLogger(ContentServlet.class.getName());
+	private Logger logger = LoggerFactory.getLogger(ContentServlet.class.getName());
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String ContentDispositionText = "Content-Disposition";
@@ -50,7 +50,7 @@ public class ContentServlet extends HttpServlet {
 			try {
 				cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
 			} catch (CacheStartFailedException e) {
-				logger.log(Level.SEVERE, "Cache didn't start. " + e.toString(), e);
+				logger.error("Cache didn't start. " + e.toString(), e);
 			}
 		}
 	}
@@ -71,11 +71,11 @@ public class ContentServlet extends HttpServlet {
 			requestParameters = new RequestParameters(request.getParameterMap());
 		} catch (NumberFormatException e) {
 
-			logger.log(Level.SEVERE, "Request parameters didn't initialised. " + e.toString(), e);
+			logger.error("Request parameters didn't initialised. " + e.toString(), e);
 			try {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			} catch (IOException e1) {
-				logger.log(Level.SEVERE, "Error did not show to client. " + e1.toString(), e);
+				logger.error("Error did not show to client. " + e1.toString(), e);
 			}
 			return;
 		}
@@ -112,13 +112,13 @@ public class ContentServlet extends HttpServlet {
 
 					printWriter.println("<h3>Error</h3>");
 					printWriter.println("<p>" + e.getMessage() + "</p>");
-					logger.log(Level.SEVERE, "CodeData wasn't fetched. " + e.toString(), e);
+					logger.error("CodeData wasn't fetched. " + e.toString(), e);
 
 				} finally {
 					printWriter.println("</body></html>");
 				}
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, "PrintWriter did not created. " + e.toString(), e);
+				logger.error("PrintWriter did not created. " + e.toString(), e);
 			}
 
 			break;
@@ -137,13 +137,13 @@ public class ContentServlet extends HttpServlet {
 
 					printWriter.println("<h3>Error</h3>");
 					printWriter.println("<p>" + e.getMessage() + "</p>");
-					logger.log(Level.SEVERE, "ListData wasn't fetched. " + e.toString(), e);
+					logger.error("ListData wasn't fetched. " + e.toString(), e);
 
 				} finally {
 					printWriter.println("</body></html>");
 				}
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, "PrintWriter did not created. " + e.toString(), e);
+				logger.error("PrintWriter did not created. " + e.toString(), e);
 			}
 			break;
 		}
@@ -167,10 +167,10 @@ public class ContentServlet extends HttpServlet {
 				try {
 					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				} catch (IOException e1) {
-					logger.log(Level.SEVERE, e1.toString(), e1);
+					logger.error(e1.toString(), e1);
 				}
 
-				logger.log(Level.SEVERE, "Object getting is failed. " + e.toString(), e);
+				logger.error("Object getting is failed. " + e.toString(), e);
 				
 				return;
 				
@@ -179,10 +179,10 @@ public class ContentServlet extends HttpServlet {
 				try {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				} catch (IOException e1) {
-					logger.log(Level.WARNING, e1.toString(), e1);
+					logger.warn(e1.toString(), e1);
 				} 
 				
-				logger.log(Level.SEVERE, e.toString(), e);
+				logger.error(e.toString(), e);
 				return;
 			}
 		}

@@ -2,13 +2,14 @@ package ru.unisuite.contentservlet;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.unisuite.cache.Cache;
 import ru.unisuite.cache.cacheexception.CacheGetException;
@@ -20,7 +21,7 @@ import ru.unisuite.contentservlet.databasereader.OracleDatabaseReader;
 
 public class ContentGetter {
 	
-	private final Logger logger = Logger.getLogger(ContentGetter.class.getName());
+	private Logger logger = LoggerFactory.getLogger(ContentGetter.class.getName());
  
 	private DatabaseReader databaseReader = new OracleDatabaseReader();
 	
@@ -46,7 +47,7 @@ public class ContentGetter {
 		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null &&requestParameters.getFileVersionId() == null
 				&& requestParameters.getClientId() == null && requestParameters.getEntryIdInPhotoalbum() == null) {
 
-			logger.log(Level.WARNING, "Id of requested object does not contains required parameters. ");
+			logger.warn("Id of requested object does not contains required parameters. ");
 			throw new IllegalArgumentException("Id of requested object does not contains required parameters. ");
 
 		} else {

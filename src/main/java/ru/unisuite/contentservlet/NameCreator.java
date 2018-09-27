@@ -9,6 +9,36 @@ import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 
+
+
+//class NameCreatorTest {
+//	
+//	NameCreator nameCreator;
+//	
+//	@Before
+//	void setUp() {
+//		nameCreator = new NameCreator();
+//	}
+//	
+//	@Test
+//	createWithParametersWm() throws Exception {
+//		// assign
+//		RequestParameters requestParameters = new RequestParameters();
+//		
+//		String expected = "wm-blablabla";
+//		
+//		// act
+//		// put everything needed to requestParameters 
+//		String result = nameCreator.createWithParameters(requestParameters);
+//		
+//		// assert
+//		assertThat(expected.length() > 40);
+//		assertEquals(result, expected);
+//		
+//		
+//	}
+//}
+
 class NameCreator {
 
 	final static private String HASH_ALGORITHM = "MD5";

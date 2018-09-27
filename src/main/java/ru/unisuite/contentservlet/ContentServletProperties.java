@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -19,7 +20,7 @@ class ContentServletProperties {
 		initFromProperties();
 	}
 
-	private static Logger logger = Logger.getLogger(ContentServletProperties.class.getName());
+	private static Logger logger = LoggerFactory.getLogger(ContentServletProperties.class.getName());
 
 	private final static String CONFIG_FILE_NAME = "ContentServletConfig.xml";
 
@@ -32,7 +33,7 @@ class ContentServletProperties {
 
 			if (input == null) {
 				String errorMessage = "Unable to load " + filename;
-				logger.severe(errorMessage);
+				logger.error(errorMessage);
 				throw new ContentServletPropertiesException(errorMessage);
 			}
 
@@ -46,7 +47,7 @@ class ContentServletProperties {
 		} catch (IOException e) {
 			// e.printStackTrace();
 			String errorMessage = "Unable to load " + filename;
-			logger.severe(errorMessage);
+			logger.error(errorMessage, e);
 			throw new ContentServletPropertiesException(errorMessage, e);
 		}
 
