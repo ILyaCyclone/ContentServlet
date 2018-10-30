@@ -9,4 +9,10 @@
             <package-name>com.fasterxml.*</package-name>
         </prefer-application-packages> -->
     </container-descriptor>
+
+    <security-role-assignment>
+        <role-name>authenticated</role-name>
+        <principal-name>AUTHENTICATED_USERS</principal-name>
+    </security-role-assignment>
+    
 </weblogic-web-app>

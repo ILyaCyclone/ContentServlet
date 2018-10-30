@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+<title>МИИТ | Личный кабинет</title>
+<link rel="stylesheet" type="text/css" href="login/view.css" media="all"></link>
+<link rel="icon" href="/..//content/miit_icon_lk.png?id_wm=734574&SWidth=620&SHeight=60"></link>
+<script type="text/javascript" src="login/hello.js"></script>
+
+</head>
+<body id="main_body">
+
+	<img id="top" src="login/top.png" alt=""></img>
+	<div id="form_container">
+	
+                <div class="header_block" style="background-color: #4b75b3;"></div>
+		<form class="appnitro"  method="post" action="j_security_check">
+					<div class="form_description">
+			<h2 style="padding-bottom: 5px;">Личный кабинет</h2>
+			<p>Пожалуйста, введите логин и пароль для доступа к приложению.</p>
+		</div>
+			<ul >
+			
+					<li id="li_1" >
+		<label class="description" for="element_1">Логин </label>
+		<div>
+			<input id="element_1" name="j_username" class="element text medium" type="text" maxlength="255" value=""/> 
+		</div> 
+		</li>		<li id="li_2" >
+		<label class="description" for="element_2">Пароль </label>
+		<div>
+			<input id="element_2" name="j_password" class="element text medium" type="password" maxlength="255" value=""/> 
+		</div> 
+		</li>
+			
+					<li class="buttons">
+					<input id="saveForm" class="button_text" type="submit" name="submit" value="Войти"/>
+		
+		</li>
+			</ul>
+			
+			
+		</form>	
+		<div id="footer">Версия <script type="text/javascript">printVer();</script>
+                <br/>
+      © 2018 "Российский университет транспорта (МИИТ)".
+		</div>
+	</div>
+	<img id="bottom" src="login/bottom.png" alt=""></img>
+	</body>
+</html>
