@@ -11,9 +11,10 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
+		<cache.version>0.0.1-SNAPSHOT</cache.version>
 		<servlet.version>3.1.0</servlet.version>
 		<ojdbc.version>12.2.0.1</ojdbc.version>
+		<slf4j.version>1.7.25</slf4j.version>
 	</properties>
 
 	<repositories>
@@ -55,13 +56,13 @@
 		<dependency>
 			<groupId>ru.unisuite.cache</groupId>
 			<artifactId>cache</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${cache.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.8.0-beta2</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 	</dependencies>
 
