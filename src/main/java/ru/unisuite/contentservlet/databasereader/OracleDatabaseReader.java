@@ -1,5 +1,8 @@
 package ru.unisuite.contentservlet.databasereader;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
@@ -8,6 +11,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,13 +33,13 @@ import ru.unisuite.cache.Cache;
 import ru.unisuite.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
 
 	private static final String DATASOURCE_NAME = "jdbc/ds_basic_wrapper";
-	
+
 	@Override
-	public DataSource getDataSource() { //Обрабатывать местно
+	public DataSource getDataSource() { // Обрабатывать местно
 
 		try {
 			Class.forName("ru.unisuite.jdbc.wrapper.MyDriverWrapper");
@@ -43,7 +47,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		Context initialContext = null;
 		try {
 			initialContext = new InitialContext();
@@ -69,7 +73,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	public String getCodeData(final int webMetaId) throws OracleDatabaseReaderException {
 
 		final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = ?";
-		
+
 		String codeData;
 
 		try (Connection connection = getDataSource().getConnection();
@@ -92,7 +96,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	public void getResTestListData(PrintWriter printWriter) throws OracleDatabaseReaderException {
 
 		final String getResTestListDataSQL = "select wpms_cm_wp.get_ContentURL(t.id_web_metaterm, null, 2) cnt from actual_content_version_wp t\n";
-		
+
 		String data;
 
 		try (Connection connection = getDataSource().getConnection();
@@ -111,11 +115,12 @@ public class OracleDatabaseReader implements DatabaseReader {
 			throw new OracleDatabaseReaderException(e.getMessage(), e);
 		}
 	}
-	
+
 	@Override
 	public void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
-		
+			HttpServletResponse response, Cache cache, String idInCache)
+			throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
+
 		final String getBinaryDataByMetaSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?, A_alias => ?) as wpt_t_data_img_wp))";
 
 		try (Connection connection = getDataSource().getConnection();
@@ -123,7 +128,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 						.prepareStatement(getBinaryDataByMetaSQL)) {
 
 			int i = 1;
-			
+
 			setParameterInt(preparedStatement, i++, queryParameters.getWebMetaId());
 			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
 			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
@@ -145,10 +150,11 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void getBinaryDataByFileVersionId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
+			HttpServletResponse response, Cache cache, String idInCache)
+			throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 
 		final String getBinaryDataByFileVersionIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
-		
+
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
@@ -159,7 +165,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-				
+
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
@@ -175,10 +181,11 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void getBinaryDataByClientId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache) throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
+			HttpServletResponse response, Cache cache, String idInCache)
+			throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 
 		final String getBinaryDataByClientIdSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
-		
+
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection
 						.prepareStatement(getBinaryDataByClientIdSQL)) {
@@ -263,8 +270,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache cache, String idInCache)
-			throws SQLException, OracleDatabaseReaderException {
+			Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderException {
 		resultSet.next();
 
 		int blobSize = resultSet.getInt(DatabaseReaderParamName.bsize);
@@ -289,13 +295,17 @@ public class OracleDatabaseReader implements DatabaseReader {
 			parameters.put(DatabaseReaderParamName.type, mimeType);
 			parameters.put(DatabaseReaderParamName.size, blobSize);
 			parameters.put(DatabaseReaderParamName.hash, "someHash");
-			try (FileOutputStream cacheOs = cache.getFileOutputStream(mimeType, idInCache)) {
-				cache.putAsync(idInCache, parameters);
-				cache.writeToTwoStreams(idInCache, blobObject, osServlet, cacheOs);
+
+			try (OutputStream tempIS = cache.openStream(idInCache)) {
+
+				cache.writeToTwoStreams(idInCache, blobObject, osServlet, tempIS);
+//				cache.putAsync(idInCache, tempFile.getPath(), parameters);
 
 			} catch (IOException e) {
 				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}
+
+			
 
 		} else {
 			try {
