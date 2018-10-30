@@ -36,7 +36,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
 
-	private static final String DATASOURCE_NAME = "jdbc/ds_basic_wrapper";
+	private static final String DATASOURCE_NAME = "jdbc/ds_basic";
 
 	@Override
 	public DataSource getDataSource() { // Обрабатывать местно
