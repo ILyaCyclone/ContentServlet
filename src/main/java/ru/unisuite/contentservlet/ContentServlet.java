@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +22,7 @@ import ru.unisuite.cache.cacheexception.CacheStartFailedException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 
-@WebServlet({"/*", "/secure/*"})
+@WebServlet({"/app/*", "/app/secure/*"})
 public class ContentServlet extends HttpServlet {
 
 	private ContentGetter contentGetter = new ContentGetter();
@@ -56,7 +58,7 @@ public class ContentServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-
+		
 		Cache cache = null;
 		if (USE_CACHE) {
 			cache = cacheInstance.getCache();
