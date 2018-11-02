@@ -10,13 +10,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
-@WebFilter(servletNames = "ContentServlet", urlPatterns = "/*")
-public class RequestFilter implements Filter {
+@WebFilter(urlPatterns = "/*")
+public class ContentDispatcherFilter implements Filter {
+
+	private static final String LOGIN_URL = "login";
+	private static final String CONTENT_URL = "get";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -25,12 +26,14 @@ public class RequestFilter implements Filter {
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		String path = req.getRequestURI().substring(req.getContextPath().length());
+		String pathStart = path.split("/")[1];
 
-		if (path.startsWith("/login/")) {
+		switch (pathStart) {
+		case (LOGIN_URL):
 			chain.doFilter(request, response);
-		} else {
-
-			request.getRequestDispatcher("/app" + path).forward(request, response);
+			break;
+		default:
+			request.getRequestDispatcher("/" + CONTENT_URL + path).forward(request, response);
 			return;
 		}
 
@@ -38,8 +41,6 @@ public class RequestFilter implements Filter {
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-
 	}
 
 }
