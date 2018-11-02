@@ -20,18 +20,18 @@ import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 import ru.unisuite.contentservlet.databasereader.OracleDatabaseReader;
 
 public class ContentGetter {
-	
+
 	public ContentGetter(ContentServletProperties properties) {
 
 		databaseReader = new OracleDatabaseReader(properties.getDatasourceName());
 	}
-	
+
 	private Logger logger = LoggerFactory.getLogger(ContentGetter.class.getName());
- 
+
 	private DatabaseReader databaseReader;
-	
+
 	private final static String MASK = "[^/]*[^/]";
-	
+
 	public static String getFileName(final String AURI) {
 		Pattern pattern = Pattern.compile(MASK);
 		Matcher matcher = pattern.matcher(AURI);
@@ -44,13 +44,14 @@ public class ContentGetter {
 
 	public void getObject(final RequestParameters requestParameters, OutputStream os, HttpServletResponse response,
 			Cache cache) throws CacheGetException, DatabaseReaderException, DatabaseReaderNoDataException {
-		
+
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
 		String idInCache = nameCreator.createWithParameters(requestParameters);
 
-		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null &&requestParameters.getFileVersionId() == null
-				&& requestParameters.getClientId() == null && requestParameters.getEntryIdInPhotoalbum() == null) {
+		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null
+				&& requestParameters.getFileVersionId() == null && requestParameters.getClientId() == null
+				&& requestParameters.getEntryIdInPhotoalbum() == null) {
 
 			logger.warn("Id of requested object does not contains required parameters. ");
 			throw new IllegalArgumentException("Id of requested object does not contains required parameters. ");
@@ -66,29 +67,33 @@ public class ContentGetter {
 				cache.increaseHits();
 
 			} else {
-				
-				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(), requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(), requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(), requestParameters.getWidth(), requestParameters.getHeight());
+
+				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(),
+						requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(),
+						requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(),
+						requestParameters.getWidth(), requestParameters.getHeight());
 
 				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaAlias() != null) {
-					
+
 					databaseReader.getBinaryDataByMeta(queryParameters, os, response, cache, idInCache);
 
 				} else {
-					
+
 					if (queryParameters.getFileVersionId() != null) {
 
 						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, cache, idInCache);
 
 					} else {
 
-						if (queryParameters.getClientId() != null || requestParameters.getEntryIdInPhotoalbum() != null) {
+						if (queryParameters.getClientId() != null
+								|| requestParameters.getEntryIdInPhotoalbum() != null) {
 
 							databaseReader.getBinaryDataByClientId(queryParameters, os, response, cache, idInCache);
 
 						}
 					}
 				}
-				
+
 				// увеличение промахов количество в кэш
 				if (ContentServlet.USE_CACHE && cache.isUp)
 					cache.increaseMisses();

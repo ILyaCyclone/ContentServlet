@@ -1,9 +1,0 @@
-<ContentServlet>
-	<useCache>false</useCache>
-	
-	<logger>
-		<logLevel>WARNING</logLevel>
-		<logFolder>C:\Users\romanov\Desktop\cache\log\appLog</logFolder>
-		<logLimit>1000000</logLimit>
-	</logger>
-</ContentServlet>

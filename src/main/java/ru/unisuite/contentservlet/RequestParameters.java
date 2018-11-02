@@ -6,7 +6,7 @@ class RequestParameters {
 
 	private Integer contentDisposition;
 	private Integer contentType;
-	
+
 	private Integer webMetaId;
 	private String webMetaAlias;
 	private Integer fileVersionId;
@@ -14,7 +14,7 @@ class RequestParameters {
 	private Integer entryIdInPhotoalbum;
 	private String width;
 	private String height;
-	
+
 	public static final String webMetaIdParamName = "webMetaId";
 	public static final String webMetaAliasParamName = "webMetaAlias";
 	public static final String fileVersionIdParamName = "fileVersionId";
@@ -22,24 +22,22 @@ class RequestParameters {
 	public static final String entryIdInPhotoalbumParamName = "entryIdInPhotoalbum";
 	public static final String widthParamName = "width";
 	public static final String heightParamName = "height";
-	
-	
+
 	public RequestParameters(Map<String, String[]> parametersMap) throws NumberFormatException {
 
 		contentDisposition = getIntValue(parametersMap, ServletParamName.contentDisposition);
 		contentType = getIntValue(parametersMap, ServletParamName.contentType);
-	
+
 		webMetaId = getIntValue(parametersMap, ServletParamName.webMetaId);
 		webMetaAlias = getStringValue(parametersMap, ServletParamName.webMetaAlias);
 		fileVersionId = getIntValue(parametersMap, ServletParamName.fileVersionId);
 		clientId = getIntValue(parametersMap, ServletParamName.clientId);
-		entryIdInPhotoalbum = getIntValue(parametersMap,ServletParamName.entryIdInPhotoalbum);
+		entryIdInPhotoalbum = getIntValue(parametersMap, ServletParamName.entryIdInPhotoalbum);
 		width = getStringValue(parametersMap, ServletParamName.width);
 		height = getStringValue(parametersMap, ServletParamName.height);
-		
+
 	}
-	
-	
+
 	public Integer getContentDisposition() {
 		return contentDisposition;
 	}
@@ -47,11 +45,11 @@ class RequestParameters {
 	public Integer getContentType() {
 		return contentType;
 	}
-	
+
 	public String getWebMetaAlias() {
 		return webMetaAlias;
 	}
-	
+
 	public Integer getWebMetaId() {
 		return webMetaId;
 	}
@@ -75,7 +73,7 @@ class RequestParameters {
 	public String getHeight() {
 		return height;
 	}
-	
+
 	public String getStringValue(final Map<String, String[]> parametersMap, final String parameterName) {
 
 		String value = null;
@@ -86,7 +84,8 @@ class RequestParameters {
 		return value;
 	}
 
-	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName) throws NumberFormatException {
+	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName)
+			throws NumberFormatException {
 
 		Integer value = null;
 		if (parametersMap.containsKey(parameterName)) {

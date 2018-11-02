@@ -27,7 +27,7 @@ public class DatabaseQueryParameters {
 	public Integer getWebMetaId() {
 		return webMetaId;
 	}
-	
+
 	public String getWebMetaAlias() {
 		return webMetaAlias;
 	}

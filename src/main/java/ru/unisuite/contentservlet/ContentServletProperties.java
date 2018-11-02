@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 
 class ContentServletProperties {
 	public ContentServletProperties() throws ContentServletPropertiesException {
-		// initFromXml();
 		initFromProperties();
 	}
 
@@ -41,14 +40,13 @@ class ContentServletProperties {
 			prop.load(input);
 
 			Boolean useCache = Boolean.valueOf(prop.getProperty("ru.unisuite.contentservlet.usecache"));
-			
+
 			String datasourceName = prop.getProperty("ru.unisuite.contentservlet.jndi.datasource.name");
 
 			this.useCache = useCache;
 			this.datasourceName = datasourceName;
 
 		} catch (IOException e) {
-			// e.printStackTrace();
 			String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
 			logger.error(errorMessage, e);
 			throw new ContentServletPropertiesException(errorMessage, e);
@@ -88,7 +86,7 @@ class ContentServletProperties {
 	public String getDatasourceName() {
 		return datasourceName;
 	}
-	
+
 	public boolean isUseCache() {
 		return useCache;
 	}

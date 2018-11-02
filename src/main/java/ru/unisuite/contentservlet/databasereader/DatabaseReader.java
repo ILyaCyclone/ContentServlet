@@ -7,7 +7,6 @@ import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -44,6 +43,5 @@ public interface DatabaseReader {
 			throws DatabaseReaderWriteToStreamException;
 
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache cache, String idInCache)
-			throws SQLException, DatabaseReaderException;
+			Cache cache, String idInCache) throws SQLException, DatabaseReaderException;
 }

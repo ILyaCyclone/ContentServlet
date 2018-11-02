@@ -1,17 +1,12 @@
 package ru.unisuite.contentservlet.databasereader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

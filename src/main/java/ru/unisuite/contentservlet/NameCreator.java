@@ -9,36 +9,6 @@ import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 
-
-
-//class NameCreatorTest {
-//	
-//	NameCreator nameCreator;
-//	
-//	@Before
-//	void setUp() {
-//		nameCreator = new NameCreator();
-//	}
-//	
-//	@Test
-//	createWithParametersWm() throws Exception {
-//		// assign
-//		RequestParameters requestParameters = new RequestParameters();
-//		
-//		String expected = "wm-blablabla";
-//		
-//		// act
-//		// put everything needed to requestParameters 
-//		String result = nameCreator.createWithParameters(requestParameters);
-//		
-//		// assert
-//		assertThat(expected.length() > 40);
-//		assertEquals(result, expected);
-//		
-//		
-//	}
-//}
-
 class NameCreator {
 
 	final static private String HASH_ALGORITHM = "MD5";
@@ -48,7 +18,7 @@ class NameCreator {
 		StringBuilder builder = new StringBuilder();
 		if (requestParameters.getWebMetaId() != null)
 			builder.append(String.format("wm=%s-", requestParameters.getWebMetaId()));
-		
+
 		if (requestParameters.getWebMetaAlias() != null)
 			builder.append(String.format("wmAlias=%s-", requestParameters.getWebMetaAlias()));
 
@@ -57,16 +27,16 @@ class NameCreator {
 
 		if (requestParameters.getClientId() != null)
 			builder.append(String.format("cid=%s-", requestParameters.getClientId()));
-		
+
 		if (requestParameters.getEntryIdInPhotoalbum() != null)
 			builder.append(String.format("entInPhAl=%s-", requestParameters.getEntryIdInPhotoalbum()));
-		
+
 		if (requestParameters.getWidth() != null)
 			builder.append(String.format("width=%s-", requestParameters.getWidth()));
-		
+
 		if (requestParameters.getHeight() != null)
 			builder.append(String.format("height=%s-", requestParameters.getHeight()));
-		
+
 		return builder.toString();
 	}
 

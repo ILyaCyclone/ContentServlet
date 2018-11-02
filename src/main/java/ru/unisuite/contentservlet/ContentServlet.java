@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +20,7 @@ import ru.unisuite.cache.cacheexception.CacheStartFailedException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 
-@WebServlet({"/get/*", "/get/secure/*"})
+@WebServlet({ "/get/*", "/get/secure/*" })
 public class ContentServlet extends HttpServlet {
 
 	private ContentGetter contentGetter;
@@ -45,7 +43,7 @@ public class ContentServlet extends HttpServlet {
 		} catch (ContentServletPropertiesException e) {
 			throw new RuntimeException("Problems with ContentServlet config file. " + e.toString(), e);
 		}
-		
+
 		contentGetter = new ContentGetter(contentServletProperties);
 
 		USE_CACHE = contentServletProperties.isUseCache();
@@ -60,7 +58,7 @@ public class ContentServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		
+
 		Cache cache = null;
 		if (USE_CACHE) {
 			cache = cacheInstance.getCache();
@@ -68,7 +66,7 @@ public class ContentServlet extends HttpServlet {
 			if (cache.isUp)
 				cache.applyDowntine(downtime);
 		}
-		
+
 		// Инициализация класса со значениями всех параметров
 		RequestParameters requestParameters = null;
 		try {
@@ -91,7 +89,7 @@ public class ContentServlet extends HttpServlet {
 		// Временно чтобы работало
 		Integer contentType = requestParameters.getContentType();
 		if (contentType == null) {
-			contentType = -1; 
+			contentType = -1;
 		}
 
 		switch (contentType) {
@@ -167,7 +165,7 @@ public class ContentServlet extends HttpServlet {
 					}
 				}
 			} catch (CacheGetException | DatabaseReaderException | IOException e) {
-				
+
 				try {
 					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				} catch (IOException e1) {
@@ -175,24 +173,24 @@ public class ContentServlet extends HttpServlet {
 				}
 
 				logger.error("Object getting is failed. " + e.toString(), e);
-				
+
 				return;
-				
+
 			} catch (DatabaseReaderNoDataException e) {
-				
+
 				try {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				} catch (IOException e1) {
 					logger.warn(e1.toString(), e1);
-				} 
-				
+				}
+
 				logger.error(e.toString(), e);
 				return;
 			}
 		}
 		}
-		
-//		cache.shutdown();
+
+		// cache.shutdown();
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
