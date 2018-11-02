@@ -22,17 +22,17 @@ class ContentServletProperties {
 
 	private static Logger logger = LoggerFactory.getLogger(ContentServletProperties.class.getName());
 
-	private final static String CONFIG_FILE_NAME = "ContentServletConfig.xml";
+	private final static String CONFIG_FILE_NAME = "content.properties";
 
 	private boolean useCache;
+	private String datasourceName;
 
 	private void initFromProperties() throws ContentServletPropertiesException {
 
-		String filename = "content.properties";
-		try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(filename)) {
+		try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE_NAME)) {
 
 			if (input == null) {
-				String errorMessage = "Unable to load " + filename;
+				String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
 				logger.error(errorMessage);
 				throw new ContentServletPropertiesException(errorMessage);
 			}
@@ -41,12 +41,15 @@ class ContentServletProperties {
 			prop.load(input);
 
 			Boolean useCache = Boolean.valueOf(prop.getProperty("ru.unisuite.contentservlet.usecache"));
+			
+			String datasourceName = prop.getProperty("ru.unisuite.contentservlet.jndi.datasource.name");
 
 			this.useCache = useCache;
+			this.datasourceName = datasourceName;
 
 		} catch (IOException e) {
 			// e.printStackTrace();
-			String errorMessage = "Unable to load " + filename;
+			String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
 			logger.error(errorMessage, e);
 			throw new ContentServletPropertiesException(errorMessage, e);
 		}
@@ -82,6 +85,10 @@ class ContentServletProperties {
 		this.useCache = useCache;
 	}
 
+	public String getDatasourceName() {
+		return datasourceName;
+	}
+	
 	public boolean isUseCache() {
 		return useCache;
 	}

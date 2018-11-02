@@ -22,10 +22,10 @@ import ru.unisuite.cache.cacheexception.CacheStartFailedException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 
-@WebServlet({"/app/*", "/app/secure/*"})
+@WebServlet({"/get/*", "/get/secure/*"})
 public class ContentServlet extends HttpServlet {
 
-	private ContentGetter contentGetter = new ContentGetter();
+	private ContentGetter contentGetter;
 	private CacheInstance cacheInstance;
 
 	private static final long serialVersionUID = 1L;
@@ -45,6 +45,8 @@ public class ContentServlet extends HttpServlet {
 		} catch (ContentServletPropertiesException e) {
 			throw new RuntimeException("Problems with ContentServlet config file. " + e.toString(), e);
 		}
+		
+		contentGetter = new ContentGetter(contentServletProperties);
 
 		USE_CACHE = contentServletProperties.isUseCache();
 

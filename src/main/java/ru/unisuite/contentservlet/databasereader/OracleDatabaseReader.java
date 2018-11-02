@@ -33,10 +33,16 @@ import ru.unisuite.cache.Cache;
 import ru.unisuite.contentservlet.ContentServlet;
 
 public class OracleDatabaseReader implements DatabaseReader {
+	
+	public OracleDatabaseReader (String datasourceName) {
+		
+		this.datasourceName = datasourceName;
+		
+	}
 
 	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
 
-	private static final String DATASOURCE_NAME = "jdbc/ds_basic";
+	private String datasourceName;
 
 	@Override
 	public DataSource getDataSource() { // Обрабатывать местно
@@ -51,7 +57,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 		Context initialContext = null;
 		try {
 			initialContext = new InitialContext();
-			DataSource dataSource = (DataSource) initialContext.lookup(DATASOURCE_NAME);
+			DataSource dataSource = (DataSource) initialContext.lookup(datasourceName);
 			return dataSource;
 		} catch (NamingException e) {
 			logger.error(e.toString(), e);

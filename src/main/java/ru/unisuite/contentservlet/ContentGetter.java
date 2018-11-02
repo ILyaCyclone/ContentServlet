@@ -21,9 +21,14 @@ import ru.unisuite.contentservlet.databasereader.OracleDatabaseReader;
 
 public class ContentGetter {
 	
+	public ContentGetter(ContentServletProperties properties) {
+
+		databaseReader = new OracleDatabaseReader(properties.getDatasourceName());
+	}
+	
 	private Logger logger = LoggerFactory.getLogger(ContentGetter.class.getName());
  
-	private DatabaseReader databaseReader = new OracleDatabaseReader();
+	private DatabaseReader databaseReader;
 	
 	private final static String MASK = "[^/]*[^/]";
 	
@@ -114,18 +119,13 @@ public class ContentGetter {
 
 	public String getCodeData(final int WebMetaId) throws DatabaseReaderException {
 
-		String answer = null;
-
-		DatabaseReader databaseReader = new OracleDatabaseReader();
-		answer = databaseReader.getCodeData(WebMetaId);
+		String answer = databaseReader.getCodeData(WebMetaId);
 
 		return answer;
 
 	}
 
 	public void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException {
-
-		DatabaseReader databaseReader = new OracleDatabaseReader();
 
 		databaseReader.getResTestListData(printWriter);
 
