@@ -29,13 +29,6 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="lib" path="C:/Users/romanov/git/wrapper/jdbc-wrapper/jdbc-wrapper/target/ojdbc-wrapper-0.0.1-SNAPSHOT.jar">
-		<attributes>
-			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="oracle.eclipse.tools.weblogic.lib.system">
 		<attributes>
 			<attribute name="owner.project.facets" value="jst.web"/>

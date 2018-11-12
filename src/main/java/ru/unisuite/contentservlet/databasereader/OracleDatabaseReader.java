@@ -40,14 +40,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	private String datasourceName;
 
 	@Override
-	public DataSource getDataSource() { // Обрабатывать местно
-
-		try {
-			Class.forName("ru.unisuite.jdbc.wrapper.MyDriverWrapper");
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+	public DataSource getDataSource() {
 
 		Context initialContext = null;
 		try {
