@@ -17,7 +17,7 @@ class ContentServletPropertiesException extends Exception {
 	}
 
 	public ContentServletPropertiesException(String message, Throwable cause) {
-		super(message, cause);
+		super("See configuration file: " + message, cause);
 	}
 
 	public int getErrorCode() {

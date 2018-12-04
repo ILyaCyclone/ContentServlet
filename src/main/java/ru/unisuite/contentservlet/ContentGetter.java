@@ -58,11 +58,9 @@ public class ContentGetter {
 
 		} else {
 
-			boolean foundInCache = ContentServlet.USE_CACHE && cache.isUp && cache.exists(idInCache)
-					&& cache.getHashById(idInCache).equals("someHash");
+			boolean foundInCache = ContentServlet.USE_CACHE && cache.isUp && cache.exists(idInCache) && cache.get(idInCache, os, response);
 
 			if (foundInCache) {
-				cache.get(idInCache, os, response);
 				// увеличение попаданий в кэш
 				cache.increaseHits();
 

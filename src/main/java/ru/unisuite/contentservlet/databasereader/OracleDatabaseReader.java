@@ -290,17 +290,19 @@ public class OracleDatabaseReader implements DatabaseReader {
 			parameters.put(DatabaseReaderParamName.size, blobSize);
 			parameters.put(DatabaseReaderParamName.hash, "someHash");
 
-			try (OutputStream tempIS = cache.openStream(idInCache)) {
-
-				cache.writeToTwoStreams(idInCache, blobObject, osServlet, tempIS);
-//				cache.putAsync(idInCache, tempFile.getPath(), parameters);
-
-			} catch (IOException e) {
+			try (OutputStream isFromCache = cache.openStream(idInCache)) {
+				
+				if (isFromCache != null) {
+					cache.writeToTwoStreams(idInCache, blobObject, osServlet, isFromCache);
+					cache.putAsync(idInCache, parameters);
+				} else {
+					writeToStream(blobObject, osServlet);
+				}
+				
+			} catch (IOException | DatabaseReaderWriteToStreamException e) {
 				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}
-
 			
-
 		} else {
 			try {
 				writeToStream(blobObject, osServlet);
