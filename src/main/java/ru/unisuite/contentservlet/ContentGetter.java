@@ -58,7 +58,8 @@ public class ContentGetter {
 
 		} else {
 
-			boolean foundInCache = ContentServlet.USE_CACHE && cache.isUp && cache.exists(idInCache) && cache.get(idInCache, os, response);
+			boolean foundInCache = ContentServlet.USE_CACHE && cache.isUp && cache.exists(idInCache)
+					&& cache.get(idInCache, os, response);
 
 			if (foundInCache) {
 				// увеличение попаданий в кэш
@@ -100,7 +101,7 @@ public class ContentGetter {
 		}
 	}
 
-	public String getHeader(final HttpServletRequest request, final Integer contentDisposition) {
+	public String getContentDisposition(final HttpServletRequest request, final Integer contentDisposition) {
 
 		String fileName = getFileName(request.getRequestURI());
 
@@ -118,6 +119,19 @@ public class ContentGetter {
 			}
 		}
 
+	}
+
+	public String getCacheControl(final boolean noCache) {
+
+		String cacheControl;
+
+		if (noCache) {
+			cacheControl = "no-cache";
+		} else {
+			cacheControl = "max-age=31536000";
+		}
+		
+		return cacheControl;
 	}
 
 	public String getCodeData(final int WebMetaId) throws DatabaseReaderException {

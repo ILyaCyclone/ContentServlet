@@ -14,6 +14,7 @@ class RequestParameters {
 	private Integer entryIdInPhotoalbum;
 	private String width;
 	private String height;
+	private boolean noCache;
 
 	public static final String webMetaIdParamName = "webMetaId";
 	public static final String webMetaAliasParamName = "webMetaAlias";
@@ -36,6 +37,8 @@ class RequestParameters {
 		width = getStringValue(parametersMap, ServletParamName.width);
 		height = getStringValue(parametersMap, ServletParamName.height);
 
+		noCache = parametersMap.containsKey(ServletParamName.cacheControl);
+
 	}
 
 	public Integer getContentDisposition() {
@@ -46,6 +49,10 @@ class RequestParameters {
 		return contentType;
 	}
 
+	public boolean getCacheControl() {
+		return noCache;
+	}
+	
 	public String getWebMetaAlias() {
 		return webMetaAlias;
 	}
@@ -96,4 +103,5 @@ class RequestParameters {
 
 		return value;
 	}
+	
 }

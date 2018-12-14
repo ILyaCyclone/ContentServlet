@@ -33,7 +33,8 @@ public class ContentServlet extends HttpServlet {
 	private Logger logger = LoggerFactory.getLogger(ContentServlet.class.getName());
 
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
-	private final static String ContentDispositionText = "Content-Disposition";
+	private final static String contentDispositionText = "Content-Disposition";
+	private final static String cacheControlHeaderName = "Cache-Control";
 
 	public void init() {
 
@@ -83,8 +84,11 @@ public class ContentServlet extends HttpServlet {
 		}
 
 		// Задание Header
-		String respHeader = contentGetter.getHeader(request, requestParameters.getContentDisposition());
-		response.setHeader(ContentDispositionText, respHeader);
+		String respHeader = contentGetter.getContentDisposition(request, requestParameters.getContentDisposition());
+		response.setHeader(contentDispositionText, respHeader);
+		
+		String cacheControl = contentGetter.getCacheControl(requestParameters.getCacheControl());
+		response.setHeader(cacheControlHeaderName, cacheControl);
 
 		// Временно чтобы работало
 		Integer contentType = requestParameters.getContentType();
