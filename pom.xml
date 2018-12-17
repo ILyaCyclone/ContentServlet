@@ -5,7 +5,7 @@
 
 	<groupId>ru.unisuite.contentservlet</groupId>
 	<artifactId>contentservlet</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>war</packaging>
 
 	<properties>
@@ -16,7 +16,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
-		<cache.version>0.0.1-SNAPSHOT</cache.version>
+		<cache.version>1.0.0</cache.version>
 		<servlet.version>3.1.0</servlet.version>
 		<ojdbc.version>12.2.0.1</ojdbc.version>
 		<slf4j.version>1.7.25</slf4j.version>
