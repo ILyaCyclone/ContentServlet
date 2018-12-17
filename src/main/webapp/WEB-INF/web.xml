@@ -3,7 +3,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Protected Area</web-resource-name>
-      <url-pattern>/secure/*</url-pattern>
+      <url-pattern>/get/secure/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>authenticated</role-name>
