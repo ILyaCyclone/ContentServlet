@@ -264,7 +264,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderException {
+			Cache cache, String idInCache) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
 		resultSet.next();
 
 		int blobSize = resultSet.getInt(DatabaseReaderParamName.bsize);
@@ -277,6 +277,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 		String mimeType = resultSet.getString(DatabaseReaderParamName.mime);
 
+		if (blobSize == 0) {
+			throw new DatabaseReaderNoDataException("ContentLength is empty. ");
+		}
+		
 		response.setContentType(mimeType);
 		response.setContentLength(blobSize);
 		response.setHeader("Last-Modified", lastModifiedTime.toString());
