@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import ru.unisuite.cache.Cache;
+import ru.unisuite.scf4j.Cache;
 
 public interface DatabaseReader {
 
@@ -23,15 +23,15 @@ public interface DatabaseReader {
 	void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException;
 
 	void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache)
+			HttpServletResponse response, Cache persistantCache, String idInCache)
 			throws DatabaseReaderException, DatabaseReaderNoDataException;
 
 	void getBinaryDataByFileVersionId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache)
+			HttpServletResponse response, Cache persistantCache, String idInCache)
 			throws DatabaseReaderException, DatabaseReaderNoDataException;
 
 	void getBinaryDataByClientId(DatabaseQueryParameters queryParameters, OutputStream osServlet,
-			HttpServletResponse response, Cache cache, String idInCache)
+			HttpServletResponse response, Cache persistantCache, String idInCache)
 			throws DatabaseReaderException, DatabaseReaderNoDataException;
 
 	public void setParameterInt(PreparedStatement preparedStatement, int filed, Integer value) throws SQLException;
@@ -44,5 +44,5 @@ public interface DatabaseReader {
 			throws DatabaseReaderWriteToStreamException;
 
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache cache, String idInCache) throws SQLException, DatabaseReaderException, DatabaseReaderNoDataException, IOException;
+			Cache persistantCache, String idInCache) throws SQLException, DatabaseReaderException, DatabaseReaderNoDataException, IOException;
 }

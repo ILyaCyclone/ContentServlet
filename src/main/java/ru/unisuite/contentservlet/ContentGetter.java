@@ -11,13 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.unisuite.cache.Cache;
-import ru.unisuite.cache.cacheexception.CacheGetException;
 import ru.unisuite.contentservlet.databasereader.DatabaseQueryParameters;
 import ru.unisuite.contentservlet.databasereader.DatabaseReader;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
 import ru.unisuite.contentservlet.databasereader.OracleDatabaseReader;
+import ru.unisuite.scf4j.Cache;
+import ru.unisuite.scf4j.exception.SCF4JCacheGetException;
 
 public class ContentGetter {
 
@@ -43,7 +43,7 @@ public class ContentGetter {
 	}
 
 	public void getObject(final RequestParameters requestParameters, OutputStream os, HttpServletResponse response,
-			Cache cache) throws CacheGetException, DatabaseReaderException, DatabaseReaderNoDataException {
+			Cache persistantCache) throws SCF4JCacheGetException, DatabaseReaderException, DatabaseReaderNoDataException {
 
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
@@ -58,12 +58,12 @@ public class ContentGetter {
 
 		} else {
 
-			boolean foundInCache = ContentServlet.USE_CACHE && cache.isUp && cache.exists(idInCache)
-					&& cache.get(idInCache, os, response);
+			boolean foundInCache = ContentServlet.USE_CACHE && persistantCache.connectionIsUp() && persistantCache.exists(idInCache)
+					&& persistantCache.get(idInCache, os, response);
 
 			if (foundInCache) {
 				// увеличение попаданий в кэш
-				cache.increaseHits();
+				persistantCache.increaseHits();
 
 			} else {
 
@@ -74,28 +74,28 @@ public class ContentGetter {
 
 				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaAlias() != null) {
 
-					databaseReader.getBinaryDataByMeta(queryParameters, os, response, cache, idInCache);
+					databaseReader.getBinaryDataByMeta(queryParameters, os, response, persistantCache, idInCache);
 
 				} else {
 
 					if (queryParameters.getFileVersionId() != null) {
 
-						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, cache, idInCache);
+						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, persistantCache, idInCache);
 
 					} else {
 
 						if (queryParameters.getClientId() != null
 								|| requestParameters.getEntryIdInPhotoalbum() != null) {
 
-							databaseReader.getBinaryDataByClientId(queryParameters, os, response, cache, idInCache);
+							databaseReader.getBinaryDataByClientId(queryParameters, os, response, persistantCache, idInCache);
 
 						}
 					}
 				}
 
 				// увеличение промахов количество в кэш
-				if (ContentServlet.USE_CACHE && cache.isUp)
-					cache.increaseMisses();
+				if (ContentServlet.USE_CACHE && persistantCache.connectionIsUp())
+					persistantCache.increaseMisses();
 			}
 
 		}
