@@ -12,19 +12,20 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.unisuite.cache.Cache;
-import ru.unisuite.cache.CacheInstance;
-import ru.unisuite.cache.CacheStatist;
-import ru.unisuite.cache.cacheexception.CacheGetException;
-import ru.unisuite.cache.cacheexception.CacheStartFailedException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderNoDataException;
+import ru.unisuite.scf4j.Cache;
+import ru.unisuite.scf4j.CacheFactory;
+import ru.unisuite.scf4j.GeneralCacheFactory;
+import ru.unisuite.scf4j.exception.SCF4JCacheGetException;
+import ru.unisuite.scf4j.exception.SCF4JCacheStartFailedException;
 
 @WebServlet("/*")//@WebServlet({ "/get/*", "/get/secure/*" })
 public class ContentServlet extends HttpServlet {
 
 	private ContentGetter contentGetter;
-	private CacheInstance cacheInstance;
+	private CacheFactory cacheFactory;
+	private Cache persistantCache;
 
 	private static final long serialVersionUID = 1L;
 
@@ -51,22 +52,15 @@ public class ContentServlet extends HttpServlet {
 
 		if (USE_CACHE) {
 			try {
-				cacheInstance = new CacheInstance("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
-			} catch (CacheStartFailedException e) {
-				logger.error("Cache didn't start. " + e.toString(), e);
+				cacheFactory = GeneralCacheFactory.getCacheFactory("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
+			} catch (SCF4JCacheStartFailedException e) {
+				throw new RuntimeException("Problems with Cache config file. " + e.toString(), e);
 			}
+			persistantCache = cacheFactory.getCache();
 		}
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-
-		Cache cache = null;
-		if (USE_CACHE) {
-			cache = cacheInstance.getCache();
-			long downtime = 0L; // берется из бд
-			if (cache.isUp)
-				cache.applyDowntine(downtime);
-		}
 
 		// Инициализация класса со значениями всех параметров
 		RequestParameters requestParameters = null;
@@ -157,18 +151,15 @@ public class ContentServlet extends HttpServlet {
 
 			try (OutputStream os = response.getOutputStream()) {
 
-				contentGetter.getObject(requestParameters, os, response, cache);
+				contentGetter.getObject(requestParameters, os, response, persistantCache);
 
 				if (USE_CACHE) {
-					if (cache.isUp) {
+					if (persistantCache.connectionIsUp()) {
 
-						CacheStatist statist = cache.getStatistics();
-
-						System.out.println("cacheHits: " + statist.getCacheHits() + " cacheMisses: "
-								+ statist.getCacheMisses() + " Ratio: " + statist.getCacheHitRatio());
+						System.out.println(persistantCache.getStatistics());
 					}
 				}
-			} catch (CacheGetException | DatabaseReaderException | IOException e) {
+			} catch (SCF4JCacheGetException | DatabaseReaderException | IOException e) {
 
 				try {
 					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -194,7 +185,6 @@ public class ContentServlet extends HttpServlet {
 		}
 		}
 
-		// cache.shutdown();
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -202,8 +192,8 @@ public class ContentServlet extends HttpServlet {
 	}
 
 	public void destroy() {
-		if (cacheInstance != null)
-			cacheInstance.close();
+		if (cacheFactory != null)
+			cacheFactory.close();
 	}
 
 }
