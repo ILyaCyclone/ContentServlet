@@ -22,7 +22,6 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
-		<cache.version>0.1.1-SNAPSHOT</cache.version>
 		<servlet.version>3.1.0</servlet.version>
 		<slf4j.version>1.7.25</slf4j.version>
 	</properties>
@@ -42,16 +41,17 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ru.unisuite.cache</groupId>
-			<artifactId>cache</artifactId>
-			<version>${cache.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>ru.unisuite.scf4j</groupId>
+			<artifactId>scf4j</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
