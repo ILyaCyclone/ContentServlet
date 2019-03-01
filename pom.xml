@@ -55,6 +55,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>aa_content</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
