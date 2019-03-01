@@ -36,6 +36,8 @@ public class ContentServlet extends HttpServlet {
 	private final static String contentTypeHTML = "text/html; charset=UTF-8";
 	private final static String contentDispositionText = "Content-Disposition";
 	private final static String cacheControlHeaderName = "Cache-Control";
+	
+	private final static String CACHE_CONFIG_FILE_NAME = "cache-config.xml";
 
 	public void init() {
 
@@ -52,7 +54,7 @@ public class ContentServlet extends HttpServlet {
 
 		if (USE_CACHE) {
 			try {
-				cacheFactory = GeneralCacheFactory.getCacheFactory("C:\\Users\\romanov\\Desktop\\cache\\cacheConfig.xml");
+				cacheFactory = GeneralCacheFactory.getCacheFactory(this.getClass().getClassLoader().getResource(CACHE_CONFIG_FILE_NAME).toString());
 			} catch (SCF4JCacheStartFailedException e) {
 				throw new RuntimeException("Problems with Cache config file. " + e.toString(), e);
 			}
