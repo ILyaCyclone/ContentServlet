@@ -54,7 +54,7 @@ public class ContentServlet extends HttpServlet {
 
 		if (USE_CACHE) {
 			try {
-				cacheFactory = GeneralCacheFactory.getCacheFactory(this.getClass().getClassLoader().getResource(CACHE_CONFIG_FILE_NAME).toString());
+				cacheFactory = GeneralCacheFactory.getCacheFactory(this.getClass().getClassLoader().getResource(CACHE_CONFIG_FILE_NAME).getPath());
 			} catch (SCF4JCacheStartFailedException e) {
 				throw new RuntimeException("Problems with Cache config file. " + e.toString(), e);
 			}
