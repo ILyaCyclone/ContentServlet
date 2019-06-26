@@ -51,7 +51,7 @@ public class ContentServlet extends HttpServlet {
 		contentGetter = new ContentGetter(contentServletProperties);
 
 		USE_CACHE = contentServletProperties.isUseCache();
-
+		
 		if (USE_CACHE) {
 			try {
 				cacheFactory = GeneralCacheFactory.getCacheFactory(this.getClass().getClassLoader().getResource(CACHE_CONFIG_FILE_NAME).getPath());

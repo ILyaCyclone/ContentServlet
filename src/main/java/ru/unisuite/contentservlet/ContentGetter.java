@@ -128,7 +128,7 @@ public class ContentGetter {
 		if (noCache) {
 			cacheControl = "no-cache";
 		} else {
-			cacheControl = "max-age=31536000";
+			cacheControl = "max-age=604800";
 		}
 		
 		return cacheControl;
