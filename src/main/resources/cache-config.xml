@@ -3,21 +3,21 @@
 	<dbCollectionName>cache</dbCollectionName>
 
 	<node name="general">
-		<capacity>500000</capacity>
+		<capacity>50000000</capacity>
 		<directory>general</directory>
 		<timeToLive>600000</timeToLive>
 		<timeToIdle>150000</timeToIdle>
 	</node>
 
 	<node name="images">
-		<capacity>450000</capacity>
+		<capacity>45000000</capacity>
 		<directory>images</directory>
 		<timeToLive>0</timeToLive>
 		<timeToIdle>10000</timeToIdle>
 	</node>
 
 	<node name="videos">
-		<capacity>650000</capacity>
+		<capacity>65000000</capacity>
 		<directory>videos</directory>
 		<timeToLive>120000</timeToLive>
 		<timeToIdle>20000</timeToIdle>
