@@ -25,6 +25,7 @@ class ContentServletProperties {
 
 	private boolean useCache;
 	private String datasourceName;
+	private String cacheControl;
 
 	private void initFromProperties() throws ContentServletPropertiesException {
 
@@ -42,9 +43,12 @@ class ContentServletProperties {
 			Boolean useCache = Boolean.valueOf(prop.getProperty("ru.unisuite.contentservlet.usecache"));
 
 			String datasourceName = prop.getProperty("ru.unisuite.contentservlet.jndi.datasource.name");
+			
+			String cacheControl = prop.getProperty("ru.unisuite.contentservlet.cachecontrol");
 
 			this.useCache = useCache;
 			this.datasourceName = datasourceName;
+			this.cacheControl = cacheControl;
 
 		} catch (IOException e) {
 			String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
@@ -89,6 +93,10 @@ class ContentServletProperties {
 
 	public boolean isUseCache() {
 		return useCache;
+	}
+	
+	public String getCacheControl() {
+		return cacheControl;
 	}
 
 }

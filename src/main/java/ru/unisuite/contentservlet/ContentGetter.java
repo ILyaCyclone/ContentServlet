@@ -24,11 +24,14 @@ public class ContentGetter {
 	public ContentGetter(ContentServletProperties properties) {
 
 		databaseReader = new OracleDatabaseReader(properties.getDatasourceName());
+		cacheControl = properties.getCacheControl();
 	}
 
 	private Logger logger = LoggerFactory.getLogger(ContentGetter.class.getName());
 
 	private DatabaseReader databaseReader;
+	
+	private String cacheControl;
 
 	private final static String MASK = "[^/]*[^/]";
 
@@ -128,7 +131,7 @@ public class ContentGetter {
 		if (noCache) {
 			cacheControl = "no-cache";
 		} else {
-			cacheControl = "max-age=604800";
+			cacheControl = "max-age=" + this.cacheControl;
 		}
 		
 		return cacheControl;
