@@ -25,7 +25,7 @@ class ContentServletProperties {
 
 	private boolean useCache;
 	private String datasourceName;
-	private String cacheControl;
+	private int cacheControl;
 
 	private void initFromProperties() throws ContentServletPropertiesException {
 
@@ -43,8 +43,8 @@ class ContentServletProperties {
 			Boolean useCache = Boolean.valueOf(prop.getProperty("ru.unisuite.contentservlet.usecache"));
 
 			String datasourceName = prop.getProperty("ru.unisuite.contentservlet.jndi.datasource.name");
-			
-			String cacheControl = prop.getProperty("ru.unisuite.contentservlet.cachecontrol");
+
+			int cacheControl = getInSeconds(prop.getProperty("ru.unisuite.contentservlet.cachecontrol"));
 
 			this.useCache = useCache;
 			this.datasourceName = datasourceName;
@@ -94,9 +94,45 @@ class ContentServletProperties {
 	public boolean isUseCache() {
 		return useCache;
 	}
-	
-	public String getCacheControl() {
+
+	public int getCacheControl() {
 		return cacheControl;
+	}
+
+	private int getInSeconds(String cacheControlString) {
+
+		char[] charArray = cacheControlString.toCharArray();
+
+		int i = 0;
+		while (i < charArray.length && !Character.isLetter(charArray[i])) {
+			i++;
+		}
+
+		int time = Integer.parseInt(cacheControlString.substring(0, i));
+
+		if (i < charArray.length) {
+
+			switch (String.valueOf(charArray[i])) {
+			case ("y"):
+				return time * 31536000;
+			case ("m"):
+				return time * 2592000;
+			case ("w"):
+				return time * 345600;
+			case ("d"):
+				return time * 86400;
+			case ("h"):
+				return time * 3600;
+			case ("s"):
+				return time;
+			default:
+				return time;
+
+			}
+		} else {
+			return time;
+		}
+
 	}
 
 }

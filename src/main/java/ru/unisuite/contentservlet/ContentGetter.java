@@ -31,7 +31,7 @@ public class ContentGetter {
 
 	private DatabaseReader databaseReader;
 	
-	private String cacheControl;
+	private int cacheControl;
 
 	private final static String MASK = "[^/]*[^/]";
 
