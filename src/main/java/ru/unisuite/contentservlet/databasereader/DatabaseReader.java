@@ -2,6 +2,7 @@ package ru.unisuite.contentservlet.databasereader;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.sql.Blob;
@@ -38,11 +39,11 @@ public interface DatabaseReader {
 
 	public void setParameterStr(PreparedStatement preparedStatement, int filed, String value) throws SQLException;
 
-	void writeToStream(Blob blobData, OutputStream os) throws DatabaseReaderWriteToStreamException;
+	void writeToStream(InputStream is, OutputStream os) throws DatabaseReaderWriteToStreamException;
 
 	void writeToTwoStreams(Blob blobData, OutputStream os1, FileOutputStream os2)
 			throws DatabaseReaderWriteToStreamException;
 
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache persistantCache, String idInCache) throws SQLException, DatabaseReaderException, DatabaseReaderNoDataException, IOException;
+			Cache persistantCache, String idInCache, String width) throws SQLException, DatabaseReaderException, DatabaseReaderNoDataException, IOException;
 }

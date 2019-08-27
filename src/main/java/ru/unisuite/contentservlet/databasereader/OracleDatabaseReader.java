@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.unisuite.contentservlet.ContentServlet;
+import ru.unisuite.imageresizer.ImageResizer;
+import ru.unisuite.imageresizer.ThumbnailatorImageResizer;
 import ru.unisuite.scf4j.Cache;
 
 public class OracleDatabaseReader implements DatabaseReader {
@@ -124,15 +126,15 @@ public class OracleDatabaseReader implements DatabaseReader {
 			int i = 1;
 
 			setParameterInt(preparedStatement, i++, queryParameters.getWebMetaId());
-			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
-			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
+			setParameterStr(preparedStatement, i++, null);
+			setParameterStr(preparedStatement, i++, null);
 			setParameterStr(preparedStatement, i++, queryParameters.getWebMetaAlias());
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
-					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache);
+					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth());
 				}
 
 			}
@@ -155,7 +157,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 			int i = 1;
 			setParameterInt(preparedStatement, i++, queryParameters.getFileVersionId());
-			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
+			setParameterStr(preparedStatement, i++, null);
 			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -163,7 +165,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
-					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache);
+					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth());
 				}
 
 			}
@@ -187,15 +189,15 @@ public class OracleDatabaseReader implements DatabaseReader {
 			int i = 1;
 			setParameterInt(preparedStatement, i++, queryParameters.getClientId());
 			setParameterInt(preparedStatement, i++, queryParameters.getEntryIdInPhotoalbum());
-			setParameterStr(preparedStatement, i++, queryParameters.getWidth());
-			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
+			setParameterStr(preparedStatement, i++, null);
+			setParameterStr(preparedStatement, i++, null);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
-					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache);
+					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth());
 				}
 
 			}
@@ -224,17 +226,17 @@ public class OracleDatabaseReader implements DatabaseReader {
 	}
 
 	@Override
-	public void writeToStream(Blob blobData, OutputStream os) throws DatabaseReaderWriteToStreamException {
+	public void writeToStream(InputStream is, OutputStream os) throws DatabaseReaderWriteToStreamException {
 
 		int length;
 		int bufSize = 4096;
 		byte buffer[] = new byte[bufSize];
-		try (InputStream is = blobData.getBinaryStream()) {
+		try {
 			while ((length = is.read(buffer, 0, bufSize)) != -1) {
 				os.write(buffer, 0, length);
 			}
 			os.flush();
-		} catch (IOException | SQLException e) {
+		} catch (IOException e) {
 			throw new DatabaseReaderWriteToStreamException(e.getMessage(), e);
 		}
 
@@ -264,7 +266,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache persistantCache, String idInCache) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
+			Cache persistantCache, String idInCache, String width) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
+		
+		ImageResizer resizer = new ThumbnailatorImageResizer();
+		
 		resultSet.next();
 
 		int blobSize = resultSet.getInt(DatabaseReaderParamName.bsize);
@@ -300,7 +305,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 					persistantCache.writeToTwoStreams(idInCache, blobObject, osServlet, isFromCache);
 					persistantCache.putAsync(idInCache, parameters);
 				} else {
-					writeToStream(blobObject, osServlet);
+					try (InputStream blobIs = blobObject.getBinaryStream()) {
+						writeToStream(blobIs, osServlet);
+					}
+					
 				}
 				
 			} catch (IOException | DatabaseReaderWriteToStreamException e) {
@@ -308,9 +316,16 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 			
 		} else {
-			try {
-				writeToStream(blobObject, osServlet);
-			} catch (DatabaseReaderWriteToStreamException e) {
+			try (InputStream blobIs = blobObject.getBinaryStream()) {
+				if(width != null) {
+					int intWidth = Integer.parseInt(width);
+					resizer.resize(blobIs, intWidth, intWidth * 2/3, fileExtension, osServlet);
+					System.out.println("with the help of thumbnailator");
+				} else {
+					writeToStream(blobIs, osServlet);
+				}
+	
+			} catch (IOException | DatabaseReaderWriteToStreamException e) {
 				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}
 		}
