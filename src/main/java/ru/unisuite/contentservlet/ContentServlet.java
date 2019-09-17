@@ -162,7 +162,7 @@ public class ContentServlet extends HttpServlet {
 					}
 				}
 			} catch (SCF4JCacheGetException | DatabaseReaderException | IOException e) {
-				
+
 				try {
 					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				} catch (IOException e1) {
