@@ -320,7 +320,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				
 				if (width != null && height !=null) {
 					
-					int intWidth = Integer.parseInt(width); // Начать проверять входные параметры выше (http)
+					int intWidth = Integer.parseInt(width);
 					int intHeight = Integer.parseInt(height);
 				
 					resizer.resize(blobIs, intWidth, intHeight, osServlet);
