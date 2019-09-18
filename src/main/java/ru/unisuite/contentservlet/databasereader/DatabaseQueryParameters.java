@@ -8,11 +8,11 @@ public class DatabaseQueryParameters {
 	private Integer clientId;
 	private Integer entryIdInPhotoalbum;
 
-	private String width;
-	private String height;
+	private Integer width;
+	private Integer height;
 
 	public DatabaseQueryParameters(Integer webMetaId, String webMetaAlias, Integer fileVersionId, Integer clientId,
-			Integer entryIdInPhotoalbum, String width, String height) {
+			Integer entryIdInPhotoalbum, Integer width, Integer height) {
 
 		this.webMetaId = webMetaId;
 		this.webMetaAlias = webMetaAlias;
@@ -44,11 +44,11 @@ public class DatabaseQueryParameters {
 		return entryIdInPhotoalbum;
 	}
 
-	public String getWidth() {
+	public Integer getWidth() {
 		return width;
 	}
 
-	public String getHeight() {
+	public Integer getHeight() {
 		return height;
 	}
 

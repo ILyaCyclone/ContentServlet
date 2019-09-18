@@ -21,7 +21,6 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import org.apache.commons.io.output.CountingOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,7 +158,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			int i = 1;
 			setParameterInt(preparedStatement, i++, queryParameters.getFileVersionId());
 			setParameterStr(preparedStatement, i++, null);
-			setParameterStr(preparedStatement, i++, queryParameters.getHeight());
+			setParameterStr(preparedStatement, i++, null);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -267,7 +266,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache persistantCache, String idInCache, String width, String height) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
+			Cache persistantCache, String idInCache, Integer width, Integer height) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
 		
 		resultSet.next();
 
@@ -319,19 +318,14 @@ public class OracleDatabaseReader implements DatabaseReader {
 				ImageResizer resizer = ImageResizerFactory.getImageResizer();
 				
 				if (width != null && height !=null) {
-					
-					int intWidth = Integer.parseInt(width);
-					int intHeight = Integer.parseInt(height);
 				
-					resizer.resize(blobIs, intWidth, intHeight, osServlet);
+					resizer.resize(blobIs, width, height, osServlet);
 				} else {
 					if (width != null) {
-						int intWidth = Integer.parseInt(width);
-						resizer.resizeByWidth(blobIs, intWidth, osServlet);
+						resizer.resizeByWidth(blobIs, width, osServlet);
 					} else {
 						if (height != null) {
-							int intHeight = Integer.parseInt(height);
-							resizer.resizeByHeight(blobIs, intHeight, osServlet);
+							resizer.resizeByHeight(blobIs, height, osServlet);
 						} else {
 							response.setContentLengthLong(blobSize);
 							writeToStream(blobIs, osServlet);

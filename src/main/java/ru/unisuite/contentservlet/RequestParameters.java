@@ -12,8 +12,8 @@ class RequestParameters {
 	private Integer fileVersionId;
 	private Integer clientId;
 	private Integer entryIdInPhotoalbum;
-	private String width;
-	private String height;
+	private Integer width;
+	private Integer height;
 	private boolean noCache;
 
 	public static final String webMetaIdParamName = "webMetaId";
@@ -34,8 +34,8 @@ class RequestParameters {
 		fileVersionId = getIntValue(parametersMap, ServletParamName.fileVersionId);
 		clientId = getIntValue(parametersMap, ServletParamName.clientId);
 		entryIdInPhotoalbum = getIntValue(parametersMap, ServletParamName.entryIdInPhotoalbum);
-		width = getStringValue(parametersMap, ServletParamName.width);
-		height = getStringValue(parametersMap, ServletParamName.height);
+		width = getIntValue(parametersMap, ServletParamName.width);
+		height = getIntValue(parametersMap, ServletParamName.height);
 
 		noCache = parametersMap.containsKey(ServletParamName.cacheControl);
 
@@ -73,11 +73,11 @@ class RequestParameters {
 		return entryIdInPhotoalbum;
 	}
 
-	public String getWidth() {
+	public Integer getWidth() {
 		return width;
 	}
 
-	public String getHeight() {
+	public Integer getHeight() {
 		return height;
 	}
 
