@@ -17,7 +17,7 @@ import ru.unisuite.scf4j.Cache;
 
 public interface DatabaseReader {
 
-	DataSource getDataSource();
+	DataSource getDataSource() throws DatabaseReaderException;
 
 	String getCodeData(final int webMetaId) throws DatabaseReaderException;
 
