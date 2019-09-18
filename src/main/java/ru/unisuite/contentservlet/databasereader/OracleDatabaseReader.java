@@ -43,7 +43,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 	private String datasourceName;
 
 	@Override
-	public DataSource getDataSource() {
+	public DataSource getDataSource() throws OracleDatabaseReaderException {
 
 		Context initialContext = null;
 		try {
@@ -52,7 +52,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			return dataSource;
 		} catch (Exception e) {
 			logger.error(e.toString(), e);
-			throw new RuntimeException("Unable to lookup datasource by name", e);
+			throw new OracleDatabaseReaderException("Unable to lookup datasource by name", e);
 		} finally {
 			if (initialContext != null) {
 				try {
@@ -287,7 +287,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 		
 		response.setContentType(mimeType);
 		response.setHeader("Last-Modified", lastModifiedTime.toString());
-//		response.setContentLengthLong(blobSize);
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 
@@ -315,8 +314,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			}
 
 		} else {
-			try (InputStream blobIs = blobObject.getBinaryStream();
-					CountingOutputStream cos = new CountingOutputStream(osServlet)) {
+			try (InputStream blobIs = blobObject.getBinaryStream()) {
 				
 				ImageResizer resizer = ImageResizerFactory.getImageResizer();
 				
@@ -325,24 +323,21 @@ public class OracleDatabaseReader implements DatabaseReader {
 					int intWidth = Integer.parseInt(width); // Начать проверять входные параметры выше (http)
 					int intHeight = Integer.parseInt(height);
 				
-					resizer.resize(blobIs, intWidth, intHeight, cos);
+					resizer.resize(blobIs, intWidth, intHeight, osServlet);
 				} else {
 					if (width != null) {
 						int intWidth = Integer.parseInt(width);
-						resizer.resizeByWidth(blobIs, intWidth, cos);
+						resizer.resizeByWidth(blobIs, intWidth, osServlet);
 					} else {
 						if (height != null) {
 							int intHeight = Integer.parseInt(height);
-							resizer.resizeByHeight(blobIs, intHeight, cos);
+							resizer.resizeByHeight(blobIs, intHeight, osServlet);
 						} else {
-							writeToStream(blobIs, cos);
+							response.setContentLengthLong(blobSize);
+							writeToStream(blobIs, osServlet);
 						}
 					}
 				}
-				
-				System.out.println(Long.toString(cos.getByteCount()));
-				response.setContentLengthLong(cos.getByteCount());
-//				response.addHeader("Content-Length", Long.toString(cos.getByteCount()));
 	
 			} catch (IOException | DatabaseReaderWriteToStreamException e) {
 				throw new OracleDatabaseReaderException(e.getMessage(), e);
