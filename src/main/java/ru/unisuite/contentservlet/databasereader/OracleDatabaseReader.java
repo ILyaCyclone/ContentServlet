@@ -299,7 +299,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (OutputStream isFromCache = persistantCache.openStream(idInCache)) {
 				
 				if (isFromCache != null) {
-					persistantCache.writeToTwoStreams(idInCache, blobObject, osServlet, isFromCache);
+					persistantCache.writeToTwoStreams(idInCache, blobObject, osServlet, isFromCache); //maybe better to use TeeOutputStream
 					persistantCache.putAsync(idInCache, parameters);
 				} else {
 					try (InputStream blobIs = blobObject.getBinaryStream()) {
