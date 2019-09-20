@@ -34,10 +34,15 @@ public class OracleDatabaseReader implements DatabaseReader {
 	public OracleDatabaseReader (String datasourceName) {
 		
 		this.datasourceName = datasourceName;
+		this.imageResizerFactory = new ImageResizerFactory();
 		
 	}
 
+	public Long lastTime;
+	
 	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
+	
+	private ImageResizerFactory imageResizerFactory;
 
 	private String datasourceName;
 
@@ -117,6 +122,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 			HttpServletResponse response, Cache persistantCache, String idInCache)
 			throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
 
+		lastTime = System.currentTimeMillis();
+		
 		final String getBinaryDataByMetaSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?, A_alias => ?) as wpt_t_data_img_wp))";
 
 		try (Connection connection = getDataSource().getConnection();
@@ -134,6 +141,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
+					System.out.println(System.currentTimeMillis()-lastTime);
+					lastTime = System.currentTimeMillis();
 					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight());
 				}
 
@@ -271,7 +280,12 @@ public class OracleDatabaseReader implements DatabaseReader {
 		resultSet.next();
 
 		int blobSize = resultSet.getInt(DatabaseReaderParamName.bsize);
-
+		
+		if (blobSize == 0) {
+			throw new DatabaseReaderNoDataException("ContentLength is empty. ");
+		}
+		System.out.println(System.currentTimeMillis()-lastTime);
+		lastTime = System.currentTimeMillis();
 		Long lastModifiedTime = resultSet.getLong(DatabaseReaderParamName.lastModified);
 
 		String fileName = resultSet.getString(DatabaseReaderParamName.filename);
@@ -279,16 +293,13 @@ public class OracleDatabaseReader implements DatabaseReader {
 		String fileExtension = resultSet.getString(DatabaseReaderParamName.extension);
 
 		String mimeType = resultSet.getString(DatabaseReaderParamName.mime);
-
-		if (blobSize == 0) {
-			throw new DatabaseReaderNoDataException("ContentLength is empty. ");
-		}
 		
 		response.setContentType(mimeType);
 		response.setHeader("Last-Modified", lastModifiedTime.toString());
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
-
+		System.out.println(System.currentTimeMillis()-lastTime);
+		lastTime = System.currentTimeMillis();
 		if (ContentServlet.USE_CACHE && persistantCache.connectionIsUp()) {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put(DatabaseReaderParamName.contentType, mimeType);
@@ -303,6 +314,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 					persistantCache.putAsync(idInCache, parameters);
 				} else {
 					try (InputStream blobIs = blobObject.getBinaryStream()) {
+						response.setContentLengthLong(blobSize);
 						writeToStream(blobIs, osServlet);
 					}
 					
@@ -315,8 +327,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 		} else {
 			try (InputStream blobIs = blobObject.getBinaryStream()) {
 				
-				ImageResizer resizer = ImageResizerFactory.getImageResizer();
-				
+				ImageResizer resizer = imageResizerFactory.getImageResizer();
+				System.out.println(System.currentTimeMillis()-lastTime);
+				lastTime = System.currentTimeMillis();
 				if (width != null && height !=null) {
 				
 					resizer.resize(blobIs, width, height, osServlet);
@@ -332,7 +345,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 						}
 					}
 				}
-	
+				System.out.println(System.currentTimeMillis()-lastTime);
+				lastTime = System.currentTimeMillis();
 			} catch (IOException | DatabaseReaderWriteToStreamException e) {
 				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}
