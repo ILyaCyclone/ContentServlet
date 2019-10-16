@@ -52,6 +52,8 @@ public class ContentGetter {
 		NameCreator nameCreator = new NameCreator();
 		String idInCache = nameCreator.createWithParameters(requestParameters);
 
+		logger.debug("HTTP request " + idInCache);
+		
 		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null
 				&& requestParameters.getFileVersionId() == null && requestParameters.getClientId() == null
 				&& requestParameters.getEntryIdInPhotoalbum() == null) {
@@ -73,7 +75,7 @@ public class ContentGetter {
 				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(),
 						requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(),
 						requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(),
-						requestParameters.getWidth(), requestParameters.getHeight());
+						requestParameters.getWidth(), requestParameters.getHeight(), requestParameters.getQuality());
 
 				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaAlias() != null) {
 

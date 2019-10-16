@@ -121,8 +121,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 	public void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache persistantCache, String idInCache)
 			throws OracleDatabaseReaderException, DatabaseReaderNoDataException {
-
-		lastTime = System.currentTimeMillis();
 		
 		final String getBinaryDataByMetaSQL = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?, A_alias => ?) as wpt_t_data_img_wp))";
 
@@ -141,9 +139,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
-					System.out.println(System.currentTimeMillis()-lastTime);
-					lastTime = System.currentTimeMillis();
-					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight());
+					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight(), queryParameters.getQuality());
 				}
 
 			}
@@ -174,7 +170,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
-					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight());
+					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight(), queryParameters.getQuality());
 				}
 
 			}
@@ -206,7 +202,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
 				} else {
-					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight());
+					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache, queryParameters.getWidth(), queryParameters.getHeight(), queryParameters.getQuality());
 				}
 
 			}
@@ -275,7 +271,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	@Override
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache persistantCache, String idInCache, Integer width, Integer height) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
+			Cache persistantCache, String idInCache, Integer width, Integer height, Integer quality) throws SQLException, OracleDatabaseReaderException, DatabaseReaderNoDataException {
 		
 		resultSet.next();
 
@@ -284,8 +280,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 		if (blobSize == 0) {
 			throw new DatabaseReaderNoDataException("ContentLength is empty. ");
 		}
-		System.out.println(System.currentTimeMillis()-lastTime);
-		lastTime = System.currentTimeMillis();
 		Long lastModifiedTime = resultSet.getLong(DatabaseReaderParamName.lastModified);
 
 		String fileName = resultSet.getString(DatabaseReaderParamName.filename);
@@ -298,8 +292,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 		response.setHeader("Last-Modified", lastModifiedTime.toString());
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
-		System.out.println(System.currentTimeMillis()-lastTime);
-		lastTime = System.currentTimeMillis();
 		if (ContentServlet.USE_CACHE && persistantCache.connectionIsUp()) {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put(DatabaseReaderParamName.contentType, mimeType);
@@ -328,25 +320,29 @@ public class OracleDatabaseReader implements DatabaseReader {
 			try (InputStream blobIs = blobObject.getBinaryStream()) {
 				
 				ImageResizer resizer = imageResizerFactory.getImageResizer();
-				System.out.println(System.currentTimeMillis()-lastTime);
-				lastTime = System.currentTimeMillis();
+				
+				float floatQuality;
+				if (quality != null && quality >= 0 && quality <= 100) {
+					floatQuality = quality.floatValue() / 100;
+				} else {
+					floatQuality = 1;
+				}
+				
 				if (width != null && height !=null) {
 				
-					resizer.resize(blobIs, width, height, osServlet);
+					resizer.resize(blobIs, width, height, osServlet, floatQuality);
 				} else {
 					if (width != null) {
-						resizer.resizeByWidth(blobIs, width, osServlet);
+						resizer.resizeByWidth(blobIs, width, osServlet, blobSize, floatQuality);
 					} else {
 						if (height != null) {
-							resizer.resizeByHeight(blobIs, height, osServlet);
+							resizer.resizeByHeight(blobIs, height, osServlet, floatQuality);
 						} else {
 							response.setContentLengthLong(blobSize);
 							writeToStream(blobIs, osServlet);
 						}
 					}
 				}
-				System.out.println(System.currentTimeMillis()-lastTime);
-				lastTime = System.currentTimeMillis();
 			} catch (IOException | DatabaseReaderWriteToStreamException e) {
 				throw new OracleDatabaseReaderException(e.getMessage(), e);
 			}

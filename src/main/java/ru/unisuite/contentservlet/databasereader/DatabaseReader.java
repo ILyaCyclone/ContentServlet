@@ -45,5 +45,5 @@ public interface DatabaseReader {
 			throws DatabaseReaderWriteToStreamException;
 
 	public void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
-			Cache persistantCache, String idInCache, Integer width, Integer height) throws SQLException, DatabaseReaderException, DatabaseReaderNoDataException, IOException;
+			Cache persistantCache, String idInCache, Integer width, Integer height, Integer quality) throws SQLException, DatabaseReaderException, DatabaseReaderNoDataException, IOException;
 }

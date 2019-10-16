@@ -15,6 +15,7 @@ class RequestParameters {
 	private Integer width;
 	private Integer height;
 	private boolean noCache;
+	private Integer quality;
 
 	public static final String webMetaIdParamName = "webMetaId";
 	public static final String webMetaAliasParamName = "webMetaAlias";
@@ -23,6 +24,7 @@ class RequestParameters {
 	public static final String entryIdInPhotoalbumParamName = "entryIdInPhotoalbum";
 	public static final String widthParamName = "width";
 	public static final String heightParamName = "height";
+	
 
 	public RequestParameters(Map<String, String[]> parametersMap) throws NumberFormatException {
 
@@ -38,6 +40,8 @@ class RequestParameters {
 		height = getIntValue(parametersMap, ServletParamName.height);
 
 		noCache = parametersMap.containsKey(ServletParamName.cacheControl);
+		
+		quality = getIntValue(parametersMap, ServletParamName.quality);
 
 	}
 
@@ -79,6 +83,10 @@ class RequestParameters {
 
 	public Integer getHeight() {
 		return height;
+	}
+	
+	public Integer getQuality() {
+		return quality;
 	}
 
 	public String getStringValue(final Map<String, String[]> parametersMap, final String parameterName) {

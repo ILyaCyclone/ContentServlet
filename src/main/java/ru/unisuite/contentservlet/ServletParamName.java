@@ -31,6 +31,8 @@ class ServletParamName {
 	// значение высоты для масштабирования изображения
 	public static final String height = "SHeight";
 	
+	public static final String quality = "quality";
+	
 	public static final String cacheControl = "no_cache";
 
 	public static final String cacheID = "id";

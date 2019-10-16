@@ -10,9 +10,11 @@ public class DatabaseQueryParameters {
 
 	private Integer width;
 	private Integer height;
+	
+	private Integer quality;
 
 	public DatabaseQueryParameters(Integer webMetaId, String webMetaAlias, Integer fileVersionId, Integer clientId,
-			Integer entryIdInPhotoalbum, Integer width, Integer height) {
+			Integer entryIdInPhotoalbum, Integer width, Integer height, Integer quality) {
 
 		this.webMetaId = webMetaId;
 		this.webMetaAlias = webMetaAlias;
@@ -21,6 +23,7 @@ public class DatabaseQueryParameters {
 		this.entryIdInPhotoalbum = entryIdInPhotoalbum;
 		this.width = width;
 		this.height = height;
+		this.quality = quality;
 
 	}
 
@@ -50,6 +53,10 @@ public class DatabaseQueryParameters {
 
 	public Integer getHeight() {
 		return height;
+	}
+	
+	public Integer getQuality() {
+		return quality;
 	}
 
 }
