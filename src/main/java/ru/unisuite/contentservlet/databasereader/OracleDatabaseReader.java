@@ -12,8 +12,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -23,6 +35,8 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.bea.core.repackaged.springframework.beans.propertyeditors.ZoneIdEditor;
 
 import ru.unisuite.contentservlet.ContentServlet;
 import ru.unisuite.imageresizer.ImageResizer;
@@ -289,7 +303,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 		String mimeType = resultSet.getString(DatabaseReaderParamName.mime);
 		
 		response.setContentType(mimeType);
-		response.setHeader("Last-Modified", lastModifiedTime.toString());
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+	    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+		response.setHeader("Last-Modified", sdf.format(new Date(lastModifiedTime * 1000)).toString());
 
 		Blob blobObject = resultSet.getBlob(DatabaseReaderParamName.dataBinary);
 		if (ContentServlet.USE_CACHE && persistantCache.connectionIsUp()) {
