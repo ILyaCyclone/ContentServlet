@@ -2,6 +2,9 @@ package ru.unisuite.contentservlet;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class RequestParameters {
 
 	private Integer contentDisposition;
@@ -15,7 +18,7 @@ class RequestParameters {
 	private Integer width;
 	private Integer height;
 	private boolean noCache;
-	private Integer quality;
+	private int quality;
 
 	public static final String webMetaIdParamName = "webMetaId";
 	public static final String webMetaAliasParamName = "webMetaAlias";
@@ -25,7 +28,10 @@ class RequestParameters {
 	public static final String widthParamName = "width";
 	public static final String heightParamName = "height";
 	
-
+	static final int DEFAULT_QUALITY = 100;
+	
+	private Logger logger = LoggerFactory.getLogger(RequestParameters.class.getName());
+	
 	public RequestParameters(Map<String, String[]> parametersMap) throws NumberFormatException {
 
 		contentDisposition = getIntValue(parametersMap, ServletParamName.contentDisposition);
@@ -41,7 +47,13 @@ class RequestParameters {
 
 		noCache = parametersMap.containsKey(ServletParamName.cacheControl);
 		
-		quality = getIntValue(parametersMap, ServletParamName.quality);
+		Integer inQuality = getIntValue(parametersMap, ServletParamName.quality);
+		if (inQuality != null && inQuality >=0 && inQuality <= 100) {
+			quality = inQuality;
+			logger.warn("Quality value is not correct. It was set by default value: " + DEFAULT_QUALITY);
+		} else {
+			quality = DEFAULT_QUALITY;
+		}
 
 	}
 
@@ -85,7 +97,7 @@ class RequestParameters {
 		return height;
 	}
 	
-	public Integer getQuality() {
+	public int getQuality() {
 		return quality;
 	}
 
