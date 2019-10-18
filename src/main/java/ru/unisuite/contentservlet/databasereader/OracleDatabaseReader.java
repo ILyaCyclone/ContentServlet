@@ -339,7 +339,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 					resizer.resize(blobIs, width, height, osServlet, quality);
 				} else {
 					if (width != null) {
-						resizer.resizeByWidth(blobIs, width, osServlet, blobSize, quality);
+						resizer.resizeByWidth(blobIs, width, osServlet, quality);
 					} else {
 						if (height != null) {
 							resizer.resizeByHeight(blobIs, height, osServlet, quality);
