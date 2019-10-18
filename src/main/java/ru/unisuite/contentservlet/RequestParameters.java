@@ -27,6 +27,8 @@ class RequestParameters {
 	public static final String entryIdInPhotoalbumParamName = "entryIdInPhotoalbum";
 	public static final String widthParamName = "width";
 	public static final String heightParamName = "height";
+	public static final String noCacheParamName = "noCache";
+	public static final String qualityParamName = "quality";
 	
 	static final int DEFAULT_QUALITY = 100;
 	
@@ -124,4 +126,38 @@ class RequestParameters {
 		return value;
 	}
 	
+	public String toString() {
+		
+		StringBuilder builder = new StringBuilder();
+		String stringFormat = "%s: %s ";
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, webMetaIdParamName, webMetaId));
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, webMetaAliasParamName, webMetaAlias));
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, fileVersionIdParamName, fileVersionId));
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, clientIdParamName, clientId));
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, entryIdInPhotoalbumParamName, entryIdInPhotoalbum));
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, widthParamName, width));
+		
+		if (webMetaId != null)
+			builder.append(String.format(stringFormat, heightParamName, noCache));
+		
+		builder.append(String.format(stringFormat, noCacheParamName, noCache));
+		
+		builder.append(String.format(stringFormat, qualityParamName, quality));
+		
+		return builder.toString();
+		
+	}
+
 }
