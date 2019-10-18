@@ -68,6 +68,7 @@ public class ContentServlet extends HttpServlet {
 		RequestParameters requestParameters = null;
 		try {
 			requestParameters = new RequestParameters(request.getParameterMap());
+			logger.debug("HTTP request: " + requestParameters.toString());
 		} catch (NumberFormatException e) {
 
 			logger.error("Request parameters didn't initialised. " + e.toString(), e);
