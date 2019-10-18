@@ -51,8 +51,6 @@ public class ContentGetter {
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
 		String idInCache = nameCreator.createWithParameters(requestParameters);
-
-		logger.debug("HTTP request " + idInCache);
 		
 		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null
 				&& requestParameters.getFileVersionId() == null && requestParameters.getClientId() == null
