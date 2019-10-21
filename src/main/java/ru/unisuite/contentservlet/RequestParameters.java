@@ -134,23 +134,23 @@ class RequestParameters {
 		if (webMetaId != null)
 			builder.append(String.format(stringFormat, webMetaIdParamName, webMetaId));
 		
-		if (webMetaId != null)
+		if (webMetaAlias != null)
 			builder.append(String.format(stringFormat, webMetaAliasParamName, webMetaAlias));
 		
-		if (webMetaId != null)
+		if (fileVersionId != null)
 			builder.append(String.format(stringFormat, fileVersionIdParamName, fileVersionId));
 		
-		if (webMetaId != null)
+		if (clientId != null)
 			builder.append(String.format(stringFormat, clientIdParamName, clientId));
 		
-		if (webMetaId != null)
+		if (entryIdInPhotoalbum != null)
 			builder.append(String.format(stringFormat, entryIdInPhotoalbumParamName, entryIdInPhotoalbum));
 		
-		if (webMetaId != null)
+		if (width != null)
 			builder.append(String.format(stringFormat, widthParamName, width));
 		
-		if (webMetaId != null)
-			builder.append(String.format(stringFormat, heightParamName, noCache));
+		if (height != null)
+			builder.append(String.format(stringFormat, heightParamName, height));
 		
 		builder.append(String.format(stringFormat, noCacheParamName, noCache));
 		
