@@ -63,7 +63,7 @@ class ContentServletProperties {
 		File xmlFile = new File(this.getClass().getClassLoader().getResource(CONFIG_FILE_NAME).getFile());
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
-		Document document = null;
+		Document document;
 		try {
 			db = dbf.newDocumentBuilder();
 			document = db.parse(xmlFile);
@@ -77,7 +77,7 @@ class ContentServletProperties {
 
 		try {
 			useCache = Boolean.parseBoolean(document.getDocumentElement()
-					.getElementsByTagName(ServletParamName.useCache).item(0).getTextContent().toString());
+					.getElementsByTagName(ServletParamName.useCache).item(0).getTextContent());
 		} catch (NullPointerException e) {
 			useCache = false;
 			// rootLogger.log(Level.WARNING, " useCache value not found. By default useCache

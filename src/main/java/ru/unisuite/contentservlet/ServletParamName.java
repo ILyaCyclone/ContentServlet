@@ -3,7 +3,6 @@ package ru.unisuite.contentservlet;
 class ServletParamName {
 
 	private ServletParamName() {
-		new AssertionError(ServletParamName.class.getName() + " shouldn't be initialised");
 	}
 
 	// Названия параметров из БД

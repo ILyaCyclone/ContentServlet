@@ -60,10 +60,8 @@ class NameCreator {
 			byte[] digest = m.digest();
 			BigInteger bigInt = new BigInteger(1, digest);
 			return bigInt.toString(16);
-		} catch (NoSuchAlgorithmException e) {
-			throw new AssertionError();
-		} catch (UnsupportedEncodingException e) {
-			throw new AssertionError();
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			throw new AssertionError(e);
 		}
 	}
 

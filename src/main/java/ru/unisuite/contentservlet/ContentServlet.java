@@ -41,7 +41,7 @@ public class ContentServlet extends HttpServlet {
 
 	public void init() {
 
-		ContentServletProperties contentServletProperties = null;
+		ContentServletProperties contentServletProperties;
 		try {
 			contentServletProperties = new ContentServletProperties();
 		} catch (ContentServletPropertiesException e) {
@@ -63,9 +63,9 @@ public class ContentServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-
+		
 		// Инициализация класса со значениями всех параметров
-		RequestParameters requestParameters = null;
+		RequestParameters requestParameters;
 		try {
 			requestParameters = new RequestParameters(request.getParameterMap());
 			logger.debug("HTTP request: " + requestParameters.toString());
@@ -98,7 +98,7 @@ public class ContentServlet extends HttpServlet {
 
 			response.setContentType(contentTypeHTML);
 
-			String codeData = null;
+			String codeData;
 
 			try (PrintWriter printWriter = response.getWriter()) {
 

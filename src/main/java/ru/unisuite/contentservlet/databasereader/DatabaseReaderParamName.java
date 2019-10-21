@@ -3,7 +3,6 @@ package ru.unisuite.contentservlet.databasereader;
 class DatabaseReaderParamName {
 
 	private DatabaseReaderParamName() {
-		new AssertionError(DatabaseReaderParamName.class.getName() + " shouldn't be initialised");
 	}
 
 	final static public String rstr = "rStr"

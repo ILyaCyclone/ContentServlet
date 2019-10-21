@@ -138,10 +138,8 @@ public class ContentGetter {
 	}
 
 	public String getCodeData(final int WebMetaId) throws DatabaseReaderException {
-
-		String answer = databaseReader.getCodeData(WebMetaId);
-
-		return answer;
+		
+		return databaseReader.getCodeData(WebMetaId);
 
 	}
 
