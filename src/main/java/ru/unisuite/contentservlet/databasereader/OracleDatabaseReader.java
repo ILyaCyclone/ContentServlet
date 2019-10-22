@@ -41,8 +41,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 
 	private String datasourceName;
 
-	static final ZoneId GMT = ZoneId.of("GMT");
-	static final DateTimeFormatter LAST_MODIFIED_FORMATTER = DateTimeFormatter
+	private static final ZoneId GMT = ZoneId.of("GMT");
+	private static final DateTimeFormatter LAST_MODIFIED_FORMATTER = DateTimeFormatter
 			.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).withZone(GMT);
 
 	private DataSource getDataSource() throws DatabaseReaderException {

@@ -35,7 +35,7 @@ public class ContentGetter {
 
 	private final static String MASK = "[^/]*[^/]";
 
-	public static String getFileName(final String AURI) {
+	private static String getFileName(final String AURI) {
 		Pattern pattern = Pattern.compile(MASK);
 		Matcher matcher = pattern.matcher(AURI);
 		String rS = null;

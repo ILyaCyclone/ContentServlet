@@ -20,15 +20,15 @@ class RequestParameters {
 	private boolean noCache;
 	private int quality;
 
-	public static final String webMetaIdParamName = "webMetaId";
-	public static final String webMetaAliasParamName = "webMetaAlias";
-	public static final String fileVersionIdParamName = "fileVersionId";
-	public static final String clientIdParamName = "clientId";
-	public static final String entryIdInPhotoalbumParamName = "entryIdInPhotoalbum";
-	public static final String widthParamName = "width";
-	public static final String heightParamName = "height";
-	public static final String noCacheParamName = "noCache";
-	public static final String qualityParamName = "quality";
+	private static final String webMetaIdParamName = "webMetaId";
+	private static final String webMetaAliasParamName = "webMetaAlias";
+	private static final String fileVersionIdParamName = "fileVersionId";
+	private static final String clientIdParamName = "clientId";
+	private static final String entryIdInPhotoalbumParamName = "entryIdInPhotoalbum";
+	private static final String widthParamName = "width";
+	private static final String heightParamName = "height";
+	private static final String noCacheParamName = "noCache";
+	private static final String qualityParamName = "quality";
 	
 	static final int DEFAULT_QUALITY = 100;
 	
@@ -52,9 +52,9 @@ class RequestParameters {
 		Integer inQuality = getIntValue(parametersMap, ServletParamName.quality);
 		if (inQuality != null && inQuality >=0 && inQuality <= 100) {
 			quality = inQuality;
-			logger.warn("Quality value is not correct. It was set by default value: " + DEFAULT_QUALITY);
 		} else {
 			quality = DEFAULT_QUALITY;
+			logger.warn("Quality value is not correct. It was set by default value: " + DEFAULT_QUALITY);
 		}
 
 	}
@@ -103,7 +103,7 @@ class RequestParameters {
 		return quality;
 	}
 
-	public String getStringValue(final Map<String, String[]> parametersMap, final String parameterName) {
+	private String getStringValue(final Map<String, String[]> parametersMap, final String parameterName) {
 
 		String value = null;
 		if (parametersMap.containsKey(parameterName)) {
@@ -113,7 +113,7 @@ class RequestParameters {
 		return value;
 	}
 
-	public Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName)
+	private Integer getIntValue(final Map<String, String[]> parametersMap, final String parameterName)
 			throws NumberFormatException {
 
 		Integer value = null;
