@@ -23,6 +23,7 @@ class DatabaseReaderParamName {
 			, entryIdInPhotoalbum = "entryIdInPhotoalbum"
 			, width = "width"
 			, height = "height"
-			, type = "type";
+			, type = "type"
+			, imageQuality = "imagequality";
 
 }

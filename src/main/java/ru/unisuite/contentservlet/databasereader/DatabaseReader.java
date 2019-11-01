@@ -12,6 +12,8 @@ public interface DatabaseReader {
 	String getCodeData(final int webMetaId) throws DatabaseReaderException;
 
 	void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException;
+	
+	int getDefaultImageQuality() throws DatabaseReaderException, DatabaseReaderNoDataException;
 
 	void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
 			HttpServletResponse response, Cache persistantCache, String idInCache)
