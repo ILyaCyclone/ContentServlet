@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,8 @@ public class ContentServlet extends HttpServlet {
 	private final static String cacheControlHeaderName = "Cache-Control";
 	
 	private final static String CACHE_CONFIG_FILE_NAME = "cache-config.xml";
+	
+	private int defaultQuality;
 
 	public void init() {
 
@@ -49,6 +52,12 @@ public class ContentServlet extends HttpServlet {
 		}
 
 		contentGetter = new ContentGetter(contentServletProperties);
+		
+		try {
+			defaultQuality = contentGetter.getDefaultImageQuality();
+		} catch (DatabaseReaderException | DatabaseReaderNoDataException e1) {
+			throw new RuntimeException("Can't read default image quality. " + e1.toString(), e1);
+		}
 
 		USE_CACHE = contentServletProperties.isUseCache();
 		
@@ -67,7 +76,7 @@ public class ContentServlet extends HttpServlet {
 		// Инициализация класса со значениями всех параметров
 		RequestParameters requestParameters;
 		try {
-			requestParameters = new RequestParameters(request.getParameterMap());
+			requestParameters = new RequestParameters(request.getParameterMap(), defaultQuality);
 			logger.debug("HTTP request: " + requestParameters.toString());
 		} catch (NumberFormatException e) {
 
@@ -76,6 +85,16 @@ public class ContentServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			} catch (IOException e1) {
 				logger.error("Error did not show to client. " + e1.toString(), e);
+			}
+			return;
+		}
+		
+		if (requestParameters.isEmpty()) {
+			try {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				request.getServletContext().getRequestDispatcher("/help").forward(request, response);
+			} catch (ServletException | IOException e) {
+				logger.error("Servlet can't show /help page. " + e.getMessage(), e);
 			}
 			return;
 		}

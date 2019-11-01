@@ -30,7 +30,7 @@ public class ContentGetter {
 	private Logger logger = LoggerFactory.getLogger(ContentGetter.class.getName());
 
 	private DatabaseReader databaseReader;
-	
+
 	private String cacheControl;
 
 	private final static String MASK = "[^/]*[^/]";
@@ -46,62 +46,54 @@ public class ContentGetter {
 	}
 
 	public void getObject(final RequestParameters requestParameters, OutputStream os, HttpServletResponse response,
-			Cache persistantCache) throws SCF4JCacheGetException, DatabaseReaderException, DatabaseReaderNoDataException {
+			Cache persistantCache)
+			throws SCF4JCacheGetException, DatabaseReaderException, DatabaseReaderNoDataException {
 
 		// Создание id объекта в кэше
 		NameCreator nameCreator = new NameCreator();
 		String idInCache = nameCreator.createWithParameters(requestParameters);
-		
-		if (requestParameters.getWebMetaId() == null && requestParameters.getWebMetaAlias() == null
-				&& requestParameters.getFileVersionId() == null && requestParameters.getClientId() == null
-				&& requestParameters.getEntryIdInPhotoalbum() == null) {
 
-			logger.warn("Id of requested object does not contains required parameters. ");
-			throw new IllegalArgumentException("Id of requested object does not contains required parameters. ");
+		boolean foundInCache = ContentServlet.USE_CACHE && persistantCache.connectionIsUp()
+				&& persistantCache.exists(idInCache) && persistantCache.get(idInCache, os, response);
+
+		if (foundInCache) {
+			// увеличение попаданий в кэш
+			persistantCache.increaseHits();
 
 		} else {
 
-			boolean foundInCache = ContentServlet.USE_CACHE && persistantCache.connectionIsUp() && persistantCache.exists(idInCache)
-					&& persistantCache.get(idInCache, os, response);
+			DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(),
+					requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(),
+					requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(),
+					requestParameters.getWidth(), requestParameters.getHeight(), requestParameters.getQuality());
 
-			if (foundInCache) {
-				// увеличение попаданий в кэш
-				persistantCache.increaseHits();
+			if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaAlias() != null) {
+
+				databaseReader.getBinaryDataByMeta(queryParameters, os, response, persistantCache, idInCache);
 
 			} else {
 
-				DatabaseQueryParameters queryParameters = new DatabaseQueryParameters(requestParameters.getWebMetaId(),
-						requestParameters.getWebMetaAlias(), requestParameters.getFileVersionId(),
-						requestParameters.getClientId(), requestParameters.getEntryIdInPhotoalbum(),
-						requestParameters.getWidth(), requestParameters.getHeight(), requestParameters.getQuality());
+				if (queryParameters.getFileVersionId() != null) {
 
-				if (queryParameters.getWebMetaId() != null || requestParameters.getWebMetaAlias() != null) {
-
-					databaseReader.getBinaryDataByMeta(queryParameters, os, response, persistantCache, idInCache);
+					databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, persistantCache,
+							idInCache);
 
 				} else {
 
-					if (queryParameters.getFileVersionId() != null) {
+					if (queryParameters.getClientId() != null || requestParameters.getEntryIdInPhotoalbum() != null) {
 
-						databaseReader.getBinaryDataByFileVersionId(queryParameters, os, response, persistantCache, idInCache);
+						databaseReader.getBinaryDataByClientId(queryParameters, os, response, persistantCache,
+								idInCache);
 
-					} else {
-
-						if (queryParameters.getClientId() != null
-								|| requestParameters.getEntryIdInPhotoalbum() != null) {
-
-							databaseReader.getBinaryDataByClientId(queryParameters, os, response, persistantCache, idInCache);
-
-						}
 					}
 				}
-
-				// увеличение промахов количество в кэш
-				if (ContentServlet.USE_CACHE && persistantCache.connectionIsUp())
-					persistantCache.increaseMisses();
 			}
 
+			// увеличение промахов количество в кэш
+			if (ContentServlet.USE_CACHE && persistantCache.connectionIsUp())
+				persistantCache.increaseMisses();
 		}
+
 	}
 
 	public String getContentDisposition(final HttpServletRequest request, final Integer contentDisposition) {
@@ -133,12 +125,12 @@ public class ContentGetter {
 		} else {
 			cacheControl = "max-age=" + this.cacheControl;
 		}
-		
+
 		return cacheControl;
 	}
 
 	public String getCodeData(final int WebMetaId) throws DatabaseReaderException {
-		
+
 		return databaseReader.getCodeData(WebMetaId);
 
 	}
@@ -146,6 +138,12 @@ public class ContentGetter {
 	public void getResTestListData(PrintWriter printWriter) throws DatabaseReaderException {
 
 		databaseReader.getResTestListData(printWriter);
+
+	}
+
+	public int getDefaultImageQuality() throws DatabaseReaderException, DatabaseReaderNoDataException {
+
+		return databaseReader.getDefaultImageQuality();
 
 	}
 

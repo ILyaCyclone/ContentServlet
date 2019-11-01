@@ -1,0 +1,16 @@
+Content Servlet
+
+
+
+Parameters:
+id_wm 		id of web metaterm.
+alias_wm	alias if web metaterm.
+id_vf		id of file's version.
+id_fe		id of person for his photo request.
+id_fpa		id of photo album.
+cd			Content-Disposition. Valid values: 1 - attachment, 2 - inline, null - null.
+ct			Content Type. Valid values: 1 - iframe (returns html), null - null.
+SWidth		width of requested image in pixels. Example: SWidth=716.
+SHeight		height of requested image in pixels. Example: SHeight=500.
+quality	 	quality of requested image. Valid values: from 0 to 100. Example: quality=80.
+no_cache	Cache-Control. Valid values: any int value - max-age=int value, null - no-cache.
