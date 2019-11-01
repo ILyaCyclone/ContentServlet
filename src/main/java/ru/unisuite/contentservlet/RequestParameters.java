@@ -29,12 +29,11 @@ class RequestParameters {
 	private static final String heightParamName = "height";
 	private static final String noCacheParamName = "noCache";
 	private static final String qualityParamName = "quality";
-	
-	static final int DEFAULT_QUALITY = 100;
-	
+
 	private Logger logger = LoggerFactory.getLogger(RequestParameters.class.getName());
-	
-	public RequestParameters(Map<String, String[]> parametersMap) throws NumberFormatException {
+
+	public RequestParameters(Map<String, String[]> parametersMap, int defaultImageQuality)
+			throws NumberFormatException {
 
 		contentDisposition = getIntValue(parametersMap, ServletParamName.contentDisposition);
 		contentType = getIntValue(parametersMap, ServletParamName.contentType);
@@ -48,13 +47,13 @@ class RequestParameters {
 		height = getIntValue(parametersMap, ServletParamName.height);
 
 		noCache = parametersMap.containsKey(ServletParamName.cacheControl);
-		
+
 		Integer inQuality = getIntValue(parametersMap, ServletParamName.quality);
-		if (inQuality != null && inQuality >=0 && inQuality <= 100) {
+		if (inQuality != null && inQuality >= 0 && inQuality <= 100) {
 			quality = inQuality;
 		} else {
-			quality = DEFAULT_QUALITY;
-			logger.warn("Quality value is not correct. It was set by default value: " + DEFAULT_QUALITY);
+			quality = defaultImageQuality;
+			logger.warn("Quality value is not correct. It was set by default value: " + defaultImageQuality);
 		}
 
 	}
@@ -70,7 +69,7 @@ class RequestParameters {
 	public boolean getCacheControl() {
 		return noCache;
 	}
-	
+
 	public String getWebMetaAlias() {
 		return webMetaAlias;
 	}
@@ -98,7 +97,7 @@ class RequestParameters {
 	public Integer getHeight() {
 		return height;
 	}
-	
+
 	public int getQuality() {
 		return quality;
 	}
@@ -125,39 +124,46 @@ class RequestParameters {
 
 		return value;
 	}
-	
+
 	public String toString() {
-		
+
 		StringBuilder builder = new StringBuilder();
 		String stringFormat = "%s: %s ";
-		
+
 		if (webMetaId != null)
 			builder.append(String.format(stringFormat, webMetaIdParamName, webMetaId));
-		
+
 		if (webMetaAlias != null)
 			builder.append(String.format(stringFormat, webMetaAliasParamName, webMetaAlias));
-		
+
 		if (fileVersionId != null)
 			builder.append(String.format(stringFormat, fileVersionIdParamName, fileVersionId));
-		
+
 		if (clientId != null)
 			builder.append(String.format(stringFormat, clientIdParamName, clientId));
-		
+
 		if (entryIdInPhotoalbum != null)
 			builder.append(String.format(stringFormat, entryIdInPhotoalbumParamName, entryIdInPhotoalbum));
-		
+
 		if (width != null)
 			builder.append(String.format(stringFormat, widthParamName, width));
-		
+
 		if (height != null)
 			builder.append(String.format(stringFormat, heightParamName, height));
-		
+
 		builder.append(String.format(stringFormat, noCacheParamName, noCache));
-		
+
 		builder.append(String.format(stringFormat, qualityParamName, quality));
-		
+
 		return builder.toString();
-		
+
+	}
+
+	public boolean isEmpty() {
+
+		return getWebMetaId() == null && getWebMetaAlias() == null && getFileVersionId() == null
+				&& getClientId() == null && getEntryIdInPhotoalbum() == null;
+
 	}
 
 }
