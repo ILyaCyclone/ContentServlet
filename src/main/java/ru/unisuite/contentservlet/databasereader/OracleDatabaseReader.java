@@ -112,6 +112,31 @@ public class OracleDatabaseReader implements DatabaseReader {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
 	}
+	
+	@Override
+	public int getDefaultImageQuality() throws DatabaseReaderException, DatabaseReaderNoDataException {
+		
+		final String getDefaultImageQualitySQL = "select 98 imagequality from dual";
+		
+		try (Connection connection = getDataSource().getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(getDefaultImageQualitySQL)) {
+			
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
+				if (!resultSet.isBeforeFirst()) {
+					throw new DatabaseReaderNoDataException("Image quality value in DB is empty. ");
+				} else {
+					resultSet.next();
+					return resultSet.getInt(DatabaseReaderParamName.imageQuality);
+				}
+
+			}
+			
+		} catch (SQLException e) {
+			throw new DatabaseReaderException(e.getMessage(), e);
+		}
+		
+	}
 
 	@Override
 	public void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
