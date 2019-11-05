@@ -1,7 +1,5 @@
 Content Servlet
 
-Добавить про filename из path
-
 One of the following parameters is required:
 id_wm 		id of web_metaterm.
 alias_wm	alias of web_metaterm.
