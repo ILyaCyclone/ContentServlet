@@ -61,10 +61,8 @@ public class OracleDatabaseReader implements DatabaseReader {
 				} catch (NamingException e) {
 					logger.warn("InitialContext wasn't closed. " + e.toString(), e);
 				}
-
 			}
 		}
-
 	}
 
 	@Override
@@ -77,13 +75,12 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(getCodeDataSQL)) {
 
-			setParameterInt(preparedStatement, 1, webMetaId);
+			preparedStatement.setObject(1, webMetaId);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 				resultSet.next();
 				codeData = resultSet.getString(DatabaseReaderParamName.rstr);
 			}
-
 		} catch (SQLException e) {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
@@ -107,20 +104,19 @@ public class OracleDatabaseReader implements DatabaseReader {
 					printWriter.println("<p>" + data + "</p>");
 				}
 			}
-
 		} catch (SQLException e) {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
 	}
-	
+
 	@Override
 	public int getDefaultImageQuality() throws DatabaseReaderException, DatabaseReaderNoDataException {
-		
-		final String getDefaultImageQualitySQL = "select 98 imagequality from dual";
-		
+
+		final String getDefaultImageQualitySQL = "select 84 imagequality from dual";
+
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(getDefaultImageQualitySQL)) {
-			
+
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (!resultSet.isBeforeFirst()) {
@@ -129,13 +125,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 					resultSet.next();
 					return resultSet.getInt(DatabaseReaderParamName.imageQuality);
 				}
-
 			}
-			
 		} catch (SQLException e) {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
-		
 	}
 
 	@Override
@@ -148,13 +141,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(getBinaryDataByMetaSQL)) {
 
-			int i = 1;
-
-			setParameterInt(preparedStatement, i++, queryParameters.getWebMetaId());
-			setParameterStr(preparedStatement, i++, null);
-			setParameterStr(preparedStatement, i++, null);
-			setParameterStr(preparedStatement, i, queryParameters.getWebMetaAlias());
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+			Object[] parametersArray = { queryParameters.getWebMetaId(), null, null, queryParameters.getWebMetaAlias() };
+			
+			try (ResultSet resultSet = executeWithParameters(preparedStatement, parametersArray)) {
 
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
@@ -162,12 +151,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache,
 							queryParameters.getWidth(), queryParameters.getHeight(), queryParameters.getQuality());
 				}
-
 			}
 		} catch (SQLException e) {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
-
 	}
 
 	@Override
@@ -180,12 +167,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
 
-			int i = 1;
-			setParameterInt(preparedStatement, i++, queryParameters.getFileVersionId());
-			setParameterStr(preparedStatement, i++, null);
-			setParameterStr(preparedStatement, i, null);
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+			Object[] parametersArray = { queryParameters.getFileVersionId(), null, null };
+			
+			try (ResultSet resultSet = executeWithParameters(preparedStatement, parametersArray)) {
 
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
@@ -193,12 +177,10 @@ public class OracleDatabaseReader implements DatabaseReader {
 					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache,
 							queryParameters.getWidth(), queryParameters.getHeight(), queryParameters.getQuality());
 				}
-
 			}
 		} catch (SQLException e) {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
-
 	}
 
 	@Override
@@ -211,13 +193,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(getBinaryDataByClientIdSQL)) {
 
-			int i = 1;
-			setParameterInt(preparedStatement, i++, queryParameters.getClientId());
-			setParameterInt(preparedStatement, i++, queryParameters.getEntryIdInPhotoalbum());
-			setParameterStr(preparedStatement, i++, null);
-			setParameterStr(preparedStatement, i, null);
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+			Object[] parametersArray = { queryParameters.getClientId(), queryParameters.getEntryIdInPhotoalbum(), null, null };
+			
+			try (ResultSet resultSet = executeWithParameters(preparedStatement, parametersArray)) {
 
 				if (!resultSet.isBeforeFirst()) {
 					throw new DatabaseReaderNoDataException("No content found for these parameters. ");
@@ -225,28 +203,18 @@ public class OracleDatabaseReader implements DatabaseReader {
 					fetchDataFromResultSet(resultSet, osServlet, response, persistantCache, idInCache,
 							queryParameters.getWidth(), queryParameters.getHeight(), queryParameters.getQuality());
 				}
-
 			}
 		} catch (SQLException e) {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
-
 	}
-
-	private void setParameterInt(PreparedStatement preparedStatement, int field, Integer value) throws SQLException {
-		if (value == null) {
-			preparedStatement.setNull(field, 0);
-		} else {
-			preparedStatement.setInt(field, value);
+	
+	private ResultSet executeWithParameters(PreparedStatement preparedStatement, Object[] parametersArray) throws SQLException {
+		
+		for (int i = 0; i < parametersArray.length; i++) {
+			preparedStatement.setObject(i+1, parametersArray[i]);
 		}
-	}
-
-	private void setParameterStr(PreparedStatement preparedStatement, int field, String value) throws SQLException {
-		if (value == null) {
-			preparedStatement.setNull(field, 0);
-		} else {
-			preparedStatement.setString(field, value);
-		}
+		return preparedStatement.executeQuery();
 	}
 
 	private void writeToStream(InputStream is, OutputStream os) throws DatabaseReaderWriteToStreamException {
@@ -262,7 +230,6 @@ public class OracleDatabaseReader implements DatabaseReader {
 		} catch (IOException e) {
 			throw new DatabaseReaderWriteToStreamException(e.getMessage(), e);
 		}
-
 	}
 
 	private void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
