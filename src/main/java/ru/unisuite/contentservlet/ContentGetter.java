@@ -8,9 +8,6 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ru.unisuite.contentservlet.databasereader.DatabaseQueryParameters;
 import ru.unisuite.contentservlet.databasereader.DatabaseReader;
 import ru.unisuite.contentservlet.databasereader.DatabaseReaderException;
@@ -26,8 +23,6 @@ public class ContentGetter {
 		databaseReader = new OracleDatabaseReader(properties.getDatasourceName());
 		cacheControl = properties.getCacheControl();
 	}
-
-	private Logger logger = LoggerFactory.getLogger(ContentGetter.class.getName());
 
 	private DatabaseReader databaseReader;
 
