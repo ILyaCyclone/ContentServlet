@@ -49,13 +49,16 @@ class RequestParameters {
 		noCache = parametersMap.containsKey(ServletParamName.cacheControl);
 
 		Integer inQuality = getIntValue(parametersMap, ServletParamName.quality);
-		if (inQuality != null && inQuality >= 0 && inQuality <= 100) {
-			quality = inQuality;
-		} else {
+		if(inQuality == null) {
 			quality = defaultImageQuality;
-			logger.warn("Quality value is not correct. It was set by default value: " + defaultImageQuality);
+		} else {
+			if (inQuality >= 0 && inQuality <= 100) {
+				quality = inQuality;
+			} else {
+				quality = defaultImageQuality;
+				logger.warn("Incorrect quality in request "+parametersMap+". Default quality will be used: " + defaultImageQuality);
+			}
 		}
-
 	}
 
 	public Integer getContentDisposition() {

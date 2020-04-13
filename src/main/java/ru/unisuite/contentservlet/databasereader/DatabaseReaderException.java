@@ -1,7 +1,6 @@
 package ru.unisuite.contentservlet.databasereader;
 
 public class DatabaseReaderException extends Exception {
-
 	private static final long serialVersionUID = 1L;
 
 	private int errorCode;
@@ -14,6 +13,10 @@ public class DatabaseReaderException extends Exception {
 		super(message);
 
 		this.errorCode = errorCode;
+	}
+
+	public DatabaseReaderException(Throwable cause) {
+		super(cause);
 	}
 
 	public DatabaseReaderException(String message, Throwable cause) {

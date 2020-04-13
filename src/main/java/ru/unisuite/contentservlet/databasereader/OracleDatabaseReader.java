@@ -1,14 +1,22 @@
 package ru.unisuite.contentservlet.databasereader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.unisuite.contentservlet.ContentServlet;
+import ru.unisuite.imageresizer.ImageResizer;
+import ru.unisuite.imageresizer.ImageResizerFactory;
+import ru.unisuite.scf4j.Cache;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -17,29 +25,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ru.unisuite.contentservlet.ContentServlet;
-import ru.unisuite.imageresizer.ImageResizer;
-import ru.unisuite.imageresizer.ImageResizerFactory;
-import ru.unisuite.scf4j.Cache;
-
 public class OracleDatabaseReader implements DatabaseReader {
+	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
+
+	private final String datasourceName;
 
 	public OracleDatabaseReader(String datasourceName) {
 		this.datasourceName = datasourceName;
 	}
 
-	private final Logger logger = LoggerFactory.getLogger(OracleDatabaseReader.class.getName());
-
-	private String datasourceName;
 
 	private static final ZoneId GMT = ZoneId.of("GMT");
 	private static final DateTimeFormatter LAST_MODIFIED_FORMATTER = DateTimeFormatter
@@ -59,7 +53,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				try {
 					initialContext.close();
 				} catch (NamingException e) {
-					logger.warn("InitialContext wasn't closed. " + e.toString(), e);
+					logger.warn("InitialContext wasn't closed", e);
 				}
 			}
 		}
@@ -68,23 +62,22 @@ public class OracleDatabaseReader implements DatabaseReader {
 	@Override
 	public String getCodeData(final int webMetaId) throws DatabaseReaderException {
 
-		final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) rStr from content_version_wp cv where cv.id_web_metaterm = ?";
-
-		String codeData;
+		final String getCodeDataSQL = "select wpms_cm_wp.get_ContentURL(cv.id_web_metaterm, null, 4) " +
+				"from content_version_wp cv " +
+				"where cv.id_web_metaterm = ?";
 
 		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(getCodeDataSQL)) {
+			 PreparedStatement preparedStatement = connection.prepareStatement(getCodeDataSQL)) {
 
 			preparedStatement.setObject(1, webMetaId);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 				resultSet.next();
-				codeData = resultSet.getString(DatabaseReaderParamName.rstr);
+				return resultSet.getString(1);
 			}
-		} catch (SQLException e) {
-			throw new DatabaseReaderException(e.getMessage(), e);
+		} catch (Exception e) {
+			throw new DatabaseReaderException(e);
 		}
-		return codeData;
 	}
 
 	@Override
@@ -112,23 +105,24 @@ public class OracleDatabaseReader implements DatabaseReader {
 	@Override
 	public int getDefaultImageQuality() throws DatabaseReaderException, DatabaseReaderNoDataException {
 
-		final String getDefaultImageQualitySQL = "select 84 imagequality from dual";
-
-		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(getDefaultImageQualitySQL)) {
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (!resultSet.isBeforeFirst()) {
-					throw new DatabaseReaderNoDataException("Image quality value in DB is empty. ");
-				} else {
-					resultSet.next();
-					return resultSet.getInt(DatabaseReaderParamName.imageQuality);
-				}
-			}
-		} catch (SQLException e) {
-			throw new DatabaseReaderException(e.getMessage(), e);
-		}
+//		final String getDefaultImageQualitySQL = "select 80 imagequality from dual";
+//
+//		try (Connection connection = getDataSource().getConnection();
+//				PreparedStatement preparedStatement = connection.prepareStatement(getDefaultImageQualitySQL)) {
+//
+//			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+//
+//				if (!resultSet.isBeforeFirst()) {
+//					throw new DatabaseReaderNoDataException("Image quality value in DB is empty. ");
+//				} else {
+//					resultSet.next();
+//					return resultSet.getInt(DatabaseReaderParamName.imageQuality);
+//				}
+//			}
+//		} catch (SQLException e) {
+//			throw new DatabaseReaderException(e.getMessage(), e);
+//		}
+		return 80; // because why not??
 	}
 
 	@Override
@@ -142,7 +136,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				PreparedStatement preparedStatement = connection.prepareStatement(getBinaryDataByMetaSQL)) {
 
 			Object[] parametersArray = { queryParameters.getWebMetaId(), null, null, queryParameters.getWebMetaAlias() };
-			
+
 			try (ResultSet resultSet = executeWithParameters(preparedStatement, parametersArray)) {
 
 				if (!resultSet.isBeforeFirst()) {
@@ -168,7 +162,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				PreparedStatement preparedStatement = connection.prepareStatement(getBinaryDataByFileVersionIdSQL)) {
 
 			Object[] parametersArray = { queryParameters.getFileVersionId(), null, null };
-			
+
 			try (ResultSet resultSet = executeWithParameters(preparedStatement, parametersArray)) {
 
 				if (!resultSet.isBeforeFirst()) {
@@ -194,7 +188,7 @@ public class OracleDatabaseReader implements DatabaseReader {
 				PreparedStatement preparedStatement = connection.prepareStatement(getBinaryDataByClientIdSQL)) {
 
 			Object[] parametersArray = { queryParameters.getClientId(), queryParameters.getEntryIdInPhotoalbum(), null, null };
-			
+
 			try (ResultSet resultSet = executeWithParameters(preparedStatement, parametersArray)) {
 
 				if (!resultSet.isBeforeFirst()) {
@@ -208,9 +202,9 @@ public class OracleDatabaseReader implements DatabaseReader {
 			throw new DatabaseReaderException(e.getMessage(), e);
 		}
 	}
-	
+
 	private ResultSet executeWithParameters(PreparedStatement preparedStatement, Object[] parametersArray) throws SQLException {
-		
+
 		for (int i = 0; i < parametersArray.length; i++) {
 			preparedStatement.setObject(i+1, parametersArray[i]);
 		}
