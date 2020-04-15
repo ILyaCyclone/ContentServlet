@@ -25,6 +25,8 @@ class ServletParamName {
     // ID записи в таблице фотоальбом
     public static final String entryIdInPhotoalbum = "id_fpa";
 
+    // "db" or "thumbnailator" ("th") ... future: or "imaginary" ("im")
+    public static final String resizer = "resizer";
     // значение ширины для масштабирования изображения
     public static final String width = "SWidth";
     // значение высоты для масштабирования изображения

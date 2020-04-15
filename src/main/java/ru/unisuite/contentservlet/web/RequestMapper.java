@@ -6,6 +6,8 @@ import ru.unisuite.contentservlet.service.ContentRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * map HttpServletRequest to {@code ru.unisuite.contentservlet.service.ContentRequest}
@@ -39,8 +41,24 @@ public class RequestMapper {
                 logger.warn("Incorrect quality in request " + parametersMap + ". Default quality will be used.");
             }
         }
+
+        contentRequest.setFilename(getRequestedFilename(httpServletRequest));
+
         return contentRequest;
     }
+
+    private final Pattern filenamePattern = Pattern.compile("[^/]*[^/]");
+    private String getRequestedFilename(HttpServletRequest httpServletRequest) {
+        String uri = httpServletRequest.getRequestURI();
+        Matcher matcher = filenamePattern.matcher(uri);
+        String rS = null;
+        while (matcher.find()) {
+            rS = matcher.group(matcher.groupCount());
+        }
+        return rS;
+    }
+
+
 
     private String getStringValue(Map<String, String[]> parametersMap, String parameterName) {
         return parametersMap.containsKey(parameterName) ? parametersMap.get(parameterName)[0] : null;

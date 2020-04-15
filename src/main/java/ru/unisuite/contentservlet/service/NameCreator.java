@@ -1,17 +1,26 @@
 package ru.unisuite.contentservlet.service;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class NameCreator {
 
 //	final static private String HASH_ALGORITHM = "MD5";
 //	final static private String CHARSET = "UTF-8";
 
+    // attributes do not affect result file
+    private Set<String> ignoredAttributes = new HashSet<>(Arrays.asList("contentType", "contentDisposition", "noCache"));
+
     public String forContentRequest(ContentRequest contentRequest) {
-        String name = contentRequest.toString();
-        name = name.replaceFirst("ContentRequest\\{", "")
-                .replace("\\}", "")
-                .replaceAll(", ", "");
-        return name;
+        return contentRequest.values().entrySet().stream()
+                .filter(entry -> !ignoredAttributes.contains(entry.getKey()))
+                .map(entry -> entry.getKey()+"="+entry.getValue())
+                .collect(Collectors.joining());
     }
+
 
 //	public String createNameByURL(final HttpServletRequest request) {
 //

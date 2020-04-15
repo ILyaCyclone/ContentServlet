@@ -7,6 +7,8 @@ import ru.unisuite.contentservlet.repository.ContentRepositoryImpl;
 import ru.unisuite.contentservlet.service.ContentService;
 import ru.unisuite.contentservlet.service.ContentServiceImpl;
 import ru.unisuite.contentservlet.service.NameCreator;
+import ru.unisuite.contentservlet.service.ResizeServiceImpl;
+import ru.unisuite.imageresizer.ImageResizerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -24,6 +26,10 @@ public class ApplicationConfig {
 
     private final String httpCacheControlDefaultValue; // HTTP cache default value
 
+    private final ResizerType resizerType;
+
+    private byte defaultQuality = 80;
+
 
     public ApplicationConfig() {
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE_NAME)) {
@@ -38,6 +44,8 @@ public class ApplicationConfig {
 
             this.httpCacheControlDefaultValue = prop.getProperty("ru.unisuite.contentservlet.cachecontrol");
 
+            this.resizerType = ResizerType.valueOf(prop.getProperty("ru.unisuite.contentservlet.resizer-type").toUpperCase());
+
         } catch (IOException e) {
             String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
             logger.error(errorMessage, e);
@@ -48,7 +56,14 @@ public class ApplicationConfig {
 
 
     public ContentService contentService() {
-        return new ContentServiceImpl(contentRepository(), persistentCacheEnabled, cacheFilenameCreator);
+        return new ContentServiceImpl(contentRepository(), resizerType, persistentCacheEnabled, cacheFilenameCreator);
+    }
+
+    public ResizeServiceImpl resizeService() {
+        return new ResizeServiceImpl(ImageResizerFactory.getImageResizer(), defaultQuality);
+    }
+    public ResizerType getResizerType() {
+        return resizerType;
     }
 
     public String getCacheControl() {
@@ -63,4 +78,5 @@ public class ApplicationConfig {
     private ContentRepository contentRepository() {
         return new ContentRepositoryImpl(dataSource, persistentCacheEnabled);
     }
+
 }

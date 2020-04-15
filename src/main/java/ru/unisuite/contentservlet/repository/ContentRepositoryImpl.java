@@ -2,7 +2,9 @@ package ru.unisuite.contentservlet.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.unisuite.contentservlet.config.ResizerType;
 import ru.unisuite.contentservlet.exception.NotFoundException;
+import ru.unisuite.contentservlet.model.Content;
 import ru.unisuite.imageresizer.ImageResizer;
 import ru.unisuite.imageresizer.ImageResizerFactory;
 import ru.unisuite.scf4j.Cache;
@@ -40,7 +42,7 @@ public class ContentRepositoryImpl implements ContentRepository {
 
 
     @Override
-    public String getCodeData(final long webMetaId) {
+    public String getHtmlImgCode(long webMetaId) {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = prepareCodeDataStatement(connection, webMetaId);
              ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -82,6 +84,60 @@ public class ContentRepositoryImpl implements ContentRepository {
 //		}
         return 80; // because why not??
     }
+
+
+    public Content getContentByIdWebMetaterm(long idWebMetaterm) {
+        return getContentByIdWebMetaterm(idWebMetaterm, null, null);
+    }
+
+    public Content getContentByIdWebMetaterm(long idWebMetaterm, Integer width, Integer height) {
+        try {
+            try (Connection conn = dataSource.getConnection();
+                 PreparedStatement stmt = prepareContentByIdWebMetatermStatement(conn, idWebMetaterm, width, height);
+                 ResultSet rs = stmt.executeQuery();
+            ) {
+                if (!rs.isBeforeFirst()) {
+                    throw new NotFoundException("Content not found {idWebMetaterm=" + idWebMetaterm + '}');
+                }
+                rs.next();
+                return mapResultSetToContent(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PreparedStatement prepareContentByIdWebMetatermStatement(Connection conn, long idWebMetaterm, Integer width, Integer height) throws SQLException {
+        String query = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension " +
+                "from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, AScaleWidth => ?, AScaleHeight => ?, A_alias => null) as wpt_t_data_img_wp))";
+
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setLong(1, idWebMetaterm);
+        setIntPreparedStatementParameter(stmt, 2, width);
+        setIntPreparedStatementParameter(stmt, 3, height);
+        return stmt;
+    }
+
+    private void setIntPreparedStatementParameter(PreparedStatement stmt, int parameterIndex, Integer value) throws SQLException {
+        if (value != null) {
+            stmt.setInt(parameterIndex, value);
+        } else {
+            stmt.setNull(parameterIndex, Types.INTEGER);
+        }
+    }
+
+    private Content mapResultSetToContent(ResultSet rs) throws SQLException {
+        Content content = new Content();
+        Blob blob = rs.getBlob("data_binary");
+        content.setDataStream(blob.getBinaryStream());
+        content.setSize(blob.length());
+        content.setLastModified(rs.getLong("cntsecond_last_modified"));
+        content.setMimeType(rs.getString("mime"));
+        content.setFilename(rs.getString("filename"));
+        content.setExtension(rs.getString("extension"));
+        return content;
+    }
+
 
     @Override
     public void getBinaryDataByMeta(DatabaseQueryParameters queryParameters, OutputStream osServlet,
@@ -183,6 +239,8 @@ public class ContentRepositoryImpl implements ContentRepository {
             throw new DatabaseReaderWriteToStreamException(e.getMessage(), e);
         }
     }
+
+
 
     private void fetchDataFromResultSet(ResultSet resultSet, OutputStream osServlet, HttpServletResponse response,
                                         Cache persistantCache, String idInCache, Integer width, Integer height, int quality)

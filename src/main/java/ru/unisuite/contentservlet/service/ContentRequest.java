@@ -2,6 +2,7 @@ package ru.unisuite.contentservlet.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.unisuite.contentservlet.config.ResizerType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,10 +20,13 @@ public class ContentRequest {
     private Integer contentDisposition;
     private Integer contentType;
 
+    private ResizerType resizerType;
     private Integer width;
     private Integer height;
     private Boolean noCache;
     private Byte quality;
+
+    private String filename;
 
 
     public boolean isEmpty() {
@@ -37,6 +41,8 @@ public class ContentRequest {
         if (idFe != null) values.put("idFe", idFe);
         if (entryIdInPhotoalbum != null) values.put("entryIdInPhotoalbum", entryIdInPhotoalbum);
         if (fileVersionId != null) values.put("fileVersionId", fileVersionId);
+
+        if (filename != null) values.put("filename", filename);
 
         if (contentType != null) values.put("contentType", contentType);
         if (contentDisposition != null) values.put("contentDisposition", contentDisposition);
@@ -152,5 +158,13 @@ public class ContentRequest {
 
     public void setQuality(Byte quality) {
         this.quality = quality;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 }

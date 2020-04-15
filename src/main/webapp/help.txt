@@ -18,4 +18,4 @@ no_cache	Cache-Control. Valid values: any int value - max-age=int value, null - 
 URL part between /content/ and query parameters (? sign) is considered as filename.
 
 Example:
-/content/rut_banner.jpg?id_wm=798108&SWidth=1200
+/content/banner.jpg?id_wm=798108&SWidth=1200
