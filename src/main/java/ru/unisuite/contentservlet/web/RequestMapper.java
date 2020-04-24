@@ -2,6 +2,7 @@ package ru.unisuite.contentservlet.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.unisuite.contentservlet.config.ResizerType;
 import ru.unisuite.contentservlet.service.ContentRequest;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,19 +21,23 @@ public class RequestMapper {
 
         ContentRequest contentRequest = new ContentRequest();
         contentRequest.setContentDisposition(getIntValue(parametersMap, ServletParamName.contentDisposition));
-        contentRequest.setContentType(getIntValue(parametersMap, ServletParamName.contentType));
 
-        contentRequest.setWebMetaId(getLongValue(parametersMap, ServletParamName.webMetaId));
-        contentRequest.setWebMetaAlias(getStringValue(parametersMap, ServletParamName.webMetaAlias));
+        contentRequest.setIdWebMetaterm(getLongValue(parametersMap, ServletParamName.webMetaId));
+        contentRequest.setMetatermAlias(getStringValue(parametersMap, ServletParamName.webMetaAlias));
         contentRequest.setFileVersionId(getLongValue(parametersMap, ServletParamName.fileVersionId));
         contentRequest.setIdFe(getLongValue(parametersMap, ServletParamName.clientId));
         contentRequest.setEntryIdInPhotoalbum(getLongValue(parametersMap, ServletParamName.entryIdInPhotoalbum));
+
+        String resizerParam = getStringValue(parametersMap, ServletParamName.resizerType);
+        if(resizerParam != null) {
+            contentRequest.setResizerType(ResizerType.valueOf(resizerParam.toUpperCase()));
+        }
         contentRequest.setWidth(getIntValue(parametersMap, ServletParamName.width));
         contentRequest.setHeight(getIntValue(parametersMap, ServletParamName.height));
+        Integer requestedQuality = getIntValue(parametersMap, ServletParamName.quality);
 
         contentRequest.setNoCache(parametersMap.containsKey(ServletParamName.cacheControl));
 
-        Integer requestedQuality = getIntValue(parametersMap, ServletParamName.quality);
 
         if (requestedQuality != null) {
             if (requestedQuality >= 0 && requestedQuality <= 100) {

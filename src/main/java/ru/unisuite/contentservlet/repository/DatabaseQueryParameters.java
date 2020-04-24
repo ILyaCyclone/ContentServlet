@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.repository;
 
+@Deprecated
 public class DatabaseQueryParameters {
 
     private final Long webMetaId;

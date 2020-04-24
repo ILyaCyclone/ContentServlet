@@ -17,7 +17,7 @@ public class ResizeServiceImpl {
         this.defaultQuality = defaultQuality;
     }
 
-    public void resize(Content content, OutputStream out, ContentRequest contentRequest) throws IOException {
+    public void writeResized(ContentRequest contentRequest, Content content, OutputStream out) throws IOException {
         int quality = (contentRequest.getQuality() != null ? contentRequest.getQuality().intValue() : defaultQuality);
         InputStream in = content.getDataStream();
         if(contentRequest.getWidth() != null && contentRequest.getHeight() != null) {

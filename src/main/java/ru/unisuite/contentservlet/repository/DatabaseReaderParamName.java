@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.repository;
 
+@Deprecated
 class DatabaseReaderParamName {
 
     private DatabaseReaderParamName() {
