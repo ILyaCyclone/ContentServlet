@@ -14,10 +14,6 @@ class ServletParamName {
      * Content-Disposition контента 1 - attachment 2 - inline null - null
      */
     public static final String contentDisposition = "cd";
-    /*
-     * Content Type 1 - iframe (возвращает html) null - null
-     */
-    public static final String contentType = "ct";
     // ID версии файла К�?С
     public static final String fileVersionId = "id_vf";
     // ID человека для чтения его фотографии
@@ -26,7 +22,7 @@ class ServletParamName {
     public static final String entryIdInPhotoalbum = "id_fpa";
 
     // "db" or "thumbnailator" ("th") ... future: or "imaginary" ("im")
-    public static final String resizer = "resizer";
+    public static final String resizerType = "resizer";
     // значение ширины для масштабирования изображения
     public static final String width = "SWidth";
     // значение высоты для масштабирования изображения

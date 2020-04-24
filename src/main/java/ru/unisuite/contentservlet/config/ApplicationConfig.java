@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.repository.ContentRepository;
 import ru.unisuite.contentservlet.repository.ContentRepositoryImpl;
+import ru.unisuite.contentservlet.repository.ContentRowMapper;
 import ru.unisuite.contentservlet.service.ContentService;
 import ru.unisuite.contentservlet.service.ContentServiceImpl;
 import ru.unisuite.contentservlet.service.NameCreator;
@@ -32,19 +33,36 @@ public class ApplicationConfig {
 
 
     public ApplicationConfig() {
-        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE_NAME)) {
+        this(CONFIG_FILE_NAME);
+    }
+
+    public ApplicationConfig(String configFile) {
+        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(configFile)) {
             Properties prop = new Properties();
             prop.load(input);
 
-            String datasourceJndiName = prop.getProperty("ru.unisuite.contentservlet.jndi.datasource.name");
-            this.dataSource = new DataSourceLookup().lookup(datasourceJndiName);
+            DataSource dataSource;
+            String datasourceJndiName = prop.getProperty("contentservlet.datasource.jndi-name");
+            if(datasourceJndiName != null) {
+                dataSource = new DataSourceManager().lookup(datasourceJndiName);
+            } else {
+                String datasourceUrl = prop.getProperty("contentservlet.datasource.url");
+                String datasourceUsername = prop.getProperty("contentservlet.datasource.username");
+                String datasourcePassword = prop.getProperty("contentservlet.datasource.password");
+                dataSource = new DataSourceManager().createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
+            }
+            if(dataSource == null) {
+                throw new RuntimeException("Unable to configure jdbc DataSource");
+            }
+            this.dataSource = dataSource;
 
-            this.persistentCacheEnabled = Boolean.parseBoolean(prop.getProperty("ru.unisuite.contentservlet.usecache"));
+
+            this.persistentCacheEnabled = Boolean.parseBoolean(prop.getProperty("contentservlet.usecache"));
             this.cacheFilenameCreator = persistentCacheEnabled ? new NameCreator() : null;
 
-            this.httpCacheControlDefaultValue = prop.getProperty("ru.unisuite.contentservlet.cachecontrol");
+            this.httpCacheControlDefaultValue = prop.getProperty("contentservlet.cachecontrol");
 
-            this.resizerType = ResizerType.valueOf(prop.getProperty("ru.unisuite.contentservlet.resizer-type").toUpperCase());
+            this.resizerType = ResizerType.valueOf(prop.getProperty("contentservlet.resizer-type").toUpperCase());
 
         } catch (IOException e) {
             String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
@@ -75,8 +93,8 @@ public class ApplicationConfig {
         return persistentCacheEnabled;
     }
 
-    private ContentRepository contentRepository() {
-        return new ContentRepositoryImpl(dataSource, persistentCacheEnabled);
+    public ContentRepository contentRepository() {
+        return new ContentRepositoryImpl(dataSource, new ContentRowMapper(), persistentCacheEnabled);
     }
 
 }

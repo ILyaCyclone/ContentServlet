@@ -11,46 +11,45 @@ import java.util.stream.Collectors;
 public class ContentRequest {
     private final Logger logger = LoggerFactory.getLogger(ContentRequest.class.getName());
 
-    private Long webMetaId;
-    private String webMetaAlias;
+    private Long idWebMetaterm;
+    private String metatermAlias;
     private Long idFe; // former clientId
     private Long entryIdInPhotoalbum;
     private Long fileVersionId;
 
     private Integer contentDisposition;
-    private Integer contentType;
+    private String filename;
 
     private ResizerType resizerType;
     private Integer width;
     private Integer height;
-    private Boolean noCache;
     private Byte quality;
+    private Boolean noCache;
 
-    private String filename;
 
 
     public boolean isEmpty() {
-        return webMetaId == null && webMetaAlias == null && fileVersionId == null
+        return idWebMetaterm == null && metatermAlias == null && fileVersionId == null
                 && idFe == null && entryIdInPhotoalbum == null;
     }
 
     public Map<String, Object> values() {
         Map<String, Object> values = new LinkedHashMap<>();
-        if (webMetaId != null) values.put("webMetaId", webMetaId);
-        if (webMetaAlias != null) values.put("webMetaAlias", webMetaAlias);
+        if (idWebMetaterm != null) values.put("idWebMetaterm", idWebMetaterm);
+        if (metatermAlias != null) values.put("metatermAlias", metatermAlias);
         if (idFe != null) values.put("idFe", idFe);
         if (entryIdInPhotoalbum != null) values.put("entryIdInPhotoalbum", entryIdInPhotoalbum);
         if (fileVersionId != null) values.put("fileVersionId", fileVersionId);
 
+        if (contentDisposition != null) values.put("contentDisposition", contentDisposition);
         if (filename != null) values.put("filename", filename);
 
-        if (contentType != null) values.put("contentType", contentType);
-        if (contentDisposition != null) values.put("contentDisposition", contentDisposition);
-
+        if(resizerType != null) values.put("resizerType", resizerType);
         if (width != null) values.put("width", width);
         if (height != null) values.put("height", height);
-        if (noCache != null) values.put("noCache", noCache);
         if (quality != null) values.put("quality", quality);
+
+        if (noCache != null) values.put("noCache", noCache);
         return values;
     }
 
@@ -72,20 +71,20 @@ public class ContentRequest {
 
 
     // accessors
-    public Long getWebMetaId() {
-        return webMetaId;
+    public Long getIdWebMetaterm() {
+        return idWebMetaterm;
     }
 
-    public void setWebMetaId(Long webMetaId) {
-        this.webMetaId = webMetaId;
+    public void setIdWebMetaterm(Long idWebMetaterm) {
+        this.idWebMetaterm = idWebMetaterm;
     }
 
-    public String getWebMetaAlias() {
-        return webMetaAlias;
+    public String getMetatermAlias() {
+        return metatermAlias;
     }
 
-    public void setWebMetaAlias(String webMetaAlias) {
-        this.webMetaAlias = webMetaAlias;
+    public void setMetatermAlias(String metatermAlias) {
+        this.metatermAlias = metatermAlias;
     }
 
     public Long getIdFe() {
@@ -118,14 +117,6 @@ public class ContentRequest {
 
     public void setContentDisposition(Integer contentDisposition) {
         this.contentDisposition = contentDisposition;
-    }
-
-    public Integer getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(Integer contentType) {
-        this.contentType = contentType;
     }
 
     public Integer getWidth() {
@@ -166,5 +157,13 @@ public class ContentRequest {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public ResizerType getResizerType() {
+        return resizerType;
+    }
+
+    public void setResizerType(ResizerType resizerType) {
+        this.resizerType = resizerType;
     }
 }

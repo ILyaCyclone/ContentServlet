@@ -1,11 +1,11 @@
 package ru.unisuite.contentservlet.service;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class NameCreator {
 
 //	final static private String HASH_ALGORITHM = "MD5";

@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.repository;
 
+@Deprecated
 public class DatabaseReaderWriteToStreamException extends DatabaseReaderException {
 
     private static final long serialVersionUID = 1L;

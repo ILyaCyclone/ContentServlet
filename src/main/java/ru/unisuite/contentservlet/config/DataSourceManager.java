@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.config;
 
+import oracle.jdbc.pool.OracleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,9 +8,10 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.sql.SQLException;
 
-class DataSourceLookup {
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceLookup.class);
+class DataSourceManager {
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceManager.class);
 
     public DataSource lookup(String jndiName) {
         try {
@@ -40,6 +42,20 @@ class DataSourceLookup {
                     logger.warn("InitialContext wasn't closed", e);
                 }
             }
+        }
+    }
+
+    public DataSource createDataSource(String url, String username, String password) {
+        try {
+//            Class.forName("oracle.jdbc.OracleDriver"); // not needed in JDBC 4
+
+            OracleDataSource dataSource = new OracleDataSource();
+            dataSource.setURL(url);
+            dataSource.setUser(username);
+            dataSource.setPassword(password);
+            return dataSource;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to create datasource", e);
         }
     }
 }
