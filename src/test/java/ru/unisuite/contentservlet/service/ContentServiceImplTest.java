@@ -22,7 +22,7 @@
 //
 //    @BeforeEach
 //    void init() {
-//        this.contentService = new ContentServiceImpl(applicationConfig.contentRepository(), ResizerType.THUMBNAILATOR, false, null);
+//        this.contentService = new ContentServiceImpl(applicationConfig.contentRepository(), ResizerType.APP, false, null);
 //
 //    }
 //

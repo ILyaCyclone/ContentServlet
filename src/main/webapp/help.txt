@@ -8,12 +8,11 @@ id_fe		id of person for their photo request.
 id_fpa		id of photo album.
 
 Other parameters:
-cd		Content-Disposition. Valid values: 1 - download, 2 - inline.
-ct		Content Type. Valid values: 1 - returns html.
-SWidth		width of requested image in pixels. Example: SWidth=716.
-SHeight		height of requested image in pixels. Example: SHeight=500.
-quality	 	quality of requested image. Valid values: from 0 to 100. Example: quality=80.
-no_cache	Cache-Control. Valid values: any int value - max-age=int value, null - no-cache.
+cd		            Content-Disposition. Valid values: 1 - download, 2 - inline.
+SWidth,width,w		width of requested image in pixels. Example: SWidth=716.
+SHeight,height,h	height of requested image in pixels. Example: SHeight=500.
+quality,q	 	    quality of requested image. Valid values: from 0 to 100. Example: quality=80.
+no_cache	        Cache-Control. Valid values: any int value - max-age=int value, null - no-cache.
 
 URL part between /content/ and query parameters (? sign) is considered as filename.
 

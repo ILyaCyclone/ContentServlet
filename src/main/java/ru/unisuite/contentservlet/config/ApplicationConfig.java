@@ -2,14 +2,8 @@ package ru.unisuite.contentservlet.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.unisuite.contentservlet.repository.ContentRepository;
-import ru.unisuite.contentservlet.repository.ContentRepositoryImpl;
-import ru.unisuite.contentservlet.repository.ContentRowMapper;
-import ru.unisuite.contentservlet.service.ContentService;
-import ru.unisuite.contentservlet.service.ContentServiceImpl;
-import ru.unisuite.contentservlet.service.NameCreator;
-import ru.unisuite.contentservlet.service.ResizeServiceImpl;
-import ru.unisuite.imageresizer.ImageResizerFactory;
+import ru.unisuite.contentservlet.repository.*;
+import ru.unisuite.contentservlet.service.*;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -74,12 +68,14 @@ public class ApplicationConfig {
 
 
     public ContentService contentService() {
-        return new ContentServiceImpl(contentRepository(), resizerType, persistentCacheEnabled, cacheFilenameCreator);
+        return new ContentServiceImpl(contentRepository(), hashAndLastModifiedRepository(), resizerType);
     }
 
-    public ResizeServiceImpl resizeService() {
-        return new ResizeServiceImpl(ImageResizerFactory.getImageResizer(), defaultQuality);
+    public ResizeService resizeService() {
+//        return new ResizeServiceImpl(ImageResizerFactory.getImageResizer(), defaultQuality);
+        return new ResizeServiceIm4java();
     }
+
     public ResizerType getResizerType() {
         return resizerType;
     }
@@ -94,7 +90,11 @@ public class ApplicationConfig {
     }
 
     public ContentRepository contentRepository() {
-        return new ContentRepositoryImpl(dataSource, new ContentRowMapper(), persistentCacheEnabled);
+        return new ContentRepositoryImpl(dataSource, new ContentRowMapper());
+    }
+
+    public HashAndLastModifiedRepository hashAndLastModifiedRepository() {
+        return new HashAndLastModifiedRepositoryImpl(dataSource, new HashAndLastModifiedRowMapper());
     }
 
 }

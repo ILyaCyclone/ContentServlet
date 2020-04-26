@@ -44,7 +44,7 @@ public class ContentRequest {
         if (contentDisposition != null) values.put("contentDisposition", contentDisposition);
         if (filename != null) values.put("filename", filename);
 
-        if(resizerType != null) values.put("resizerType", resizerType);
+        if (resizerType != null) values.put("resizerType", resizerType);
         if (width != null) values.put("width", width);
         if (height != null) values.put("height", height);
         if (quality != null) values.put("quality", quality);

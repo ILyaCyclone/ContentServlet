@@ -6,6 +6,7 @@ public class Content {
     private InputStream dataStream;
     private Long size;
     private Long lastModified;
+    private String hash;
     private String mimeType;
     private String filename;
     private String extension;
@@ -56,5 +57,13 @@ public class Content {
 
     public void setExtension(String extension) {
         this.extension = extension;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 }

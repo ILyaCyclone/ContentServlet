@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class ResizeServiceImpl {
+public class ResizeServiceImpl implements ResizeService {
     private final ImageResizer imageResizer;
     private final byte defaultQuality;
 
@@ -17,6 +17,7 @@ public class ResizeServiceImpl {
         this.defaultQuality = defaultQuality;
     }
 
+    @Override
     public void writeResized(ContentRequest contentRequest, Content content, OutputStream out) throws IOException {
         int quality = (contentRequest.getQuality() != null ? contentRequest.getQuality().intValue() : defaultQuality);
         InputStream in = content.getDataStream();

@@ -6,44 +6,57 @@ import ru.unisuite.contentservlet.config.ResizerType;
 import ru.unisuite.contentservlet.service.ContentRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
- * map HttpServletRequest to {@code ru.unisuite.contentservlet.service.ContentRequest}
+ * map HttpServletRequest to {@link ru.unisuite.contentservlet.service.ContentRequest}
  */
 public class RequestMapper {
     private final Logger logger = LoggerFactory.getLogger(RequestMapper.class.getName());
 
     public ContentRequest mapHttpServletRequest(HttpServletRequest httpServletRequest) {
-        Map<String, String[]> parametersMap = httpServletRequest.getParameterMap();
+        Map<String, String[]> httpServletRequestParameters = httpServletRequest.getParameterMap();
+        Map<String, String> params = httpServletRequestParameters.entrySet().stream()
+                .collect(HashMap::new, (map, e) -> map.put(e.getKey(), e.getValue()[0]), HashMap::putAll);
 
         ContentRequest contentRequest = new ContentRequest();
-        contentRequest.setContentDisposition(getIntValue(parametersMap, ServletParamName.contentDisposition));
 
-        contentRequest.setIdWebMetaterm(getLongValue(parametersMap, ServletParamName.webMetaId));
-        contentRequest.setMetatermAlias(getStringValue(parametersMap, ServletParamName.webMetaAlias));
-        contentRequest.setFileVersionId(getLongValue(parametersMap, ServletParamName.fileVersionId));
-        contentRequest.setIdFe(getLongValue(parametersMap, ServletParamName.clientId));
-        contentRequest.setEntryIdInPhotoalbum(getLongValue(parametersMap, ServletParamName.entryIdInPhotoalbum));
+        // required parameters
+        contentRequest.setIdWebMetaterm(getLongValue(params, RequestParamName.webMetaId));
+        contentRequest.setMetatermAlias(params.get(RequestParamName.webMetaAlias));
+        contentRequest.setFileVersionId(getLongValue(params, RequestParamName.fileVersionId));
+        contentRequest.setIdFe(getLongValue(params, RequestParamName.idFe));
+        contentRequest.setEntryIdInPhotoalbum(getLongValue(params, RequestParamName.entryIdInPhotoalbum));
 
-        String resizerParam = getStringValue(parametersMap, ServletParamName.resizerType);
-        if(resizerParam != null) {
+        contentRequest.setContentDisposition(getIntValue(params, RequestParamName.contentDisposition));
+
+        String resizerParam = params.get(RequestParamName.resizerType);
+        if (resizerParam != null) {
+            //TODO make safe
             contentRequest.setResizerType(ResizerType.valueOf(resizerParam.toUpperCase()));
         }
-        contentRequest.setWidth(getIntValue(parametersMap, ServletParamName.width));
-        contentRequest.setHeight(getIntValue(parametersMap, ServletParamName.height));
-        Integer requestedQuality = getIntValue(parametersMap, ServletParamName.quality);
+        contentRequest.setWidth(getIntValue(params, RequestParamName.width));
+        contentRequest.setHeight(getIntValue(params, RequestParamName.height));
 
-        contentRequest.setNoCache(parametersMap.containsKey(ServletParamName.cacheControl));
-
-
+        Integer requestedQuality = getIntValue(params, RequestParamName.quality);
         if (requestedQuality != null) {
             if (requestedQuality >= 0 && requestedQuality <= 100) {
                 contentRequest.setQuality(requestedQuality.byteValue());
             } else {
-                logger.warn("Incorrect quality in request " + parametersMap + ". Default quality will be used.");
+                logger.warn("Incorrect quality in request " + params + ". Default quality will be used.");
+            }
+        }
+
+        if (params.containsKey(RequestParamName.noCache)) {
+            contentRequest.setNoCache(params.containsKey(RequestParamName.noCache));
+        } else {
+            if ("no-cache".equals(httpServletRequest.getHeader("Cache-Control"))) {
+                contentRequest.setNoCache(true);
             }
         }
 
@@ -65,13 +78,24 @@ public class RequestMapper {
 
 
 
-    private String getStringValue(Map<String, String[]> parametersMap, String parameterName) {
-        return parametersMap.containsKey(parameterName) ? parametersMap.get(parameterName)[0] : null;
+    private Long getLongValue(Map<String, String> params, String parameterName) {
+        return params.containsKey(parameterName) ? Long.parseLong(params.get(parameterName)) : null;
     }
-    private Integer getIntValue(Map<String, String[]> parametersMap, String parameterName) {
-        return parametersMap.containsKey(parameterName) ? Integer.parseInt(parametersMap.get(parameterName)[0]) : null;
+
+    private Integer getIntValue(Map<String, String> params, String parameterName) {
+        return params.containsKey(parameterName) ? Integer.parseInt(params.get(parameterName)) : null;
     }
-    private Long getLongValue(Map<String, String[]> parametersMap, String parameterName) {
-        return parametersMap.containsKey(parameterName) ? Long.parseLong(parametersMap.get(parameterName)[0]) : null;
+
+    private Integer getIntValue(Map<String, String> params, String[] parameterNames) {
+        return getParameter(params, parameterNames, Integer::parseInt);
+    }
+
+    private <T> T getParameter(Map<String, String> params, String[] parameterNames, Function<String, T> mappingFunction) {
+        return Stream.of(parameterNames)
+                .filter(params::containsKey)
+                .map(params::get)
+                .findFirst()
+                .map(mappingFunction)
+                .orElse(null);
     }
 }
