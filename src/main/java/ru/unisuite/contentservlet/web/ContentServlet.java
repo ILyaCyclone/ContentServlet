@@ -7,11 +7,10 @@ import ru.unisuite.contentservlet.config.ApplicationConfig;
 import ru.unisuite.contentservlet.config.ResizerType;
 import ru.unisuite.contentservlet.exception.NotFoundException;
 import ru.unisuite.contentservlet.model.Content;
+import ru.unisuite.contentservlet.model.HashAndLastModified;
 import ru.unisuite.contentservlet.service.ContentRequest;
 import ru.unisuite.contentservlet.service.ContentService;
-import ru.unisuite.contentservlet.service.ResizeServiceImpl;
-import ru.unisuite.scf4j.Cache;
-import ru.unisuite.scf4j.CacheFactory;
+import ru.unisuite.contentservlet.service.ResizeService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,11 +18,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 @WebServlet("/*")
 //@WebServlet({ "/get/*", "/get/secure/*" })
@@ -33,26 +27,15 @@ public class ContentServlet extends HttpServlet {
     private ContentService contentService;
     private RequestMapper requestMapper;
 
-    private ResizeServiceImpl resizeService;
+    private ResizeService resizeService;
     private ResizerType defaultResizerType;
 
 
     private String httpCacheControlDefaultValue;
 
-    private boolean persistentCacheEnabled;
-    private CacheFactory cacheFactory;
-    private Cache persistentCache;
-
-
-    private static final ZoneId GMT = ZoneId.of("GMT");
-    private static final DateTimeFormatter LAST_MODIFIED_FORMATTER = DateTimeFormatter
-            .ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).withZone(GMT);
-
     private final static String contentTypeHTML = "text/html; charset=UTF-8";
     private final static String contentDispositionHeaderName = "Content-Disposition";
     private final static String cacheControlHeaderName = "Cache-Control";
-
-    private final static String CACHE_CONFIG_FILE_NAME = "cache-config.xml";
 
     @Override
     public void init() {
@@ -82,15 +65,6 @@ public class ContentServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if(logger.isTraceEnabled()) logger.trace("request parameters {}", request.getParameterMap().toString());
 
-        String ifModifiedSince = request.getHeader("If-Modified-Since");
-        if(ifModifiedSince != null) {
-            System.out.println("ifModifiedSince = " + ifModifiedSince);
-        }
-        String ifNoneMatch = request.getHeader("If-None-Match");
-        if(ifNoneMatch != null) {
-            System.out.println("ifNoneMatch = " + ifNoneMatch);
-        }
-
         ContentRequest contentRequest;
         try {
             contentRequest = requestMapper.mapHttpServletRequest(request);
@@ -109,13 +83,40 @@ public class ContentServlet extends HttpServlet {
             return;
         }
 
-        serveContent(contentRequest, response);
+        serveContentRequest(contentRequest, request, response);
     }
 
+    private void serveContentRequest(ContentRequest contentRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+        String requestedEtag = request.getHeader("If-None-Match");
+        String requestedModifiedSince = request.getHeader("If-Modified-Since");
 
-    private void serveContent(ContentRequest contentRequest, HttpServletResponse response) throws IOException {
+        if (checkNotModified(contentRequest, requestedEtag, requestedModifiedSince)) {
+            response.setHeader(cacheControlHeaderName, getHttpCacheControl(contentRequest));
+            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+            return;
+        }
 
+        replyWithContent(contentRequest, response);
+    }
+
+    private boolean checkNotModified(ContentRequest contentRequest, String requestedEtag, String requestedModifiedSince) {
+        if (requestedEtag != null || requestedModifiedSince != null) {
+            HashAndLastModified hashAndLastModified = contentService.getHashAndLastModified(contentRequest);
+
+            if (requestedEtag != null && requestedEtag.equals(hashAndLastModified.getHash())) {
+                return true;
+            }
+
+            long requestedLastModified = HttpDateFormatter.parse(requestedModifiedSince);
+            if (requestedLastModified == hashAndLastModified.getLastModified()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void replyWithContent(ContentRequest contentRequest, HttpServletResponse response) throws IOException {
         Content content;
         try {
             content = contentService.getContent(contentRequest);
@@ -126,8 +127,11 @@ public class ContentServlet extends HttpServlet {
 
         response.setHeader(contentDispositionHeaderName, getHttpContentDisposition(contentRequest));
         response.setHeader(cacheControlHeaderName, getHttpCacheControl(contentRequest));
-        response.setHeader("Last-Modified", getHttpLastModified(content));
-        response.setHeader("ETag", String.valueOf(content.getLastModified()));
+        String httpLastModified = getHttpLastModified(content);
+        if (httpLastModified != null) {
+            response.setHeader("Last-Modified", httpLastModified);
+            response.setHeader("ETag", String.valueOf(content.getLastModified()));
+        }
         response.setContentType(content.getMimeType());
         // content-length is not needed
 
@@ -136,7 +140,7 @@ public class ContentServlet extends HttpServlet {
             case DB:
                 IOUtils.copy(content.getDataStream(), response.getOutputStream());
                 break;
-            case THUMBNAILATOR:
+            case APP:
                 resizeService.writeResized(contentRequest, content, response.getOutputStream());
         }
     }
@@ -153,9 +157,7 @@ public class ContentServlet extends HttpServlet {
     }
 
     private String getHttpLastModified(Content content) {
-        Instant instant = Instant.ofEpochSecond(content.getLastModified());
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, GMT);
-        return LAST_MODIFIED_FORMATTER.format(localDateTime);
+        return content.getLastModified() != null ? HttpDateFormatter.format(content.getLastModified()) : null;
     }
 
     private String getHttpCacheControl(ContentRequest contentRequest) {
@@ -189,11 +191,5 @@ public class ContentServlet extends HttpServlet {
         } catch (IOException e) {
             logger.error("Could not get response writer", e);
         }
-    }
-
-    @Override
-    public void destroy() {
-        if (cacheFactory != null)
-            cacheFactory.close();
     }
 }

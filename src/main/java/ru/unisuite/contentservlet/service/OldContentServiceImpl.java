@@ -47,7 +47,7 @@ public class OldContentServiceImpl {
 //        if (resizerType == ResizerType.DB) {
 //            return contentRepository.getContentByIdWebMetaterm(idWebMetaterm, width, height);
 //        }
-//        if (resizerType == ResizerType.THUMBNAILATOR) {
+//        if (resizerType == ResizerType.APP) {
 //            // resize will be called in a separate service
 //            return contentRepository.getContentByIdWebMetaterm(idWebMetaterm, null, null);
 //        }
@@ -58,7 +58,7 @@ public class OldContentServiceImpl {
 //        if (resizerType == ResizerType.DB) {
 //            return contentRepository.getContentByIdWebMetaterm(idWebMetaterm, width, height);
 //        }
-//        if (resizerType == ResizerType.THUMBNAILATOR) {
+//        if (resizerType == ResizerType.APP) {
 //            Content content = contentRepository.getContentByIdWebMetaterm(idWebMetaterm, null, null);
 //            byte defaultQuality = 80;
 //

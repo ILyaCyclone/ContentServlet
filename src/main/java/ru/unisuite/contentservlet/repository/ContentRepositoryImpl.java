@@ -2,14 +2,12 @@ package ru.unisuite.contentservlet.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.unisuite.contentservlet.exception.DataAccessException;
 import ru.unisuite.contentservlet.exception.NotFoundException;
 import ru.unisuite.contentservlet.model.Content;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.function.Supplier;
 
 public class ContentRepositoryImpl implements ContentRepository {
@@ -17,17 +15,10 @@ public class ContentRepositoryImpl implements ContentRepository {
 
     private final DataSource dataSource;
     private final ContentRowMapper contentRowMapper;
-    private final boolean persistentCacheEnabled;
 
-    private static final ZoneId GMT = ZoneId.of("GMT");
-    private static final DateTimeFormatter LAST_MODIFIED_FORMATTER = DateTimeFormatter
-            .ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).withZone(GMT);
-
-
-    public ContentRepositoryImpl(DataSource dataSource, ContentRowMapper contentRowMapper, boolean persistentCacheEnabled) {
+    public ContentRepositoryImpl(DataSource dataSource, ContentRowMapper contentRowMapper) {
         this.dataSource = dataSource;
         this.contentRowMapper = contentRowMapper;
-        this.persistentCacheEnabled = persistentCacheEnabled;
     }
 
 
@@ -72,15 +63,15 @@ public class ContentRepositoryImpl implements ContentRepository {
     }
 
 
-    private Content getContentInternal(PreparedStatement stmt, Supplier<String> paranetersStringSupplier) {
+    private Content getContentInternal(PreparedStatement stmt, Supplier<String> parametersStringSupplier) {
         try (ResultSet rs = stmt.executeQuery()) {
             if (!rs.isBeforeFirst()) {
-                throw new NotFoundException("Content not found {" + paranetersStringSupplier.get() + '}');
+                throw new NotFoundException("Content not found by {" + parametersStringSupplier.get() + '}');
             }
             rs.next();
             return contentRowMapper.mapRow(rs);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Could not get Content by {" + parametersStringSupplier.get() + '}', e);
         }
     }
 
