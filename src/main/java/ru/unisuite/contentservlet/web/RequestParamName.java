@@ -4,6 +4,7 @@ class RequestParamName {
     private RequestParamName() {
     }
 
+    // ---------- required parameters section ----------
     // ID web метатермина версии контента
     public static final String webMetaId = "id_wm";
     // алиас метатермина версии контента
@@ -15,16 +16,22 @@ class RequestParamName {
     // ID записи в таблице фотоальбом
     public static final String entryIdInPhotoalbum = "id_fpa";
 
-    // Content-Disposition контента 1 - attachment 2 - inline null - null
-    public static final String contentDisposition = "cd";
+    // ---------- image section ----------
     // "db" or "app"
     public static final String resizerType = "resizer";
-    // значение ширины для масштабирования изображения
-    public static final String[] width = new String[]{"SWidth", "width", "h"};
-    // значение высоты для масштабирования изображения
-    public static final String[] height = new String[]{"SHeight", "height", "h"};
+    public static final String[] width = {"SWidth", "width", "w"};
+    public static final String[] height = {"SHeight", "height", "h"};
+    public static final String[] quality = {"quality", "q"};
 
-    public static final String[] quality = new String[]{"quality", "q"};
-
+    // ---------- cache section ----------
+    // set response Cache-Control header value
+    public static final String cache = "cache";
+    // set response Cache-Control header to "no-cache"
     public static final String noCache = "no_cache";
+    // set response Cache-Control header to private
+    public static final String priv = "private";
+
+    // ---------- other ----------
+    // http Content-Disposition: 1 - attachment 2 - inline, default - filename=
+    public static final String contentDisposition = "cd";
 }

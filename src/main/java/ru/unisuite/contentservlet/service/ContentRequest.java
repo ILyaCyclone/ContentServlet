@@ -13,7 +13,7 @@ public class ContentRequest {
 
     private Long idWebMetaterm;
     private String metatermAlias;
-    private Long idFe; // former clientId
+    private Long idFe;
     private Long entryIdInPhotoalbum;
     private Long fileVersionId;
 
@@ -24,13 +24,16 @@ public class ContentRequest {
     private Integer width;
     private Integer height;
     private Byte quality;
+
+    private String cacheControl;
     private Boolean noCache;
+    private Boolean privateCache;
 
 
 
-    public boolean isEmpty() {
-        return idWebMetaterm == null && metatermAlias == null && fileVersionId == null
-                && idFe == null && entryIdInPhotoalbum == null;
+    public boolean hasRequiredParameters() {
+        return !(idWebMetaterm == null && metatermAlias == null && fileVersionId == null
+                && idFe == null && entryIdInPhotoalbum == null);
     }
 
     public Map<String, Object> values() {
@@ -49,7 +52,9 @@ public class ContentRequest {
         if (height != null) values.put("height", height);
         if (quality != null) values.put("quality", quality);
 
+        if (cacheControl != null) values.put("cacheControl", cacheControl);
         if (noCache != null) values.put("noCache", noCache);
+        if (privateCache != null) values.put("private", privateCache);
         return values;
     }
 
@@ -165,5 +170,21 @@ public class ContentRequest {
 
     public void setResizerType(ResizerType resizerType) {
         this.resizerType = resizerType;
+    }
+
+    public String getCacheControl() {
+        return cacheControl;
+    }
+
+    public void setCacheControl(String cacheControl) {
+        this.cacheControl = cacheControl;
+    }
+
+    public Boolean getPrivateCache() {
+        return privateCache;
+    }
+
+    public void setPrivateCache(Boolean privateCache) {
+        this.privateCache = privateCache;
     }
 }

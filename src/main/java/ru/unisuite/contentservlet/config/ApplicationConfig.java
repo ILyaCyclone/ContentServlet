@@ -3,77 +3,72 @@ package ru.unisuite.contentservlet.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.repository.*;
-import ru.unisuite.contentservlet.service.*;
+import ru.unisuite.contentservlet.service.ContentService;
+import ru.unisuite.contentservlet.service.ContentServiceImpl;
+import ru.unisuite.contentservlet.service.ResizeService;
+import ru.unisuite.contentservlet.service.ResizeServiceIm4java;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 public class ApplicationConfig {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationConfig.class.getName());
-    private final static String CONFIG_FILE_NAME = "application.properties";
 
     private final DataSource dataSource;
 
-    private final boolean persistentCacheEnabled; // persistent cache
-    private final NameCreator cacheFilenameCreator;
+    private final ContentServiceImpl contentService;
+    private final ContentRepositoryImpl contentRepository;
+    private final HashAndLastModifiedRepositoryImpl hashAndLastModifiedRepository;
+    private final ResizeServiceIm4java resizeService;
 
-    private final String httpCacheControlDefaultValue; // HTTP cache default value
+    private final String defaultHttpCacheControl;
 
     private final ResizerType resizerType;
 
-    private byte defaultQuality = 80;
+    private final byte defaultImageQuality;
 
 
-    public ApplicationConfig() {
-        this(CONFIG_FILE_NAME);
-    }
+    public ApplicationConfig(ContentServletProperties prop) {
 
-    public ApplicationConfig(String configFile) {
-        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(configFile)) {
-            Properties prop = new Properties();
-            prop.load(input);
-
-            DataSource dataSource;
-            String datasourceJndiName = prop.getProperty("contentservlet.datasource.jndi-name");
-            if(datasourceJndiName != null) {
-                dataSource = new DataSourceManager().lookup(datasourceJndiName);
+        try {
+            if (prop.getDatasourceJndiName() != null) {
+                this.dataSource = new DataSourceManager().lookup(prop.getDatasourceJndiName());
             } else {
-                String datasourceUrl = prop.getProperty("contentservlet.datasource.url");
-                String datasourceUsername = prop.getProperty("contentservlet.datasource.username");
-                String datasourcePassword = prop.getProperty("contentservlet.datasource.password");
-                dataSource = new DataSourceManager().createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
+                String datasourceUrl = prop.getDatasourceUrl();
+                String datasourceUsername = prop.getDatasourceUsername();
+                String datasourcePassword = prop.getDatasourcePassword();
+                this.dataSource = new DataSourceManager().createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
             }
-            if(dataSource == null) {
-                throw new RuntimeException("Unable to configure jdbc DataSource");
-            }
-            this.dataSource = dataSource;
-
-
-            this.persistentCacheEnabled = Boolean.parseBoolean(prop.getProperty("contentservlet.usecache"));
-            this.cacheFilenameCreator = persistentCacheEnabled ? new NameCreator() : null;
-
-            this.httpCacheControlDefaultValue = prop.getProperty("contentservlet.cachecontrol");
-
-            this.resizerType = ResizerType.valueOf(prop.getProperty("contentservlet.resizer-type").toUpperCase());
-
-        } catch (IOException e) {
-            String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
-            logger.error(errorMessage, e);
-            throw new RuntimeException(errorMessage, e);
+        } catch (Exception e) {
+            logger.error("Unable to configure jdbc dataSource", e);
+            throw new RuntimeException("Unable to configure jdbc dataSource", e);
         }
+
+
+        this.resizerType = ResizerType.forValue(prop.getResizerType());
+
+        this.contentRepository = new ContentRepositoryImpl(this.dataSource, new ContentRowMapper());
+
+        this.hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(this.dataSource, new HashAndLastModifiedRowMapper());
+
+        this.contentService = new ContentServiceImpl(this.contentRepository, this.hashAndLastModifiedRepository, this.resizerType);
+
+        this.resizeService = new ResizeServiceIm4java();
+
+
+        this.defaultHttpCacheControl = prop.getCacheControl();
+
+        this.defaultImageQuality = Byte.parseByte(prop.getImageQuality());
     }
 
 
 
     public ContentService contentService() {
-        return new ContentServiceImpl(contentRepository(), hashAndLastModifiedRepository(), resizerType);
+        return contentService;
     }
 
     public ResizeService resizeService() {
 //        return new ResizeServiceImpl(ImageResizerFactory.getImageResizer(), defaultQuality);
-        return new ResizeServiceIm4java();
+        return this.resizeService;
     }
 
     public ResizerType getResizerType() {
@@ -81,20 +76,18 @@ public class ApplicationConfig {
     }
 
     public String getCacheControl() {
-        return this.httpCacheControlDefaultValue;
-    }
-
-    // this is about persistent server side cache, not about HTTP cache
-    public boolean isPersistentCacheEnabled() {
-        return persistentCacheEnabled;
+        return this.defaultHttpCacheControl;
     }
 
     public ContentRepository contentRepository() {
-        return new ContentRepositoryImpl(dataSource, new ContentRowMapper());
+        return this.contentRepository;
     }
 
     public HashAndLastModifiedRepository hashAndLastModifiedRepository() {
-        return new HashAndLastModifiedRepositoryImpl(dataSource, new HashAndLastModifiedRowMapper());
+        return this.hashAndLastModifiedRepository;
     }
 
+    public byte getDefaultImageQuality() {
+        return this.defaultImageQuality;
+    }
 }
