@@ -16,7 +16,7 @@ class HttpDateFormatter {
     private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter
             .ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).withZone(GMT);
 
-    // org.apache.tomcat.util.http.FastHttpDateFormat
+    // parse cache from org.apache.tomcat.util.http.FastHttpDateFormat
     private static final int DATE_CACHE_CAPACITY = 256;
     private static final Map<String, Long> parseCache = new ConcurrentHashMap<>(DATE_CACHE_CAPACITY);
     private static final Map<Long, String> formatCache = new ConcurrentHashMap<>(DATE_CACHE_CAPACITY);

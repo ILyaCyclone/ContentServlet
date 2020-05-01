@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.web;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,8 @@ import ru.unisuite.contentservlet.model.HashAndLastModified;
 import ru.unisuite.contentservlet.service.ContentRequest;
 import ru.unisuite.contentservlet.service.ContentService;
 import ru.unisuite.contentservlet.service.ResizeService;
+import ru.unisuite.imageresizer.ImageResizer;
+import ru.unisuite.imageresizer.ImageResizerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,66 +22,60 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/*")
-//@WebServlet({ "/get/*", "/get/secure/*" })
+//@WebServlet({"/*", "/private/*"})
+@WebServlet({"/get/*", "/get/private/*"})
 public class ContentServlet extends HttpServlet {
     private final Logger logger = LoggerFactory.getLogger(ContentServlet.class.getName());
 
     private ContentService contentService;
     private RequestMapper requestMapper;
 
+    private HttpHeaders httpHeaders;
+
     private ResizeService resizeService;
     private ResizerType defaultResizerType;
-
-
-    private String httpCacheControlDefaultValue;
+    private byte defaultImageQuality;
 
     private final static String contentTypeHTML = "text/html; charset=UTF-8";
-    private final static String contentDispositionHeaderName = "Content-Disposition";
-    private final static String cacheControlHeaderName = "Cache-Control";
+
+    private MeterRegistry meterRegistry;
 
     @Override
     public void init() {
-        ApplicationConfig applicationConfig = new ApplicationConfig();
+        ApplicationConfig applicationConfig = (ApplicationConfig) getServletContext().getAttribute("applicationConfig");
 
         this.contentService = applicationConfig.contentService();
-        this.requestMapper = new RequestMapper();
+        this.httpHeaders = new HttpHeaders(applicationConfig);
 
         this.resizeService = applicationConfig.resizeService();
         this.defaultResizerType = applicationConfig.getResizerType();
+        this.defaultImageQuality = applicationConfig.getDefaultImageQuality();
 
-        this.httpCacheControlDefaultValue = applicationConfig.getCacheControl();
+        this.requestMapper = new RequestMapper();
 
-//        this.persistentCacheEnabled = applicationConfig.isPersistentCacheEnabled();
-//
-//		if (persistentCacheEnabled) {
-//			try {
-//				cacheFactory = GeneralCacheFactory.getCacheFactory(this.getClass().getClassLoader().getResource(CACHE_CONFIG_FILE_NAME).getPath());
-//			} catch (SCF4JCacheStartFailedException e) {
-//				throw new RuntimeException("Problems with Cache config file. " + e.toString(), e);
-//			}
-//			persistentCache = cacheFactory.getCache();
-//		}
+        this.meterRegistry = (MeterRegistry) getServletContext().getAttribute("meterRegistry");
     }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if(logger.isTraceEnabled()) logger.trace("request parameters {}", request.getParameterMap().toString());
+        if (logger.isTraceEnabled())
+            logger.trace("request URI {}", request.getRequestURI() + "?" + request.getQueryString());
 
         ContentRequest contentRequest;
         try {
             contentRequest = requestMapper.mapHttpServletRequest(request);
-            logger.debug(contentRequest.toString());
+            if (logger.isDebugEnabled()) logger.debug(contentRequest.toString());
         } catch (Exception e) {
-            logger.error("Could not map HttpRequest " + request.getParameterMap().toString() + " to ContentRequest", e);
-//                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Could not map HttpRequest {} to ContentRequest", request.getRequestURI() + "?" + request.getQueryString(), e);
+
             String html = "<p>Некорректный запрос</p>" +
                     "<p>Пожалуйста, обратитесь к документации на странице <a href=\"help\">/help</a></p>";
             replyWithHtml(response, html, HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        if (contentRequest.isEmpty()) {
+        if (!contentRequest.hasRequiredParameters()) {
             serveHelp(request, response);
             return;
         }
@@ -88,13 +85,20 @@ public class ContentServlet extends HttpServlet {
 
     private void serveContentRequest(ContentRequest contentRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        String requestedEtag = request.getHeader("If-None-Match");
-        String requestedModifiedSince = request.getHeader("If-Modified-Since");
+        httpHeaders.setCacheControl(response, contentRequest);
 
-        if (checkNotModified(contentRequest, requestedEtag, requestedModifiedSince)) {
-            response.setHeader(cacheControlHeaderName, getHttpCacheControl(contentRequest));
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-            return;
+        String requestedCacheControl = contentRequest.getCacheControl();
+        if (!(Boolean.TRUE.equals(contentRequest.getNoCache()) || (requestedCacheControl != null && requestedCacheControl.contains("no-cache")))) {
+
+            String requestedEtag = httpHeaders.getEtag(request);
+            String requestedModifiedSince = httpHeaders.getModifiedSince(request);
+
+            if (checkNotModified(contentRequest, requestedEtag, requestedModifiedSince)) {
+                if (logger.isTraceEnabled()) logger.trace("304 not modified {}", contentRequest);
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+
         }
 
         replyWithContent(contentRequest, response);
@@ -125,24 +129,37 @@ public class ContentServlet extends HttpServlet {
             return;
         }
 
-        response.setHeader(contentDispositionHeaderName, getHttpContentDisposition(contentRequest));
-        response.setHeader(cacheControlHeaderName, getHttpCacheControl(contentRequest));
-        String httpLastModified = getHttpLastModified(content);
-        if (httpLastModified != null) {
-            response.setHeader("Last-Modified", httpLastModified);
-            response.setHeader("ETag", String.valueOf(content.getLastModified()));
-        }
-        response.setContentType(content.getMimeType());
-        // content-length is not needed
+        httpHeaders.setContentDisposition(response, contentRequest);
+        httpHeaders.setContentResponseHeaders(response, content);
 
-        ResizerType resizerType = contentRequest.getResizerType() != null ? contentRequest.getResizerType() : defaultResizerType;
-        switch (resizerType) {
-            case DB:
-                IOUtils.copy(content.getDataStream(), response.getOutputStream());
-                break;
-            case APP:
-                resizeService.writeResized(contentRequest, content, response.getOutputStream());
+        Integer width = contentRequest.getWidth();
+        Integer height = contentRequest.getHeight();
+        if (width != null || height != null || contentRequest.getQuality() != null) {
+            byte quality = contentRequest.getQuality() != null ? contentRequest.getQuality() : defaultImageQuality;
+            ResizerType resizerType = contentRequest.getResizerType() != null ? contentRequest.getResizerType() : defaultResizerType;
+            switch (resizerType) {
+                case IMAGEMAGICK:
+                    resizeService.writeResized(contentRequest, content, response.getOutputStream());
+                    break;
+                case THUMBNAILATOR:
+                    ImageResizer thumbnailatorResizer = ImageResizerFactory.getImageResizer();
+                    if (width != null && height == null) {
+                        thumbnailatorResizer.resizeByWidth(content.getDataStream(), width, response.getOutputStream(), (int) quality);
+                        break;
+                    }
+                    if (width == null && height != null) {
+                        thumbnailatorResizer.resizeByHeight(content.getDataStream(), height, response.getOutputStream(), (int) quality);
+                        break;
+                    }
+                    thumbnailatorResizer.resize(content.getDataStream(), width, height, response.getOutputStream(), (int) quality);
+                    break;
+                case DB:
+                default:
+                    IOUtils.copy(content.getDataStream(), response.getOutputStream());
+            }
+            return;
         }
+        IOUtils.copy(content.getDataStream(), response.getOutputStream());
     }
 
 
@@ -152,36 +169,11 @@ public class ContentServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             request.getServletContext().getRequestDispatcher("/help").forward(request, response);
         } catch (ServletException | IOException e) {
-            logger.error("Servlet can't show /help page. " + e.getMessage(), e);
+            logger.error("Could not forward to help page", e);
         }
     }
 
-    private String getHttpLastModified(Content content) {
-        return content.getLastModified() != null ? HttpDateFormatter.format(content.getLastModified()) : null;
-    }
 
-    private String getHttpCacheControl(ContentRequest contentRequest) {
-        return Boolean.TRUE.equals(contentRequest.getNoCache()) ? "no-cache" : httpCacheControlDefaultValue;
-    }
-
-    private String getHttpContentDisposition(ContentRequest contentRequest) {
-        String fileName = contentRequest.getFilename();
-
-        if (contentRequest.getContentDisposition() == null) {
-            return "filename=" + fileName;
-        } else {
-
-            switch (contentRequest.getContentDisposition()) {
-                case 1:
-                    return "attachment; filename=" + fileName;
-                case 2:
-                    return "inline; filename=" + fileName;
-                default:
-                    return "filename=" + fileName;
-            }
-        }
-
-    }
 
     private void replyWithHtml(HttpServletResponse response, String html, int statusCode) {
         response.setContentType(contentTypeHTML);
@@ -189,7 +181,7 @@ public class ContentServlet extends HttpServlet {
         try {
             response.getWriter().println(html);
         } catch (IOException e) {
-            logger.error("Could not get response writer", e);
+            logger.error("Could not print html response", e);
         }
     }
 }

@@ -27,6 +27,8 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public Content getContent(ContentRequest contentRequest) {
+        if (logger.isTraceEnabled()) logger.trace("getContent {}", contentRequest);
+
         ResizerType resizerType = contentRequest.getResizerType() != null ? contentRequest.getResizerType() : defaultResizerType;
         boolean sendDimensionToDB = resizerType == ResizerType.DB;
         Integer effectiveWidth = sendDimensionToDB ? contentRequest.getWidth() : null;

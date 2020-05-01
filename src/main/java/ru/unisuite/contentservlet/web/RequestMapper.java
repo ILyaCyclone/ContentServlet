@@ -35,11 +35,7 @@ public class RequestMapper {
 
         contentRequest.setContentDisposition(getIntValue(params, RequestParamName.contentDisposition));
 
-        String resizerParam = params.get(RequestParamName.resizerType);
-        if (resizerParam != null) {
-            //TODO make safe
-            contentRequest.setResizerType(ResizerType.valueOf(resizerParam.toUpperCase()));
-        }
+        contentRequest.setResizerType(ResizerType.forValue(params.get(RequestParamName.resizerType)));
         contentRequest.setWidth(getIntValue(params, RequestParamName.width));
         contentRequest.setHeight(getIntValue(params, RequestParamName.height));
 
@@ -52,11 +48,16 @@ public class RequestMapper {
             }
         }
 
-        if (params.containsKey(RequestParamName.noCache)) {
-            contentRequest.setNoCache(params.containsKey(RequestParamName.noCache));
+        String requestedCacheControl = params.get(RequestParamName.cache);
+        if (requestedCacheControl != null) {
+            contentRequest.setCacheControl(requestedCacheControl);
         } else {
-            if ("no-cache".equals(httpServletRequest.getHeader("Cache-Control"))) {
-                contentRequest.setNoCache(true);
+            if (params.containsKey(RequestParamName.priv)) {
+                contentRequest.setPrivateCache(true);
+            } else {
+                if (params.containsKey(RequestParamName.noCache) || "no-cache".equals(httpServletRequest.getHeader("Cache-Control"))) {
+                    contentRequest.setNoCache(true);
+                }
             }
         }
 
