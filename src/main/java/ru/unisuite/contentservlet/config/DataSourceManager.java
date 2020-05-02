@@ -13,7 +13,7 @@ import java.sql.SQLException;
 class DataSourceManager {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceManager.class);
 
-    public DataSource lookup(String jndiName) {
+    static DataSource lookup(String jndiName) {
         try {
             return lookupDataSourceInternal(jndiName, false);
         } catch (NamingException e1) {
@@ -29,7 +29,7 @@ class DataSourceManager {
     /**
      * Tomcat wants data source jndi named prepended with "java:/comp/env/" but WebLogic doesn't. We try both.
      */
-    private DataSource lookupDataSourceInternal(String jndiName, boolean prependWithJavaCompEnv) throws NamingException {
+    private static DataSource lookupDataSourceInternal(String jndiName, boolean prependWithJavaCompEnv) throws NamingException {
         Context initialContext = null;
         try {
             initialContext = new InitialContext();
@@ -45,7 +45,7 @@ class DataSourceManager {
         }
     }
 
-    public DataSource createDataSource(String url, String username, String password) {
+    static DataSource createDataSource(String url, String username, String password) {
         try {
 //            Class.forName("oracle.jdbc.OracleDriver"); // not needed in JDBC 4
 

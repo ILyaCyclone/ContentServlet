@@ -12,6 +12,8 @@ public class ContentServletProperties {
     private static final String CONFIG_FILE_NAME = "application.properties";
     private static final String PREFIX = "contentservlet.";
 
+    private final String applicationName;
+
     private final String datasourceJndiName;
     private final String datasourceUrl;
     private final String datasourcePassword;
@@ -20,6 +22,8 @@ public class ContentServletProperties {
     private final String cacheControl;
     private final String resizerType;
     private final String imageQuality;
+
+    private final boolean enableMetrics;
 
     public ContentServletProperties() {
         this(CONFIG_FILE_NAME);
@@ -38,6 +42,8 @@ public class ContentServletProperties {
             throw new RuntimeException(errorMessage, e);
         }
 
+        this.applicationName = getPropertyOrDefault(prop, defaultProp, PREFIX + "application-name");
+
         this.datasourceJndiName = prop.getProperty(PREFIX + "datasource.jndi-name");
         this.datasourceUrl = prop.getProperty(PREFIX + "datasource.url");
         this.datasourceUsername = prop.getProperty(PREFIX + "datasource.username");
@@ -46,7 +52,9 @@ public class ContentServletProperties {
         this.cacheControl = getPropertyOrDefault(prop, defaultProp, PREFIX + "cachecontrol");
 
         this.resizerType = getPropertyOrDefault(prop, defaultProp, PREFIX + "resizer-type");
-        this.imageQuality = getPropertyOrDefault(prop, defaultProp, PREFIX + "imagequality");
+        this.imageQuality = getPropertyOrDefault(prop, defaultProp, PREFIX + "image-quality");
+
+        this.enableMetrics = Boolean.parseBoolean(getPropertyOrDefault(prop, defaultProp, PREFIX + "enable-metrics"));
     }
 
     private String getPropertyOrDefault(Properties prop, Properties defaultProp, String key) {
@@ -58,6 +66,10 @@ public class ContentServletProperties {
     }
 
 
+
+    public String getApplicationName() {
+        return applicationName;
+    }
 
     public String getDatasourceJndiName() {
         return datasourceJndiName;
@@ -85,5 +97,24 @@ public class ContentServletProperties {
 
     public String getImageQuality() {
         return imageQuality;
+    }
+
+    public boolean isEnableMetrics() {
+        return enableMetrics;
+    }
+
+    @Override
+    public String toString() {
+        return "ContentServletProperties{" +
+                "applicationName='" + applicationName + '\'' +
+                (datasourceJndiName != null ? ", datasourceJndiName='" + datasourceJndiName + '\'' : "") +
+                (datasourceUrl != null ? ", datasourceUrl='" + datasourceUrl + '\'' : "") +
+                (datasourceUsername != null ? ", datasourceUsername='" + datasourceUsername + '\'' : "") +
+                (datasourcePassword != null ? ", datasourcePassword='***'" : "") +
+                ", cacheControl='" + cacheControl + '\'' +
+                ", resizerType='" + resizerType + '\'' +
+                ", imageQuality='" + imageQuality + '\'' +
+                ", enableMetrics=" + enableMetrics +
+                '}';
     }
 }

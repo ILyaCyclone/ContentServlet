@@ -1,6 +1,5 @@
 package ru.unisuite.contentservlet.web;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 //@WebServlet({"/*", "/private/*"})
-@WebServlet({"/get/*", "/get/private/*"})
+@WebServlet({ApplicationInitializer.CONTENT_URL_PATTERN, "/get/private/*"})
 public class ContentServlet extends HttpServlet {
     private final Logger logger = LoggerFactory.getLogger(ContentServlet.class.getName());
 
@@ -38,7 +37,7 @@ public class ContentServlet extends HttpServlet {
 
     private final static String contentTypeHTML = "text/html; charset=UTF-8";
 
-    private MeterRegistry meterRegistry;
+//    private io.micrometer.core.instrument.MeterRegistry meterRegistry;
 
     @Override
     public void init() {
@@ -51,9 +50,9 @@ public class ContentServlet extends HttpServlet {
         this.defaultResizerType = applicationConfig.getResizerType();
         this.defaultImageQuality = applicationConfig.getDefaultImageQuality();
 
-        this.requestMapper = new RequestMapper();
+//        this.meterRegistry = applicationConfig.getMeterRegistry();
 
-        this.meterRegistry = (MeterRegistry) getServletContext().getAttribute("meterRegistry");
+        this.requestMapper = new RequestMapper();
     }
 
 

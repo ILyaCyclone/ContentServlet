@@ -2,15 +2,15 @@ package ru.unisuite.contentservlet.web;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import ru.unisuite.contentservlet.config.ApplicationConfig;
 
 import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 //@WebFilter("/*")
-@WebFilter("/get/*")
+//@WebFilter("/get/*")
 public class CustomMetricsFilter implements Filter {
     private static final String PREFIX = "custom_";
     private static final String HTTP_RESPONSE_COUNTER_NAME = PREFIX + "http_response";
@@ -27,14 +27,16 @@ public class CustomMetricsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        meterRegistry = (MeterRegistry) filterConfig.getServletContext().getAttribute("meterRegistry");
-        this.receivedRequests = meterRegistry.counter(PREFIX + "received_requests");
+        ApplicationConfig applicationConfig = (ApplicationConfig) filterConfig.getServletContext().getAttribute("applicationConfig");
+        this.meterRegistry = applicationConfig.getMeterRegistry();
+
+        this.receivedRequests = this.meterRegistry.counter(PREFIX + "received_requests");
         //@formatter:off
-        this.responseOkCounter                  = meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "200");
-        this.responseNotModifiedCounter         = meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "304");
-        this.responseBadRequestCounter          = meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "401");
-        this.responseNotFoundCounter            = meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "404");
-        this.responseInternalServerErrorCounter = meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "500");
+        this.responseOkCounter                  = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "200");
+        this.responseNotModifiedCounter         = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "304");
+        this.responseBadRequestCounter          = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "401");
+        this.responseNotFoundCounter            = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "404");
+        this.responseInternalServerErrorCounter = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "500");
         //@formatter:on
     }
 

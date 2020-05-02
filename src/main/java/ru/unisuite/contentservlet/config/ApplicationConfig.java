@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.config;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.repository.*;
@@ -26,17 +27,19 @@ public class ApplicationConfig {
 
     private final byte defaultImageQuality;
 
+    private final MeterRegistry meterRegistry;
+
 
     public ApplicationConfig(ContentServletProperties prop) {
 
         try {
             if (prop.getDatasourceJndiName() != null) {
-                this.dataSource = new DataSourceManager().lookup(prop.getDatasourceJndiName());
+                this.dataSource = DataSourceManager.lookup(prop.getDatasourceJndiName());
             } else {
                 String datasourceUrl = prop.getDatasourceUrl();
                 String datasourceUsername = prop.getDatasourceUsername();
                 String datasourcePassword = prop.getDatasourcePassword();
-                this.dataSource = new DataSourceManager().createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
+                this.dataSource = DataSourceManager.createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
             }
         } catch (Exception e) {
             logger.error("Unable to configure jdbc dataSource", e);
@@ -58,6 +61,9 @@ public class ApplicationConfig {
         this.defaultHttpCacheControl = prop.getCacheControl();
 
         this.defaultImageQuality = Byte.parseByte(prop.getImageQuality());
+
+        this.meterRegistry = prop.isEnableMetrics() ? MeterRegistryManager.prometheusMeterRegistry(prop.getApplicationName())
+                : MeterRegistryManager.noopMeterRegistry();
     }
 
 
@@ -89,5 +95,9 @@ public class ApplicationConfig {
 
     public byte getDefaultImageQuality() {
         return this.defaultImageQuality;
+    }
+
+    public MeterRegistry getMeterRegistry() {
+        return meterRegistry;
     }
 }
