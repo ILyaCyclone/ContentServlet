@@ -54,18 +54,17 @@ class HttpHeaders {
 
     public void setContentResponseHeaders(HttpServletResponse response, Content content) {
         response.setHeader("Last-Modified", getHttpLastModified(content));
-        response.setHeader("ETag", weakEtag(content.getHash()));
+        response.setHeader("ETag", etag(content.getHash(), EtagValidation.WEAK));
         response.setContentType(content.getMimeType());
         // content-length is not needed
     }
 
 
 
-    private String weakEtag(String etag) {
+    private String etag(String hash, EtagValidation etagValidation) {
         // check spec for strong/weak etag validators
-        if (etag == null || etag.trim().length() == 0) return null;
-        if (etag.startsWith("W/\"")) return etag;
-        return "W/\"" + etag + '"';
+        if (hash == null || hash.trim().length() == 0) return null;
+        return (etagValidation == EtagValidation.WEAK ? "W/" : "") + '"' + hash + '"';
     }
 
 
@@ -88,5 +87,9 @@ class HttpHeaders {
                     return "filename=" + fileName;
             }
         }
+    }
+
+    private enum EtagValidation {
+        STRONG, WEAK
     }
 }

@@ -112,7 +112,7 @@ public class ContentServlet extends HttpServlet {
             }
 
             long requestedLastModified = HttpDateFormatter.parse(requestedModifiedSince);
-            if (requestedLastModified == hashAndLastModified.getLastModified()) {
+            if (requestedLastModified != -1L && requestedLastModified == hashAndLastModified.getLastModified()) {
                 return true;
             }
         }

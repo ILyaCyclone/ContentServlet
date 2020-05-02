@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 public class ApplicationConfig {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationConfig.class.getName());
 
-    private final DataSource dataSource;
+//    private final DataSource dataSource;
 
     private final ContentServiceImpl contentService;
     private final ContentRepositoryImpl contentRepository;
@@ -31,15 +31,15 @@ public class ApplicationConfig {
 
 
     public ApplicationConfig(ContentServletProperties prop) {
-
+        DataSource dataSource;
         try {
             if (prop.getDatasourceJndiName() != null) {
-                this.dataSource = DataSourceManager.lookup(prop.getDatasourceJndiName());
+                dataSource = DataSourceManager.lookup(prop.getDatasourceJndiName());
             } else {
                 String datasourceUrl = prop.getDatasourceUrl();
                 String datasourceUsername = prop.getDatasourceUsername();
                 String datasourcePassword = prop.getDatasourcePassword();
-                this.dataSource = DataSourceManager.createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
+                dataSource = DataSourceManager.createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
             }
         } catch (Exception e) {
             logger.error("Unable to configure jdbc dataSource", e);
@@ -49,9 +49,9 @@ public class ApplicationConfig {
 
         this.resizerType = ResizerType.forValue(prop.getResizerType());
 
-        this.contentRepository = new ContentRepositoryImpl(this.dataSource, new ContentRowMapper());
+        this.contentRepository = new ContentRepositoryImpl(dataSource, new ContentRowMapper());
 
-        this.hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(this.dataSource, new HashAndLastModifiedRowMapper());
+        this.hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(dataSource, new HashAndLastModifiedRowMapper());
 
         this.contentService = new ContentServiceImpl(this.contentRepository, this.hashAndLastModifiedRepository, this.resizerType);
 

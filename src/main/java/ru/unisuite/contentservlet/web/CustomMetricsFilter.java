@@ -15,6 +15,8 @@ public class CustomMetricsFilter implements Filter {
     private static final String PREFIX = "custom_";
     private static final String HTTP_RESPONSE_COUNTER_NAME = PREFIX + "http_response";
 
+    private MeterRegistry meterRegistry;
+
     private Counter receivedRequests;
 
     private Counter responseOkCounter;
@@ -22,8 +24,6 @@ public class CustomMetricsFilter implements Filter {
     private Counter responseBadRequestCounter;
     private Counter responseNotFoundCounter;
     private Counter responseInternalServerErrorCounter;
-
-    private MeterRegistry meterRegistry;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

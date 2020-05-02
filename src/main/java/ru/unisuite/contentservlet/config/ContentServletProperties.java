@@ -58,11 +58,7 @@ public class ContentServletProperties {
     }
 
     private String getPropertyOrDefault(Properties prop, Properties defaultProp, String key) {
-        String value = prop.getProperty(key);
-        if (value != null) {
-            return value;
-        }
-        return defaultProp.getProperty(key);
+        return prop.getProperty(key, defaultProp.getProperty(key));
     }
 
 
