@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class ContentServletProperties {
@@ -25,6 +27,8 @@ public class ContentServletProperties {
 
     private final boolean enableMetrics;
 
+    private final Map<String, String> allProperties;
+
     public ContentServletProperties() {
         this(CONFIG_FILE_NAME);
     }
@@ -41,6 +45,9 @@ public class ContentServletProperties {
             logger.error(errorMessage, e);
             throw new RuntimeException(errorMessage, e);
         }
+
+        this.allProperties = prop.entrySet().stream()
+                .collect(HashMap::new, (map, entry) -> map.put((String) entry.getKey(), (String) entry.getValue()), HashMap::putAll);
 
         this.applicationName = getPropertyOrDefault(prop, defaultProp, PREFIX + "application-name");
 
@@ -97,6 +104,10 @@ public class ContentServletProperties {
 
     public boolean isEnableMetrics() {
         return enableMetrics;
+    }
+
+    public Map<String, String> getAllProperties() {
+        return allProperties;
     }
 
     @Override

@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.repository.*;
 import ru.unisuite.contentservlet.service.ContentService;
 import ru.unisuite.contentservlet.service.ContentServiceImpl;
-import ru.unisuite.contentservlet.service.ResizeService;
-import ru.unisuite.contentservlet.service.ResizeServiceIm4java;
+import ru.unisuite.imageprocessing.ImageProcessor;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 public class ApplicationConfig {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationConfig.class.getName());
@@ -17,13 +17,12 @@ public class ApplicationConfig {
 //    private final DataSource dataSource;
 
     private final ContentServiceImpl contentService;
-    private final ContentRepositoryImpl contentRepository;
-    private final HashAndLastModifiedRepositoryImpl hashAndLastModifiedRepository;
-    private final ResizeServiceIm4java resizeService;
+    private final Map<ResizerType, ImageProcessor> imageProcessors;
 
     private final String defaultHttpCacheControl;
 
     private final ResizerType resizerType;
+
 
     private final byte defaultImageQuality;
 
@@ -49,18 +48,20 @@ public class ApplicationConfig {
 
         this.resizerType = ResizerType.forValue(prop.getResizerType());
 
-        this.contentRepository = new ContentRepositoryImpl(dataSource, new ContentRowMapper());
+        ContentRepository contentRepository = new ContentRepositoryImpl(dataSource, new ContentRowMapper());
 
-        this.hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(dataSource, new HashAndLastModifiedRowMapper());
+        HashAndLastModifiedRepository hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(dataSource, new HashAndLastModifiedRowMapper());
 
-        this.contentService = new ContentServiceImpl(this.contentRepository, this.hashAndLastModifiedRepository, this.resizerType);
-
-        this.resizeService = new ResizeServiceIm4java();
+        this.contentService = new ContentServiceImpl(contentRepository, hashAndLastModifiedRepository, this.resizerType);
 
 
         this.defaultHttpCacheControl = prop.getCacheControl();
 
         this.defaultImageQuality = Byte.parseByte(prop.getImageQuality());
+
+
+        this.imageProcessors = ImageProcessorsManager.implementations(prop);
+
 
         this.meterRegistry = prop.isEnableMetrics() ? MeterRegistryManager.prometheusMeterRegistry(prop.getApplicationName())
                 : MeterRegistryManager.noopMeterRegistry();
@@ -72,11 +73,6 @@ public class ApplicationConfig {
         return contentService;
     }
 
-    public ResizeService resizeService() {
-//        return new ResizeServiceImpl(ImageResizerFactory.getImageResizer(), defaultQuality);
-        return this.resizeService;
-    }
-
     public ResizerType getResizerType() {
         return resizerType;
     }
@@ -85,19 +81,15 @@ public class ApplicationConfig {
         return this.defaultHttpCacheControl;
     }
 
-    public ContentRepository contentRepository() {
-        return this.contentRepository;
-    }
-
-    public HashAndLastModifiedRepository hashAndLastModifiedRepository() {
-        return this.hashAndLastModifiedRepository;
-    }
-
     public byte getDefaultImageQuality() {
         return this.defaultImageQuality;
     }
 
     public MeterRegistry getMeterRegistry() {
         return meterRegistry;
+    }
+
+    public Map<ResizerType, ImageProcessor> getImageProcessors() {
+        return imageProcessors;
     }
 }

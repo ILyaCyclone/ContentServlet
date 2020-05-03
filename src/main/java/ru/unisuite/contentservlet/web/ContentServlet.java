@@ -10,9 +10,8 @@ import ru.unisuite.contentservlet.model.Content;
 import ru.unisuite.contentservlet.model.HashAndLastModified;
 import ru.unisuite.contentservlet.service.ContentRequest;
 import ru.unisuite.contentservlet.service.ContentService;
-import ru.unisuite.contentservlet.service.ResizeService;
-import ru.unisuite.imageresizer.ImageResizer;
-import ru.unisuite.imageresizer.ImageResizerFactory;
+import ru.unisuite.imageprocessing.ImageParameters;
+import ru.unisuite.imageprocessing.ImageProcessor;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 //@WebServlet({"/*", "/private/*"})
 @WebServlet({ApplicationInitializer.CONTENT_URL_PATTERN, "/get/private/*"})
@@ -31,8 +31,8 @@ public class ContentServlet extends HttpServlet {
 
     private HttpHeaders httpHeaders;
 
-    private ResizeService resizeService;
     private ResizerType defaultResizerType;
+    private Map<ResizerType, ImageProcessor> imageProcessors;
     private byte defaultImageQuality;
 
     private final static String contentTypeHTML = "text/html; charset=UTF-8";
@@ -46,7 +46,7 @@ public class ContentServlet extends HttpServlet {
         this.contentService = applicationConfig.contentService();
         this.httpHeaders = new HttpHeaders(applicationConfig);
 
-        this.resizeService = applicationConfig.resizeService();
+        this.imageProcessors = applicationConfig.getImageProcessors();
         this.defaultResizerType = applicationConfig.getResizerType();
         this.defaultImageQuality = applicationConfig.getDefaultImageQuality();
 
@@ -134,29 +134,23 @@ public class ContentServlet extends HttpServlet {
         Integer width = contentRequest.getWidth();
         Integer height = contentRequest.getHeight();
         if (width != null || height != null || contentRequest.getQuality() != null) {
-            byte quality = contentRequest.getQuality() != null ? contentRequest.getQuality() : defaultImageQuality;
             ResizerType resizerType = contentRequest.getResizerType() != null ? contentRequest.getResizerType() : defaultResizerType;
-            switch (resizerType) {
-                case IMAGEMAGICK:
-                    resizeService.writeResized(contentRequest, content, response.getOutputStream());
-                    break;
-                case THUMBNAILATOR:
-                    ImageResizer thumbnailatorResizer = ImageResizerFactory.getImageResizer();
-                    if (width != null && height == null) {
-                        thumbnailatorResizer.resizeByWidth(content.getDataStream(), width, response.getOutputStream(), (int) quality);
-                        break;
-                    }
-                    if (width == null && height != null) {
-                        thumbnailatorResizer.resizeByHeight(content.getDataStream(), height, response.getOutputStream(), (int) quality);
-                        break;
-                    }
-                    thumbnailatorResizer.resize(content.getDataStream(), width, height, response.getOutputStream(), (int) quality);
-                    break;
-                case DB:
-                default:
-                    IOUtils.copy(content.getDataStream(), response.getOutputStream());
+            if (resizerType != ResizerType.DB) {
+                byte quality = contentRequest.getQuality() != null ? contentRequest.getQuality() : defaultImageQuality;
+
+                ImageProcessor imageProcessor = imageProcessors.get(resizerType);
+                ImageParameters imageParameters = new ImageParameters();
+                imageParameters.setQuality(quality);
+                imageParameters.setSourceFormat(content.getExtension());
+                if (width != null) {
+                    imageParameters.setWidth(width);
+                }
+                if (height != null) {
+                    imageParameters.setHeight(height);
+                }
+
+                imageProcessor.resize(content.getDataStream(), imageParameters, response.getOutputStream());
             }
-            return;
         }
         IOUtils.copy(content.getDataStream(), response.getOutputStream());
     }
