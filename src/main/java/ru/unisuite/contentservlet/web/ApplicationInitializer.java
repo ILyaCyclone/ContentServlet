@@ -5,10 +5,12 @@ import io.prometheus.client.filter.MetricsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.config.ApplicationConfig;
+import ru.unisuite.contentservlet.config.BuildProperties;
 import ru.unisuite.contentservlet.config.ContentServletProperties;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebListener;
+import java.io.IOException;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +30,13 @@ public class ApplicationInitializer implements ServletContextListener {
                 , contentServletProperties.toString().replace(ContentServletProperties.class.getSimpleName(), "")
                 , CONTENT_URL_PATTERN);
 
-        ApplicationConfig applicationConfig = new ApplicationConfig(contentServletProperties);
+        BuildProperties buildProperties = null;
+        try {
+            buildProperties = new BuildProperties();
+        } catch (IOException e) {
+            logger.warn("Could not create buildProperties", e);
+        }
+        ApplicationConfig applicationConfig = new ApplicationConfig(contentServletProperties, buildProperties);
 
         servletContext.setAttribute("applicationConfig", applicationConfig);
 

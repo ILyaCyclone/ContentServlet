@@ -14,6 +14,8 @@ import java.util.Map;
 public class ApplicationConfig {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationConfig.class.getName());
 
+    private final BuildProperties buildProperties;
+
 //    private final DataSource dataSource;
 
     private final ContentServiceImpl contentService;
@@ -30,6 +32,11 @@ public class ApplicationConfig {
 
 
     public ApplicationConfig(ContentServletProperties prop) {
+        this(prop, null);
+    }
+    public ApplicationConfig(ContentServletProperties prop, BuildProperties buildProperties) {
+        this.buildProperties = buildProperties;
+
         DataSource dataSource;
         try {
             if (prop.getDatasourceJndiName() != null) {
@@ -68,6 +75,9 @@ public class ApplicationConfig {
     }
 
 
+    public BuildProperties getBuildProperties() {
+        return buildProperties;
+    }
 
     public ContentService contentService() {
         return contentService;

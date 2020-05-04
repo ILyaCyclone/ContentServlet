@@ -28,7 +28,7 @@ public class ContentRepositoryImpl implements ContentRepository {
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, idWebMetaterm, null, width, height)) {
             return getContentInternal(stmt, () -> "idWebMetaterm=" + idWebMetaterm);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e);
         }
     }
 
@@ -38,7 +38,7 @@ public class ContentRepositoryImpl implements ContentRepository {
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, null, metatermAlias, width, height)) {
             return getContentInternal(stmt, () -> "metatermAlias=" + metatermAlias);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e);
         }
     }
 
@@ -48,7 +48,7 @@ public class ContentRepositoryImpl implements ContentRepository {
              PreparedStatement stmt = prepareContentByIdFeStatement(conn, idFe, idPhotoAlbum, width, height)) {
             return getContentInternal(stmt, () -> "idFe=" + idFe + ", idPhotoAlbum=" + idPhotoAlbum);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e);
         }
     }
 
@@ -58,7 +58,7 @@ public class ContentRepositoryImpl implements ContentRepository {
              PreparedStatement stmt = prepareContentByIdFileVersion(conn, idFileVersion, width, height)) {
             return getContentInternal(stmt, () -> "idFileVersion=" + idFileVersion);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e);
         }
     }
 
