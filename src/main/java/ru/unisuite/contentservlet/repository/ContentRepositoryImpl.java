@@ -1,7 +1,5 @@
 package ru.unisuite.contentservlet.repository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.exception.DataAccessException;
 import ru.unisuite.contentservlet.exception.NotFoundException;
 import ru.unisuite.contentservlet.model.Content;
@@ -11,7 +9,8 @@ import java.sql.*;
 import java.util.function.Supplier;
 
 public class ContentRepositoryImpl implements ContentRepository {
-    private final Logger logger = LoggerFactory.getLogger(ContentRepositoryImpl.class.getName());
+    private static final String COULD_NOT_GET_MESSAGE_FORMAT = "Could not get content by {%s}";
+    private static final String NOT_FOUND_MESSAGE_FORMAT = "Content not found by {%s}";
 
     private final DataSource dataSource;
     private final ContentRowMapper contentRowMapper;
@@ -24,41 +23,45 @@ public class ContentRepositoryImpl implements ContentRepository {
 
     @Override
     public Content getContentByIdWebMetaterm(Long idWebMetaterm, Integer width, Integer height) {
+        Supplier<String> parametersStringSupplier = () -> "idWebMetaterm=" + idWebMetaterm;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, idWebMetaterm, null, width, height)) {
-            return getContentInternal(stmt, () -> "idWebMetaterm=" + idWebMetaterm);
+            return getContentInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
-            throw new DataAccessException(e);
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
     @Override
     public Content getContentByMetatermAlias(String metatermAlias, Integer width, Integer height) {
+        Supplier<String> parametersStringSupplier = () -> "metatermAlias=" + metatermAlias;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, null, metatermAlias, width, height)) {
-            return getContentInternal(stmt, () -> "metatermAlias=" + metatermAlias);
+            return getContentInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
-            throw new DataAccessException(e);
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
     @Override
     public Content getContentByIdFe(Long idFe, Long idPhotoAlbum, Integer width, Integer height) {
+        Supplier<String> parametersStringSupplier = () -> "idFe=" + idFe + ", idPhotoAlbum=" + idPhotoAlbum;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByIdFeStatement(conn, idFe, idPhotoAlbum, width, height)) {
-            return getContentInternal(stmt, () -> "idFe=" + idFe + ", idPhotoAlbum=" + idPhotoAlbum);
+            return getContentInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
-            throw new DataAccessException(e);
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
     @Override
     public Content getContentByIdFileVersion(Long idFileVersion, Integer width, Integer height) {
+        Supplier<String> parametersStringSupplier = () -> "idFileVersion=" + idFileVersion;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByIdFileVersion(conn, idFileVersion, width, height)) {
-            return getContentInternal(stmt, () -> "idFileVersion=" + idFileVersion);
+            return getContentInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
-            throw new DataAccessException(e);
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
@@ -66,12 +69,12 @@ public class ContentRepositoryImpl implements ContentRepository {
     private Content getContentInternal(PreparedStatement stmt, Supplier<String> parametersStringSupplier) {
         try (ResultSet rs = stmt.executeQuery()) {
             if (!rs.isBeforeFirst()) {
-                throw new NotFoundException("Content not found by {" + parametersStringSupplier.get() + '}');
+                throw notFoundException(parametersStringSupplier);
             }
             rs.next();
             return contentRowMapper.mapRow(rs);
         } catch (SQLException e) {
-            throw new DataAccessException("Could not get Content by {" + parametersStringSupplier.get() + '}', e);
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
@@ -115,5 +118,14 @@ public class ContentRepositoryImpl implements ContentRepository {
         stmt.setObject(2, width, Types.INTEGER);
         stmt.setObject(3, height, Types.INTEGER);
         return stmt;
+    }
+
+
+    private DataAccessException couldNotGetDataAccessException(Supplier<String> parametersStringSupplier, SQLException e) {
+        return new DataAccessException(String.format(COULD_NOT_GET_MESSAGE_FORMAT, parametersStringSupplier.get()), e);
+    }
+
+    private NotFoundException notFoundException(Supplier<String> parametersStringSupplier) {
+        return new NotFoundException(String.format(NOT_FOUND_MESSAGE_FORMAT, parametersStringSupplier.get()));
     }
 }
