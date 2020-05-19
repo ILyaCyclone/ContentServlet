@@ -87,10 +87,10 @@ public class ContentRepositoryImpl implements ContentRepository {
                 "from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setLong(1, idWebMetaterm);
+        stmt.setObject(1, idWebMetaterm, Types.BIGINT);
         stmt.setString(2, metatermAlias);
-        setIntPreparedStatementParameter(stmt, 3, width);
-        setIntPreparedStatementParameter(stmt, 4, height);
+        stmt.setObject(3, width, Types.INTEGER);
+        stmt.setObject(4, height, Types.INTEGER);
         return stmt;
     }
 
@@ -99,10 +99,10 @@ public class ContentRepositoryImpl implements ContentRepository {
                 "from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setLong(1, idFe);
-        stmt.setLong(2, idPhotoAlbum);
-        setIntPreparedStatementParameter(stmt, 3, width);
-        setIntPreparedStatementParameter(stmt, 4, height);
+        stmt.setObject(1, idFe, Types.BIGINT);
+        stmt.setObject(2, idPhotoAlbum, Types.BIGINT);
+        stmt.setObject(3, width, Types.INTEGER);
+        stmt.setObject(4, height, Types.INTEGER);
         return stmt;
     }
 
@@ -112,17 +112,8 @@ public class ContentRepositoryImpl implements ContentRepository {
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setLong(1, idFileVersion);
-        setIntPreparedStatementParameter(stmt, 2, width);
-        setIntPreparedStatementParameter(stmt, 3, height);
+        stmt.setObject(2, width, Types.INTEGER);
+        stmt.setObject(3, height, Types.INTEGER);
         return stmt;
-    }
-
-
-    private void setIntPreparedStatementParameter(PreparedStatement stmt, int parameterIndex, Integer value) throws SQLException {
-        if (value != null) {
-            stmt.setInt(parameterIndex, value);
-        } else {
-            stmt.setNull(parameterIndex, Types.INTEGER);
-        }
     }
 }

@@ -12,4 +12,7 @@ public class HashAndLastModifiedRowMapper {
         return new HashAndLastModified(rs.getString("hash"), Instant.ofEpochMilli(rs.getTimestamp("last_modified").getTime()).getEpochSecond());
     }
 
+    HashAndLastModified mapRowLastModifiedSeconds(ResultSet rs) throws SQLException {
+        return new HashAndLastModified(null, rs.getLong("last_modified_seconds"));
+    }
 }

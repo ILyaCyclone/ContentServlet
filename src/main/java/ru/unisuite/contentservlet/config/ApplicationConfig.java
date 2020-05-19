@@ -57,7 +57,8 @@ public class ApplicationConfig {
 
         ContentRepository contentRepository = new ContentRepositoryImpl(dataSource, new ContentRowMapper());
 
-        HashAndLastModifiedRepository hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(dataSource, new HashAndLastModifiedRowMapper());
+        HashAndLastModifiedRepository hashAndLastModifiedRepository = new HashAndLastModifiedRepositoryImpl(dataSource
+                , new HashAndLastModifiedRowMapper());
 
         this.contentService = new ContentServiceImpl(contentRepository, hashAndLastModifiedRepository, this.resizerType);
 

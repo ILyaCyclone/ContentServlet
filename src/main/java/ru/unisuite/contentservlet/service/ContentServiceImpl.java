@@ -66,19 +66,11 @@ public class ContentServiceImpl implements ContentService {
         }
 
         if (contentRequest.getIdFe() != null || contentRequest.getEntryIdInPhotoalbum() != null) {
-            //TODO get from hashAndLastModifiedRepository
-//            return hashAndLastModifiedRepository.getByIdFe(contentRequest.getIdFe(), contentRequest.getEntryIdInPhotoalbum());
-            Content content = contentRepository.getContentByIdFe(contentRequest.getIdFe(), contentRequest.getEntryIdInPhotoalbum()
-                    , contentRequest.getWidth(), contentRequest.getHeight());
-            return new HashAndLastModified(content.getHash(), content.getLastModified());
+            return hashAndLastModifiedRepository.getByIdFe(contentRequest.getIdFe(), contentRequest.getEntryIdInPhotoalbum());
         }
 
         if (contentRequest.getFileVersionId() != null) {
-            //TODO get from hashAndLastModifiedRepository
-//            return hashAndLastModifiedRepository.getByIdFileVersion(contentRequest.getFileVersionId());
-            Content content = contentRepository.getContentByIdFileVersion(contentRequest.getFileVersionId()
-                    , contentRequest.getWidth(), contentRequest.getHeight());
-            return new HashAndLastModified(content.getHash(), content.getLastModified());
+            return hashAndLastModifiedRepository.getByIdFileVersion(contentRequest.getFileVersionId());
         }
 
         throw new IllegalArgumentException("ContentRequest does not determine content " + contentRequest);
