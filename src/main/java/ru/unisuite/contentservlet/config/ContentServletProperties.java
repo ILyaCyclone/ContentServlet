@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class ContentServletProperties {
     private static final Logger logger = LoggerFactory.getLogger(ContentServletProperties.class);
@@ -15,6 +16,8 @@ public class ContentServletProperties {
     private static final String PREFIX = "contentservlet.";
 
     private final String applicationName;
+    private final String contentUrlPattern;
+    private final String contentSecureUrlPattern;
 
     private final String datasourceJndiName;
     private final String datasourceUrl;
@@ -40,16 +43,19 @@ public class ContentServletProperties {
              InputStream defaultInput = this.getClass().getClassLoader().getResourceAsStream("default.properties")) {
             prop.load(input);
             defaultProp.load(defaultInput);
-        } catch (IOException e) {
-            String errorMessage = "Unable to load " + CONFIG_FILE_NAME;
+        } catch (Exception e) {
+            String errorMessage = "Unable to load '" + configFilePath + '\'';
             logger.error(errorMessage, e);
             throw new RuntimeException(errorMessage, e);
         }
 
-        this.allProperties = prop.entrySet().stream()
+        this.allProperties = defaultProp.entrySet().stream()
                 .collect(HashMap::new, (map, entry) -> map.put((String) entry.getKey(), (String) entry.getValue()), HashMap::putAll);
+        prop.forEach((key, value) -> this.allProperties.put((String) key, (String) value));
 
         this.applicationName = getPropertyOrDefault(prop, defaultProp, PREFIX + "application-name");
+        this.contentUrlPattern = getPropertyOrDefault(prop, defaultProp, PREFIX + "content-url-pattern");
+        this.contentSecureUrlPattern = getPropertyOrDefault(prop, defaultProp, PREFIX + "content-secure-url-pattern");
 
         this.datasourceJndiName = prop.getProperty(PREFIX + "datasource.jndi-name");
         this.datasourceUrl = prop.getProperty(PREFIX + "datasource.url");
@@ -72,6 +78,14 @@ public class ContentServletProperties {
 
     public String getApplicationName() {
         return applicationName;
+    }
+
+    public String getContentUrlPattern() {
+        return contentUrlPattern;
+    }
+
+    public String getContentSecureUrlPattern() {
+        return contentSecureUrlPattern;
     }
 
     public String getDatasourceJndiName() {
@@ -106,22 +120,20 @@ public class ContentServletProperties {
         return enableMetrics;
     }
 
-    public Map<String, String> getAllProperties() {
+    public Map<String, String> values() {
         return allProperties;
     }
 
     @Override
     public String toString() {
-        return "ContentServletProperties{" +
-                "applicationName='" + applicationName + '\'' +
-                (datasourceJndiName != null ? ", datasourceJndiName='" + datasourceJndiName + '\'' : "") +
-                (datasourceUrl != null ? ", datasourceUrl='" + datasourceUrl + '\'' : "") +
-                (datasourceUsername != null ? ", datasourceUsername='" + datasourceUsername + '\'' : "") +
-                (datasourcePassword != null ? ", datasourcePassword='***'" : "") +
-                ", cacheControl='" + cacheControl + '\'' +
-                ", resizerType='" + resizerType + '\'' +
-                ", imageQuality='" + imageQuality + '\'' +
-                ", enableMetrics=" + enableMetrics +
-                '}';
+        return "ContentServletProperties{"
+                + values().entrySet().stream()
+                    .map(e -> e.getKey() + "='" + (isSecret(e) ? "***" : e.getValue())+'\'')
+                    .collect(Collectors.joining(", "))
+                + '}';
+    }
+
+    private boolean isSecret(Map.Entry<String, String> e) {
+        return e.getKey().contains("password");
     }
 }

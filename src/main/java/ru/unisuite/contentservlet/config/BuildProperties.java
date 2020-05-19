@@ -19,6 +19,7 @@ public class BuildProperties {
     private final String commitId;
     private final String commitDate;
     private final String shortMessage;
+    private final String dirty;
 
     public BuildProperties() throws IOException {
         this(GIT_PROPERTIES_FILENAME);
@@ -35,6 +36,7 @@ public class BuildProperties {
         this.commitId = prop.getProperty(GIT_PREFIX + "commit.id");
         this.commitDate = prop.getProperty(GIT_PREFIX + "commit.time");
         this.shortMessage = prop.getProperty(GIT_PREFIX + "commit.message.short");
+        this.dirty = prop.getProperty(GIT_PREFIX + "dirty");
     }
 
     public String getBranch() {
@@ -55,6 +57,10 @@ public class BuildProperties {
 
     public String getShortMessage() {
         return shortMessage;
+    }
+
+    public String getDirty() {
+        return dirty;
     }
 
     // example

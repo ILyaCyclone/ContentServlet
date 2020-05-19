@@ -4,15 +4,17 @@ import ru.unisuite.imageprocessing.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 class ImageProcessorsManager {
     static Map<ResizerType, ImageProcessor> implementations(ContentServletProperties prop) {
         Map<ResizerType, ImageProcessor> map = new HashMap<>();
-        Map<String, String> allProperties = prop.getAllProperties();
+        Map<String, String> properties = prop.values();
 
-        map.put(ResizerType.THUMBNAILATOR, thumbnailatorImageProcessor(allProperties));
-        map.put(ResizerType.IMAGEMAGICK, imagemagickImageProcessor(allProperties));
-        map.put(ResizerType.IMAGINARY, imaginaryImageProcessor(allProperties));
+        map.put(ResizerType.THUMBNAILATOR, thumbnailatorImageProcessor(properties));
+
+        imagemagickImageProcessor(properties).map(imagemagick -> map.put(ResizerType.IMAGEMAGICK, imagemagick));
+        imaginaryImageProcessor(properties).map(imaginary -> map.put(ResizerType.IMAGINARY, imaginary));
 
         return map;
     }
@@ -25,15 +27,23 @@ class ImageProcessorsManager {
         return ImageProcessorFactory.getInstance(Type.THUMBNAILATOR, parameters);
     }
 
-    private static ImageProcessor imagemagickImageProcessor(Map<String, String> properties) {
+    private static Optional<ImageProcessor> imagemagickImageProcessor(Map<String, String> properties) {
+        String imagemagickPath = properties.get("imageprocessor.im4java.toolpath");
+        if (imagemagickPath == null) {
+            return Optional.empty();
+        }
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(Im4javaParameters.IMAGEMAGICK_PATH, properties.get("imageprocessor.im4java.toolpath"));
-        return ImageProcessorFactory.getInstance(Type.IM4JAVA, parameters);
+        parameters.put(Im4javaParameters.IMAGEMAGICK_PATH, imagemagickPath);
+        return Optional.of(ImageProcessorFactory.getInstance(Type.IM4JAVA, parameters));
     }
 
-    private static ImageProcessor imaginaryImageProcessor(Map<String, String> properties) {
+    private static Optional<ImageProcessor> imaginaryImageProcessor(Map<String, String> properties) {
+        String imaginaryBaseUrl = properties.get("imageprocessor.imaginary.base-url");
+        if (imaginaryBaseUrl == null) {
+            return Optional.empty();
+        }
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(ImaginaryParameters.BASE_URL, properties.get("imageprocessor.imaginary.base-url"));
-        return ImageProcessorFactory.getInstance(Type.IMAGINARY, parameters);
+        parameters.put(ImaginaryParameters.BASE_URL, imaginaryBaseUrl);
+        return Optional.of(ImageProcessorFactory.getInstance(Type.IMAGINARY, parameters));
     }
 }

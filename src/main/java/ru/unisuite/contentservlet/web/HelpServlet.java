@@ -42,7 +42,8 @@ public class HelpServlet extends HttpServlet {
                     + "\nbranch: "         + buildProperties.getBranch()
                     + "\ncommit date: "    + buildProperties.getCommitDate()
                     + "\ncommit id: "      + buildProperties.getCommitId()
-                    + "\ncommit message: " + buildProperties.getShortMessage();
+                    + "\ncommit message: " + buildProperties.getShortMessage()
+                    + "\ndirty: "          + buildProperties.getDirty();
             //@formatter:on
             out.write(buildOutput.getBytes(StandardCharsets.UTF_8));
         }

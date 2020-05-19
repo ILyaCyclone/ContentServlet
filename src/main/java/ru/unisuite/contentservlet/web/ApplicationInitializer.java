@@ -19,16 +19,18 @@ import java.util.Map;
 public class ApplicationInitializer implements ServletContextListener {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationInitializer.class);
 
-    public static final String CONTENT_URL_PATTERN = "/get/*";
-
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext servletContext = sce.getServletContext();
 
-        ContentServletProperties contentServletProperties = new ContentServletProperties();
-        logger.debug("Initializing content-servlet with properties: {}, listening for content requests on url pattern '{}'..."
-                , contentServletProperties.toString().replace(ContentServletProperties.class.getSimpleName(), "")
-                , CONTENT_URL_PATTERN);
+        String propertyFileUri = System.getProperty("contentservlet.config.location"
+                , System.getenv("CONTENTSERVLET_CONFIG_LOCATION"));
+        ContentServletProperties contentServletProperties = propertyFileUri == null
+                ? new ContentServletProperties()
+                : new ContentServletProperties(propertyFileUri);
+
+        logger.info("Initializing content-servlet with properties: {}"
+                , contentServletProperties.toString().replace(ContentServletProperties.class.getSimpleName(), ""));
 
         BuildProperties buildProperties = null;
         try {
@@ -37,19 +39,33 @@ public class ApplicationInitializer implements ServletContextListener {
             logger.warn("Could not create buildProperties", e);
         }
         ApplicationConfig applicationConfig = new ApplicationConfig(contentServletProperties, buildProperties);
-
         servletContext.setAttribute("applicationConfig", applicationConfig);
 
+
+        registerContentServlet(servletContext, applicationConfig, contentServletProperties);
+
         if (contentServletProperties.isEnableMetrics()) {
-            registerPrometheusFilter(servletContext);
-            registerCustomMetricsFilter(servletContext);
+            registerPrometheusFilter(servletContext, contentServletProperties);
+            registerCustomMetricsFilter(servletContext, contentServletProperties);
             registerPrometheusServlet(servletContext);
         }
+
+        logger.info("Listening for content requests on url pattern '{}'...", contentServletProperties.getContentUrlPattern());
+    }
+
+    private void registerContentServlet(ServletContext servletContext, ApplicationConfig applicationConfig
+            , ContentServletProperties contentServletProperties) {
+        ContentServlet contentServlet = new ContentServlet(applicationConfig);
+        ServletRegistration.Dynamic servletRegistration = servletContext.addServlet("contentServlet", contentServlet);
+        servletRegistration.setLoadOnStartup(1);
+
+        servletRegistration.addMapping(contentServletProperties.getContentUrlPattern()
+                , contentServletProperties.getContentSecureUrlPattern());
     }
 
 
 
-    private void registerPrometheusFilter(ServletContext servletContext) {
+    private void registerPrometheusFilter(ServletContext servletContext, ContentServletProperties contentServletProperties) {
         Map<String, String> initParameters = new HashMap<>();
         initParameters.put("metric-name", "contentservlet_metrics_filter");
         initParameters.put("help", "The time taken fulfilling servlet requests");
@@ -58,12 +74,14 @@ public class ApplicationInitializer implements ServletContextListener {
 
         FilterRegistration.Dynamic prometheusFilter = servletContext.addFilter("prometheusFilter", MetricsFilter.class);
         prometheusFilter.setInitParameters(initParameters);
-        prometheusFilter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, CONTENT_URL_PATTERN);
+        prometheusFilter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true
+                , contentServletProperties.getContentUrlPattern(), contentServletProperties.getContentSecureUrlPattern());
     }
 
-    private void registerCustomMetricsFilter(ServletContext servletContext) {
+    private void registerCustomMetricsFilter(ServletContext servletContext, ContentServletProperties contentServletProperties) {
         FilterRegistration.Dynamic customMetricsFilter = servletContext.addFilter("customMetricsFilter", CustomMetricsFilter.class);
-        customMetricsFilter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, CONTENT_URL_PATTERN);
+        customMetricsFilter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true
+                , contentServletProperties.getContentUrlPattern(), contentServletProperties.getContentSecureUrlPattern());
     }
 
     private void registerPrometheusServlet(ServletContext servletContext) {
@@ -74,5 +92,6 @@ public class ApplicationInitializer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        // no action needed
     }
 }

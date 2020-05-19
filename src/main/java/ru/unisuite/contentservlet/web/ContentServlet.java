@@ -22,18 +22,19 @@ import java.io.IOException;
 import java.util.Map;
 
 //@WebServlet({"/*", "/private/*"})
-@WebServlet({ApplicationInitializer.CONTENT_URL_PATTERN, "/get/private/*"})
+//@WebServlet({ApplicationInitializer.CONTENT_URL_PATTERN, "/get/private/*"})
 public class ContentServlet extends HttpServlet {
     private final Logger logger = LoggerFactory.getLogger(ContentServlet.class.getName());
+    private static final String contentTypeHTML = "text/html; charset=UTF-8";
 
-    private ContentService contentService;
-    private RequestMapper requestMapper;
+    private final  ContentService contentService;
+    private final RequestMapper requestMapper;
 
-    private HttpHeaders httpHeaders;
+    private final HttpHeaders httpHeaders;
 
-    private ResizerType defaultResizerType;
-    private Map<ResizerType, ImageProcessor> imageProcessors;
-    private byte defaultImageQuality;
+    private final ResizerType defaultResizerType;
+    private final Map<ResizerType, ImageProcessor> imageProcessors;
+    private final byte defaultImageQuality;
 
     private final static String contentTypeHTML = "text/html; charset=UTF-8";
 
@@ -43,6 +44,7 @@ public class ContentServlet extends HttpServlet {
     public void init() {
         ApplicationConfig applicationConfig = (ApplicationConfig) getServletContext().getAttribute("applicationConfig");
 
+    ContentServlet(ApplicationConfig applicationConfig) {
         this.contentService = applicationConfig.contentService();
         this.httpHeaders = new HttpHeaders(applicationConfig);
 
