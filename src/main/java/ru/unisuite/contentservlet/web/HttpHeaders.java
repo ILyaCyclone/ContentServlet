@@ -13,8 +13,8 @@ class HttpHeaders {
 
     private final String httpCacheControlDefaultValue;
 
-    private final static String contentDispositionHeaderName = "Content-Disposition";
-    private final static String cacheControlHeaderName = "Cache-Control";
+    private static final String contentDispositionHeaderName = "Content-Disposition";
+    private static final String cacheControlHeaderName = "Cache-Control";
 
     HttpHeaders(ApplicationConfig applicationConfig) {
         this.httpCacheControlDefaultValue = applicationConfig.getCacheControl();

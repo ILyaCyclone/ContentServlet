@@ -14,7 +14,7 @@ public class ContentRowMapper {
         content.setSize(blob.length());
         content.setLastModified(rs.getLong("cntsecond_last_modified"));
         //TODO get real content hash
-        content.setHash(content.getLastModified() != null ? content.getLastModified().toString() : null);
+        content.setHash(null);
         content.setMimeType(rs.getString("mime"));
         content.setFilename(rs.getString("filename"));
         content.setExtension(rs.getString("extension"));

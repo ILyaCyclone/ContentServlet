@@ -44,7 +44,7 @@ public class RequestMapper {
             if (requestedQuality >= 0 && requestedQuality <= 100) {
                 contentRequest.setQuality(requestedQuality.byteValue());
             } else {
-                logger.warn("Incorrect quality in request " + params + ". Default quality will be used.");
+                logger.warn("Incorrect quality in request {}. Default quality will be used.", params);
             }
         }
 

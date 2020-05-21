@@ -25,6 +25,7 @@ public class HelpServlet extends HttpServlet {
         this.buildProperties = applicationConfig.getBuildProperties();
     }
 
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         respondWithHelp(response);
     }

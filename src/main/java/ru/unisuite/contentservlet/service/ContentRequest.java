@@ -1,7 +1,5 @@
 package ru.unisuite.contentservlet.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.config.ResizerType;
 
 import java.util.LinkedHashMap;
@@ -9,8 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ContentRequest {
-    private final Logger logger = LoggerFactory.getLogger(ContentRequest.class.getName());
-
     private Long idWebMetaterm;
     private String metatermAlias;
     private Long idFe;

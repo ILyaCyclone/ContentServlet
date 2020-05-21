@@ -1,16 +1,10 @@
 package ru.unisuite.contentservlet.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 public class BuildProperties {
-    private static final Logger logger = LoggerFactory.getLogger(BuildProperties.class);
     private static final String GIT_PROPERTIES_FILENAME = "git.properties";
     private static final String GIT_PREFIX = "git.";
 

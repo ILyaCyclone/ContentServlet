@@ -13,6 +13,8 @@ import java.sql.SQLException;
 class DataSourceManager {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceManager.class);
 
+    private DataSourceManager(){}
+
     static DataSource lookup(String jndiName) {
         try {
             return lookupDataSourceInternal(jndiName, false);
