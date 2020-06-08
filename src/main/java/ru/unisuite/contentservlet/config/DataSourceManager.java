@@ -1,6 +1,7 @@
 package ru.unisuite.contentservlet.config;
 
-import oracle.jdbc.pool.OracleDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,14 +9,32 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 class DataSourceManager {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceManager.class);
 
-    private DataSourceManager(){}
+    private DataSourceManager() {
+    }
 
-    static DataSource lookup(String jndiName) {
+
+    static DataSource getDataSource(ContentServletProperties prop) {
+        try {
+            if (prop.getDatasourceJndiName() != null) {
+                return lookup(prop.getDatasourceJndiName());
+            } else {
+                String datasourceUrl = prop.getDatasourceUrl();
+                String datasourceUsername = prop.getDatasourceUsername();
+                String datasourcePassword = prop.getDatasourcePassword();
+                return createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
+            }
+        } catch (Exception e) {
+            logger.error("Unable to configure jdbc dataSource", e);
+            throw new RuntimeException("Unable to configure jdbc dataSource", e);
+        }
+    }
+
+
+    private static DataSource lookup(String jndiName) {
         try {
             return lookupDataSourceInternal(jndiName, false);
         } catch (NamingException e1) {
@@ -47,17 +66,24 @@ class DataSourceManager {
         }
     }
 
-    static DataSource createDataSource(String url, String username, String password) {
-        try {
-//            Class.forName("oracle.jdbc.OracleDriver"); // not needed in JDBC 4
+    private static DataSource createDataSource(String propertyFileName) {
+        return createHikariConnectionPool(propertyFileName);
+    }
 
-            OracleDataSource dataSource = new OracleDataSource();
-            dataSource.setURL(url);
-            dataSource.setUser(username);
-            dataSource.setPassword(password);
-            return dataSource;
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to create datasource", e);
-        }
+    private static DataSource createDataSource(String url, String username, String password) {
+        return createHikariConnectionPool(url, username, password);
+    }
+
+    private static DataSource createHikariConnectionPool(String url, String username, String password) {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        return new HikariDataSource(config);
+    }
+
+    private static DataSource createHikariConnectionPool(String propertyFileName) {
+        HikariConfig config = new HikariConfig(propertyFileName);
+        return new HikariDataSource(config);
     }
 }

@@ -33,20 +33,7 @@ public class ApplicationConfig {
     public ApplicationConfig(ContentServletProperties prop, BuildProperties buildProperties, PropertyResolver propertyResolver) {
         this.buildProperties = buildProperties;
 
-        DataSource dataSource;
-        try {
-            if (prop.getDatasourceJndiName() != null) {
-                dataSource = DataSourceManager.lookup(prop.getDatasourceJndiName());
-            } else {
-                String datasourceUrl = prop.getDatasourceUrl();
-                String datasourceUsername = prop.getDatasourceUsername();
-                String datasourcePassword = prop.getDatasourcePassword();
-                dataSource = DataSourceManager.createDataSource(datasourceUrl, datasourceUsername, datasourcePassword);
-            }
-        } catch (Exception e) {
-            logger.error("Unable to configure jdbc dataSource", e);
-            throw new RuntimeException("Unable to configure jdbc dataSource", e);
-        }
+        DataSource dataSource = DataSourceManager.getDataSource(prop);
 
 
         this.resizerType = ResizerType.forValue(prop.getResizerType());
