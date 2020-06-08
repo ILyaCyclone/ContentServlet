@@ -26,7 +26,7 @@ public class ContentRepositoryImpl implements ContentRepository {
         Supplier<String> parametersStringSupplier = () -> "idWebMetaterm=" + idWebMetaterm;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, idWebMetaterm, null, width, height)) {
-            return getContentInternal(stmt, parametersStringSupplier);
+            return getContentInternal(stmt, parametersStringSupplier, true);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -37,7 +37,7 @@ public class ContentRepositoryImpl implements ContentRepository {
         Supplier<String> parametersStringSupplier = () -> "metatermAlias=" + metatermAlias;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, null, metatermAlias, width, height)) {
-            return getContentInternal(stmt, parametersStringSupplier);
+            return getContentInternal(stmt, parametersStringSupplier, true);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -48,7 +48,7 @@ public class ContentRepositoryImpl implements ContentRepository {
         Supplier<String> parametersStringSupplier = () -> "idFe=" + idFe + ", idPhotoAlbum=" + idPhotoAlbum;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByIdFeStatement(conn, idFe, idPhotoAlbum, width, height)) {
-            return getContentInternal(stmt, parametersStringSupplier);
+            return getContentInternal(stmt, parametersStringSupplier, false);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -59,34 +59,28 @@ public class ContentRepositoryImpl implements ContentRepository {
         Supplier<String> parametersStringSupplier = () -> "idFileVersion=" + idFileVersion;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByIdFileVersion(conn, idFileVersion, width, height)) {
-            return getContentInternal(stmt, parametersStringSupplier);
+            return getContentInternal(stmt, parametersStringSupplier, false);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
 
-    private Content getContentInternal(PreparedStatement stmt, Supplier<String> parametersStringSupplier) {
+    private Content getContentInternal(PreparedStatement stmt, Supplier<String> parametersStringSupplier, boolean mapHash) {
         try (ResultSet rs = stmt.executeQuery()) {
             if (!rs.isBeforeFirst()) {
                 throw notFoundException(parametersStringSupplier);
             }
             rs.next();
-            return contentRowMapper.mapRow(rs);
+            return mapHash ? contentRowMapper.mapRow(rs) : contentRowMapper.mapRowWithoutHash(rs);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
     }
 
 
-    @Override
-    public int getDefaultImageQuality() {
-        return 80; // because why not??
-    }
-
-
     private PreparedStatement prepareContentByMetatermStatement(Connection conn, Long idWebMetaterm, String metatermAlias, Integer width, Integer height) throws SQLException {
-        String query = "select data_binary, bsize, cntsecond_last_modified, filename, mime, extension " +
+        String query = "select data_binary, bsize, hash, cntsecond_last_modified, filename, mime, extension " +
                 "from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);

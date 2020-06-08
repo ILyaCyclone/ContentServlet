@@ -12,5 +12,4 @@ public interface ContentRepository {
 
     Content getContentByIdFileVersion(Long idFileVersion, Integer width, Integer height);
 
-    int getDefaultImageQuality();
 }

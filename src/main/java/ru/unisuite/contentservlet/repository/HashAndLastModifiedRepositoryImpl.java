@@ -24,8 +24,8 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
     public HashAndLastModified getByIdWebMetaterm(Long idWebMetaterm) {
         Supplier<String> parametersStringSupplier = () -> "idWebMetaterm=" + idWebMetaterm;
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = prepareByIdWebMetatermStatement(conn, idWebMetaterm)) {
-            return getInternal(stmt, parametersStringSupplier);
+             PreparedStatement stmt = prepareContentByMetatermStatement(conn, idWebMetaterm, null)) {
+            return getInternalWithHash(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -35,8 +35,8 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
     public HashAndLastModified getByMetatermAlias(String metatermAlias) {
         Supplier<String> parametersStringSupplier = () -> "metatermAlias=" + metatermAlias;
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = prepareByMetatermAliasStatement(conn, metatermAlias)) {
-            return getInternal(stmt, parametersStringSupplier);
+             PreparedStatement stmt = prepareContentByMetatermStatement(conn, null, metatermAlias)) {
+            return getInternalWithHash(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -47,7 +47,7 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         Supplier<String> parametersStringSupplier = () -> "idFe=" + idFe + ", entryIdInPhotoalbum=" + entryIdInPhotoalbum;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareByIdFeStatement(conn, idFe, entryIdInPhotoalbum)) {
-            return getInternalLastModifiedSeconds(stmt, parametersStringSupplier);
+            return getInternalWithoutHash(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -58,7 +58,7 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         Supplier<String> parametersStringSupplier = () -> "fileVersionId=" + fileVersionId;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareByIdFileVersion(conn, fileVersionId)) {
-            return getInternalLastModifiedSeconds(stmt, parametersStringSupplier);
+            return getInternalWithoutHash(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -66,42 +66,34 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
 
 
 
-    private HashAndLastModified getInternal(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
+    private HashAndLastModified getInternalWithHash(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
         try (ResultSet rs = stmt.executeQuery()) {
             if (!rs.isBeforeFirst()) {
                 throw notFoundException(parametersStringSupplier);
             }
             rs.next();
-            return rowMapper.mapRow(rs);
+            return rowMapper.mapRowWithHash(rs);
         }
     }
 
-    private HashAndLastModified getInternalLastModifiedSeconds(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
+    private HashAndLastModified getInternalWithoutHash(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
         try (ResultSet rs = stmt.executeQuery()) {
             if (!rs.isBeforeFirst()) {
                 throw notFoundException(parametersStringSupplier);
             }
             rs.next();
-            return rowMapper.mapRowLastModifiedSeconds(rs);
+            return rowMapper.mapRowWithoutHash(rs);
         }
     }
 
 
-    private PreparedStatement prepareByIdWebMetatermStatement(Connection conn, Long idWebMetaterm) throws SQLException {
-        String query = "select lbd.hash_sh1 as hash, lbd.d_last as last_modified from large_binary_data_wp lbd, content_version_wp cv " +
-                "where lbd.id_content_version = cv.id_content_version and cv.id_web_metaterm = ?";
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setLong(1, idWebMetaterm);
-        return stmt;
-    }
+    private PreparedStatement prepareContentByMetatermStatement(Connection conn, Long idWebMetaterm, String metatermAlias) throws SQLException {
+        String query = "select hash, cntsecond_last_modified as last_modified_seconds " +
+                "from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?) as wpt_t_data_img_wp))";
 
-    private PreparedStatement prepareByMetatermAliasStatement(Connection conn, String metatermAlias) throws SQLException {
-        String query = "select lbd.hash_sh1 as hash, lbd.d_last as last_modified from web_metaterm_wp wm, content_version_wp cv, large_binary_data_wp lbd " +
-                "where cv.id_web_metaterm = wm.id_web_metaterm " +
-                "and lbd.id_content_version = cv.id_content_version " +
-                "and wm.alias =  = ?";
         PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setString(1, metatermAlias);
+        stmt.setObject(1, idWebMetaterm, Types.BIGINT);
+        stmt.setString(2, metatermAlias);
         return stmt;
     }
 

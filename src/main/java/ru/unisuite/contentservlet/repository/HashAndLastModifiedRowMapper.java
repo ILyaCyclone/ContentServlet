@@ -4,15 +4,14 @@ import ru.unisuite.contentservlet.model.HashAndLastModified;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Instant;
 
 public class HashAndLastModifiedRowMapper {
 
-    HashAndLastModified mapRow(ResultSet rs) throws SQLException {
-        return new HashAndLastModified(rs.getString("hash"), Instant.ofEpochMilli(rs.getTimestamp("last_modified").getTime()).getEpochSecond());
+    HashAndLastModified mapRowWithHash(ResultSet rs) throws SQLException {
+        return new HashAndLastModified(rs.getString("hash"), rs.getLong("last_modified_seconds"));
     }
 
-    HashAndLastModified mapRowLastModifiedSeconds(ResultSet rs) throws SQLException {
+    HashAndLastModified mapRowWithoutHash(ResultSet rs) throws SQLException {
         return new HashAndLastModified(null, rs.getLong("last_modified_seconds"));
     }
 }
