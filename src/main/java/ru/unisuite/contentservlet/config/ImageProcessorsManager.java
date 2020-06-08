@@ -2,33 +2,34 @@ package ru.unisuite.contentservlet.config;
 
 import ru.unisuite.imageprocessing.*;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 class ImageProcessorsManager {
-    static Map<ResizerType, ImageProcessor> implementations(ContentServletProperties prop) {
-        Map<ResizerType, ImageProcessor> map = new HashMap<>();
-        Map<String, String> properties = prop.values();
+    private ImageProcessorsManager(){}
 
-        map.put(ResizerType.THUMBNAILATOR, thumbnailatorImageProcessor(properties));
+    static Map<ResizerType, ImageProcessor> implementations(PropertyResolver propertyResolver) {
+        Map<ResizerType, ImageProcessor> implementations = new EnumMap<>(ResizerType.class);
 
-        imagemagickImageProcessor(properties).map(imagemagick -> map.put(ResizerType.IMAGEMAGICK, imagemagick));
-        imaginaryImageProcessor(properties).map(imaginary -> map.put(ResizerType.IMAGINARY, imaginary));
+        implementations.put(ResizerType.THUMBNAILATOR, thumbnailatorImageProcessor(propertyResolver));
 
-        return map;
+        imagemagickImageProcessor(propertyResolver).ifPresent(imagemagick -> implementations.put(ResizerType.IMAGEMAGICK, imagemagick));
+        imaginaryImageProcessor(propertyResolver).ifPresent(imaginary -> implementations.put(ResizerType.IMAGINARY, imaginary));
+        return implementations;
     }
 
 
-    private static ImageProcessor thumbnailatorImageProcessor(Map<String, String> properties) {
+    private static ImageProcessor thumbnailatorImageProcessor(PropertyResolver propertyResolver) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(ThumbnailatorParameters.ANTIALIASING, properties.get("imageprocessor.thumbnailator.antialiasing"));
-        parameters.put(ThumbnailatorParameters.RENDERING, properties.get("imageprocessor.thumbnailator.rendering"));
+        parameters.put(ThumbnailatorParameters.ANTIALIASING, propertyResolver.resolve("imageprocessor.thumbnailator.antialiasing"));
+        parameters.put(ThumbnailatorParameters.RENDERING, propertyResolver.resolve("imageprocessor.thumbnailator.rendering"));
         return ImageProcessorFactory.getInstance(Type.THUMBNAILATOR, parameters);
     }
 
-    private static Optional<ImageProcessor> imagemagickImageProcessor(Map<String, String> properties) {
-        String imagemagickPath = properties.get("imageprocessor.im4java.toolpath");
+    private static Optional<ImageProcessor> imagemagickImageProcessor(PropertyResolver propertyResolver) {
+        String imagemagickPath = propertyResolver.resolve("imageprocessor.im4java.toolpath");
         if (imagemagickPath == null) {
             return Optional.empty();
         }
@@ -37,8 +38,8 @@ class ImageProcessorsManager {
         return Optional.of(ImageProcessorFactory.getInstance(Type.IM4JAVA, parameters));
     }
 
-    private static Optional<ImageProcessor> imaginaryImageProcessor(Map<String, String> properties) {
-        String imaginaryBaseUrl = properties.get("imageprocessor.imaginary.base-url");
+    private static Optional<ImageProcessor> imaginaryImageProcessor(PropertyResolver propertyResolver) {
+        String imaginaryBaseUrl = propertyResolver.resolve("imageprocessor.imaginary.base-url");
         if (imaginaryBaseUrl == null) {
             return Optional.empty();
         }

@@ -1,8 +1,8 @@
 Content Servlet
 
 One of the following parameters is required:
-id_wm 		id of web_metaterm.
-alias_wm	alias of web_metaterm.
+id_wm 		id of content version web_metaterm.
+alias_wm	alias of content version web_metaterm.
 id_vf		id of file's version.
 id_fe		id of person for their photo request.
 id_fpa		id of photo album.
@@ -22,4 +22,4 @@ cd                  Content-Disposition. Valid values: 1 - download, 2 - inline.
 URL part between /content/ and query parameters (? sign) is considered as filename.
 
 Example:
-/content/banner.jpg?id_wm=798108&SWidth=1200
+/content/banner.jpg?id_wm=798108&w=1200

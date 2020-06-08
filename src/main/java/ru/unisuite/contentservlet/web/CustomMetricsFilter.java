@@ -60,19 +60,18 @@ public class CustomMetricsFilter implements Filter {
 
     private Counter counterForResponseStatus(int status) {
         switch (status) {
-            //@formatter:off
             case 200: return responseOkCounter;
             case 304: return responseNotModifiedCounter;
             case 401: return responseBadRequestCounter;
             case 404: return responseNotFoundCounter;
             case 500: return responseInternalServerErrorCounter;
             default: return  meterRegistry.counter(PREFIX + "http_response", "status", Integer.toString(status));
-            //@formatter:on
         }
     }
 
 
     @Override
     public void destroy() {
+        // no action needed here
     }
 }

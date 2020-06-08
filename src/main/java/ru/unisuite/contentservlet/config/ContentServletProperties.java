@@ -1,17 +1,6 @@
 package ru.unisuite.contentservlet.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.stream.Collectors;
-
 public class ContentServletProperties {
-    private static final Logger logger = LoggerFactory.getLogger(ContentServletProperties.class);
-    private static final String CONFIG_FILE_NAME = "application.properties";
     private static final String PREFIX = "contentservlet.";
 
     private final String applicationName;
@@ -29,48 +18,22 @@ public class ContentServletProperties {
 
     private final boolean enableMetrics;
 
-    private final Map<String, String> allProperties;
+    public ContentServletProperties(PropertyResolver propertyResolver) {
+        this.applicationName = propertyResolver.resolve(PREFIX + "application-name");
+        this.contentUrlPattern = propertyResolver.resolve(PREFIX + "content-url-pattern");
+        this.contentSecureUrlPattern = propertyResolver.resolve(PREFIX + "content-secure-url-pattern");
 
-    public ContentServletProperties() {
-        this(CONFIG_FILE_NAME);
-    }
+        this.datasourceJndiName = propertyResolver.resolve(PREFIX + "datasource.jndi-name");
+        this.datasourceUrl = propertyResolver.resolve(PREFIX + "datasource.url");
+        this.datasourceUsername = propertyResolver.resolve(PREFIX + "datasource.username");
+        this.datasourcePassword = propertyResolver.resolve(PREFIX + "datasource.password");
 
-    public ContentServletProperties(String configFilePath) {
-        Properties prop = new Properties();
-        Properties defaultProp = new Properties();
-        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(configFilePath);
-             InputStream defaultInput = this.getClass().getClassLoader().getResourceAsStream("default.properties")) {
-            prop.load(input);
-            defaultProp.load(defaultInput);
-        } catch (Exception e) {
-            String errorMessage = "Unable to load '" + configFilePath + '\'';
-            logger.error(errorMessage, e);
-            throw new RuntimeException(errorMessage, e);
-        }
+        this.cacheControl = propertyResolver.resolve(PREFIX + "cachecontrol");
 
-        this.allProperties = defaultProp.entrySet().stream()
-                .collect(HashMap::new, (map, entry) -> map.put((String) entry.getKey(), (String) entry.getValue()), HashMap::putAll);
-        prop.forEach((key, value) -> this.allProperties.put((String) key, (String) value));
+        this.resizerType = propertyResolver.resolve(PREFIX + "resizer-type");
+        this.imageQuality = propertyResolver.resolve(PREFIX + "image-quality");
 
-        this.applicationName = getPropertyOrDefault(prop, defaultProp, PREFIX + "application-name");
-        this.contentUrlPattern = getPropertyOrDefault(prop, defaultProp, PREFIX + "content-url-pattern");
-        this.contentSecureUrlPattern = getPropertyOrDefault(prop, defaultProp, PREFIX + "content-secure-url-pattern");
-
-        this.datasourceJndiName = prop.getProperty(PREFIX + "datasource.jndi-name");
-        this.datasourceUrl = prop.getProperty(PREFIX + "datasource.url");
-        this.datasourceUsername = prop.getProperty(PREFIX + "datasource.username");
-        this.datasourcePassword = prop.getProperty(PREFIX + "datasource.password");
-
-        this.cacheControl = getPropertyOrDefault(prop, defaultProp, PREFIX + "cachecontrol");
-
-        this.resizerType = getPropertyOrDefault(prop, defaultProp, PREFIX + "resizer-type");
-        this.imageQuality = getPropertyOrDefault(prop, defaultProp, PREFIX + "image-quality");
-
-        this.enableMetrics = Boolean.parseBoolean(getPropertyOrDefault(prop, defaultProp, PREFIX + "enable-metrics"));
-    }
-
-    private String getPropertyOrDefault(Properties prop, Properties defaultProp, String key) {
-        return prop.getProperty(key, defaultProp.getProperty(key));
+        this.enableMetrics = Boolean.parseBoolean(propertyResolver.resolve(PREFIX + "enable-metrics"));
     }
 
 
@@ -119,20 +82,22 @@ public class ContentServletProperties {
         return enableMetrics;
     }
 
-    public Map<String, String> values() {
-        return allProperties;
-    }
-
     @Override
     public String toString() {
-        return "ContentServletProperties{"
-                + values().entrySet().stream()
-                    .map(e -> e.getKey() + "='" + (isSecret(e) ? "***" : e.getValue())+'\'')
-                    .collect(Collectors.joining(", "))
-                + '}';
-    }
-
-    private boolean isSecret(Map.Entry<String, String> e) {
-        return e.getKey().contains("password");
+        //@formatter:off
+        return "ContentServletProperties{" +
+                (applicationName != null ?           "applicationName='" + applicationName + '\'' : "") +
+                (contentUrlPattern != null ?       ", contentUrlPattern='" + contentUrlPattern + '\'' : "") +
+                (contentSecureUrlPattern != null ? ", contentSecureUrlPattern='" + contentSecureUrlPattern + '\'' : "") +
+                (datasourceJndiName != null ?      ", datasourceJndiName='" + datasourceJndiName + '\'' : "") +
+                (datasourceUrl != null ?           ", datasourceUrl='" + datasourceUrl + '\'' : "") +
+                (datasourcePassword != null ?      ", datasourcePassword='***'" : "") +
+                (datasourceUsername != null ?      ", datasourceUsername='" + datasourceUsername + '\'' : "") +
+                (cacheControl != null ?            ", cacheControl='" + cacheControl + '\'' : "") +
+                (resizerType != null ?             ", resizerType='" + resizerType + '\'' : "") +
+                (imageQuality != null ?            ", imageQuality='" + imageQuality + '\'' : "") +
+                ", enableMetrics=" + enableMetrics +
+                '}';
+        //@formatter:on
     }
 }

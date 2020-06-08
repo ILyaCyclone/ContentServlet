@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.config.ApplicationConfig;
 import ru.unisuite.contentservlet.config.BuildProperties;
 import ru.unisuite.contentservlet.config.ContentServletProperties;
+import ru.unisuite.contentservlet.config.PropertyResolver;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebListener;
@@ -23,13 +24,23 @@ public class ApplicationInitializer implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext servletContext = sce.getServletContext();
 
-        String propertyFileUri = System.getProperty("contentservlet.config.location"
-                , System.getenv("CONTENTSERVLET_CONFIG_LOCATION"));
-        ContentServletProperties contentServletProperties = propertyFileUri == null
-                ? new ContentServletProperties()
-                : new ContentServletProperties(propertyFileUri);
+        PropertyResolver propertyResolver = new PropertyResolver();
+        String propertyFileUri = propertyResolver.resolve("contentservlet.config.location", "application.properties");
+        try {
+            propertyResolver.addProperties(propertyFileUri);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load property file '" + propertyFileUri + '\'', e);
+        }
 
-        logger.info("Initializing content-servlet with properties: {}"
+        try {
+            propertyResolver.addProperties("default.properties");
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load property file 'default.properties'", e);
+        }
+
+        ContentServletProperties contentServletProperties = new ContentServletProperties(propertyResolver);
+
+        if(logger.isInfoEnabled()) logger.info("Initializing content-servlet with properties: {}"
                 , contentServletProperties.toString().replace(ContentServletProperties.class.getSimpleName(), ""));
 
         BuildProperties buildProperties = null;
@@ -38,9 +49,9 @@ public class ApplicationInitializer implements ServletContextListener {
         } catch (IOException e) {
             logger.warn("Could not create buildProperties", e);
         }
-        ApplicationConfig applicationConfig = new ApplicationConfig(contentServletProperties, buildProperties);
-        servletContext.setAttribute("applicationConfig", applicationConfig);
 
+        ApplicationConfig applicationConfig = new ApplicationConfig(contentServletProperties, buildProperties, propertyResolver);
+        servletContext.setAttribute("applicationConfig", applicationConfig);
 
         registerContentServlet(servletContext, applicationConfig, contentServletProperties);
 

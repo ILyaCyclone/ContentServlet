@@ -30,11 +30,7 @@ public class ApplicationConfig {
 
     private final MeterRegistry meterRegistry;
 
-
-    public ApplicationConfig(ContentServletProperties prop) {
-        this(prop, null);
-    }
-    public ApplicationConfig(ContentServletProperties prop, BuildProperties buildProperties) {
+    public ApplicationConfig(ContentServletProperties prop, BuildProperties buildProperties, PropertyResolver propertyResolver) {
         this.buildProperties = buildProperties;
 
         DataSource dataSource;
@@ -68,7 +64,7 @@ public class ApplicationConfig {
         this.defaultImageQuality = Byte.parseByte(prop.getImageQuality());
 
 
-        this.imageProcessors = ImageProcessorsManager.implementations(prop);
+        this.imageProcessors = ImageProcessorsManager.implementations(propertyResolver);
 
 
         this.meterRegistry = prop.isEnableMetrics() ? MeterRegistryManager.prometheusMeterRegistry(prop.getApplicationName())
