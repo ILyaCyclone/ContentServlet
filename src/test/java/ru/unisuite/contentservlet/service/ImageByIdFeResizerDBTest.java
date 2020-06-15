@@ -12,16 +12,16 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ImageByIdwmResizerDBTest extends ContentServiceParentTest {
-    private static final String EXPECTED_FOLDER = "ImageByIdwmResizerDB";
+class ImageByIdFeResizerDBTest extends ContentServiceParentTest {
+    private static final String EXPECTED_FOLDER = "ImageByIdFeResizerDB";
 
     @Test
     void actualSize() throws IOException {
-        String expectedResourceFilename = "idwm-842025_rt-db_q-80.jpg";
-        final int expectedSize = 6599730;
+        String expectedResourceFilename = "idfe-64285_rt-db_q-80.jpg";
+        final int expectedSize = 2986903;
 
         ContentRequest contentRequest = new ContentRequest();
-        contentRequest.setIdWebMetaterm(842025L);
+        contentRequest.setIdFe(64285L);
         contentRequest.setResizerType(ResizerType.DB);
         contentRequest.setQuality((byte) 80);
         Content actualContent = contentService.getContent(contentRequest);
@@ -31,11 +31,11 @@ class ImageByIdwmResizerDBTest extends ContentServiceParentTest {
 
     @Test
     void resizeByWidth() throws IOException {
-        String expectedResourceFilename = "idwm-842025_w-500_rt-db_q-80.jpg";
-        final int expectedSize = 24889;
+        String expectedResourceFilename = "idfe-64285_w-500_rt-db_q-80.jpg";
+        final int expectedSize = 35415;
 
         ContentRequest contentRequest = new ContentRequest();
-        contentRequest.setIdWebMetaterm(842025L);
+        contentRequest.setIdFe(64285L);
         contentRequest.setWidth(500);
         contentRequest.setResizerType(ResizerType.DB);
         contentRequest.setQuality((byte) 80);
@@ -46,11 +46,11 @@ class ImageByIdwmResizerDBTest extends ContentServiceParentTest {
 
     @Test
     void resizeByHeight() throws IOException {
-        String expectedResourceFilename = "idwm-842025_h-500_rt-db_q-80.jpg";
-        final int expectedSize = 65976;
+        String expectedResourceFilename = "idfe-64285_h-500_rt-db_q-80.jpg";
+        final int expectedSize = 19436;
 
         ContentRequest contentRequest = new ContentRequest();
-        contentRequest.setIdWebMetaterm(842025L);
+        contentRequest.setIdFe(64285L);
         contentRequest.setHeight(500);
         contentRequest.setResizerType(ResizerType.DB);
         contentRequest.setQuality((byte) 80);
@@ -61,13 +61,13 @@ class ImageByIdwmResizerDBTest extends ContentServiceParentTest {
 
     @Test
     void resizeByWithAndHeight() throws IOException {
-        String expectedResourceFilename = "idwm-842025_w-600_h-300_rt-db_q-80.jpg";
-        final int expectedSize = 29309;
+        String expectedResourceFilename = "idfe-64285_w-400_h-600_rt-db_q-80.jpg";
+        final int expectedSize = 25179;
 
         ContentRequest contentRequest = new ContentRequest();
-        contentRequest.setIdWebMetaterm(842025L);
-        contentRequest.setWidth(600);
-        contentRequest.setHeight(300);
+        contentRequest.setIdFe(64285L);
+        contentRequest.setWidth(400);
+        contentRequest.setHeight(600);
         contentRequest.setResizerType(ResizerType.DB);
         contentRequest.setQuality((byte) 80);
         Content actualContent = contentService.getContent(contentRequest);
@@ -75,15 +75,15 @@ class ImageByIdwmResizerDBTest extends ContentServiceParentTest {
         assertActualContent(expectedResourceFilename, expectedSize, actualContent);
     }
 
-    private void assertActualContent(String expectedResourceFilename, int expectedSize, Content actualContent) throws IOException {
+    private void assertActualContent(String expectedResourceFilename, int expectedSize, Content content) throws IOException {
         byte[] expectedBytes = super.getExpectedFileBytes(EXPECTED_FOLDER + File.separator + expectedResourceFilename);
-        byte[] actualBytes = IOUtils.toByteArray(actualContent.getDataStream());
+        byte[] actualBytes = IOUtils.toByteArray(content.getDataStream());
         Assertions.assertAll(
-                () -> assertEquals("Фото1", actualContent.getFilename(), "filename mismatch")
-                , () -> assertEquals("jpg", actualContent.getExtension(), "extension mismatch")
-                , () -> assertEquals("image/jpeg", actualContent.getMimeType(), "mimetype mismatch")
-                , () -> assertEquals("84AE445BED7F0913249DFA8B167234C57AE321CB", actualContent.getHash(), "hash mismatch")
-                , () -> assertEquals(expectedSize, actualContent.getSize(), "size mismatch")
+                () -> assertEquals("64285", content.getFilename(), "filename mismatch")
+                , () -> assertEquals("jpg", content.getExtension(), "extension mismatch")
+                , () -> assertEquals("image/jpeg", content.getMimeType(), "mimetype mismatch")
+                , () -> assertEquals(null, content.getHash(), "hash mismatch") // DB function doesn't support hash
+                , () -> assertEquals(expectedSize, content.getSize(), "size mismatch")
                 , () -> assertArrayEquals(expectedBytes, actualBytes, "bytes mismatch")
         );
     }

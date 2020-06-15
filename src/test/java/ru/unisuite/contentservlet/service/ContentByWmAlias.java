@@ -16,23 +16,25 @@ public class ContentByWmAlias extends ContentServiceParentTest {
 
     @Test
     void byWmAlias() throws IOException {
-        String expectedFilename = "wmalias-portal2.svg-sprite.svg";
+        String expectedResourceFilename = "wmalias-test.star.png";
 
         ContentRequest contentRequest = new ContentRequest();
-        contentRequest.setMetatermAlias("portal2.svg-sprite");
+        contentRequest.setMetatermAlias("test.star.png");
         Content content = contentService.getContent(contentRequest);
 
-        byte[] expectedBytes = expectedBytes(expectedFilename);
+        byte[] expectedBytes = expectedBytes(expectedResourceFilename);
         byte[] actualBytes = IOUtils.toByteArray(content.getDataStream());
         Assertions.assertAll(
-                () -> assertEquals("svg-sprite-miit", content.getFilename())
-                , () -> assertEquals("svg", content.getExtension())
-                , () -> assertEquals("image/svg+xml", content.getMimeType())
+                () -> assertEquals("star", content.getFilename(), "filename mismatch")
+                , () -> assertEquals("png", content.getExtension(), "extension mismatch")
+                , () -> assertEquals("image/png", content.getMimeType(), "mimetype mismatch")
+                , () -> assertEquals("7C1C54F29C9BD797C5FD9E082D938C67BF419E2A", content.getHash(), "hash mismatch")
+                , () -> assertEquals(528L, content.getSize())
                 , () -> assertArrayEquals(expectedBytes, actualBytes, "bytes mismatch")
         );
     }
 
-    private byte[] expectedBytes(String expectedFilename) throws IOException {
-        return super.getExpectedFileBytes(EXPECTED_FOLDER + File.separator + expectedFilename);
+    private byte[] expectedBytes(String expectedResourceFilename) throws IOException {
+        return super.getExpectedFileBytes(EXPECTED_FOLDER + File.separator + expectedResourceFilename);
     }
 }
