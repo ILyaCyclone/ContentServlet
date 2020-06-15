@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.function.Supplier;
 
 public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRepository {
+    private static final String SELECT_COLUMNS = "hash, cntsecond_last_modified as last_modified_seconds";
+
     private static final String COULD_NOT_GET_MESSAGE_FORMAT = "Could not get HashAndLastModified by {%s}";
     private static final String NOT_FOUND_MESSAGE_FORMAT = "HashAndLastModified not found by {%s}";
 
@@ -25,7 +27,7 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         Supplier<String> parametersStringSupplier = () -> "idWebMetaterm=" + idWebMetaterm;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, idWebMetaterm, null)) {
-            return getInternalWithHash(stmt, parametersStringSupplier);
+            return getInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -36,7 +38,7 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         Supplier<String> parametersStringSupplier = () -> "metatermAlias=" + metatermAlias;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareContentByMetatermStatement(conn, null, metatermAlias)) {
-            return getInternalWithHash(stmt, parametersStringSupplier);
+            return getInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -47,7 +49,7 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         Supplier<String> parametersStringSupplier = () -> "idFe=" + idFe + ", entryIdInPhotoalbum=" + entryIdInPhotoalbum;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareByIdFeStatement(conn, idFe, entryIdInPhotoalbum)) {
-            return getInternalWithoutHash(stmt, parametersStringSupplier);
+            return getInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -58,7 +60,7 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         Supplier<String> parametersStringSupplier = () -> "fileVersionId=" + fileVersionId;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = prepareByIdFileVersion(conn, fileVersionId)) {
-            return getInternalWithoutHash(stmt, parametersStringSupplier);
+            return getInternal(stmt, parametersStringSupplier);
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -66,30 +68,21 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
 
 
 
-    private HashAndLastModified getInternalWithHash(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
+    private HashAndLastModified getInternal(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
         try (ResultSet rs = stmt.executeQuery()) {
             if (!rs.isBeforeFirst()) {
                 throw notFoundException(parametersStringSupplier);
             }
             rs.next();
-            return rowMapper.mapRowWithHash(rs);
-        }
-    }
-
-    private HashAndLastModified getInternalWithoutHash(PreparedStatement stmt, Supplier<String> parametersStringSupplier) throws SQLException {
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (!rs.isBeforeFirst()) {
-                throw notFoundException(parametersStringSupplier);
-            }
-            rs.next();
-            return rowMapper.mapRowWithoutHash(rs);
+            return rowMapper.mapRow(rs);
         }
     }
 
 
+    @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareContentByMetatermStatement(Connection conn, Long idWebMetaterm, String metatermAlias) throws SQLException {
-        String query = "select hash, cntsecond_last_modified as last_modified_seconds " +
-                "from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS +
+                " from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setObject(1, idWebMetaterm, Types.BIGINT);
@@ -97,9 +90,10 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         return stmt;
     }
 
+    @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareByIdFeStatement(Connection conn, Long idFe, Long idPhotoAlbum) throws SQLException {
-        String query = "select cntsecond_last_modified as last_modified_seconds " +
-                "from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS +
+                " from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setObject(1, idFe, Types.BIGINT);
@@ -107,9 +101,10 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
         return stmt;
     }
 
+    @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareByIdFileVersion(Connection conn, Long idFileVersion) throws SQLException {
-        String query = "select cntsecond_last_modified as last_modified_seconds " +
-                "from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS +
+                " from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setLong(1, idFileVersion);
