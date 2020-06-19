@@ -4,13 +4,16 @@ import ru.unisuite.contentservlet.config.ResizerType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ContentRequest {
     private Long idWebMetaterm;
     private String metatermAlias;
     private Long idFe;
     private Long entryIdInPhotoalbum;
+    private Long idPropose;
     private Long fileVersionId;
 
     private Integer contentDisposition;
@@ -25,11 +28,12 @@ public class ContentRequest {
     private Boolean noCache;
     private Boolean privateCache;
 
-
-
     public boolean hasRequiredParameters() {
-        return !(idWebMetaterm == null && metatermAlias == null && fileVersionId == null
-                && idFe == null && entryIdInPhotoalbum == null);
+        return Stream.of(idWebMetaterm, metatermAlias
+                , idFe, entryIdInPhotoalbum
+                , fileVersionId
+                , idPropose)
+                .anyMatch(Objects::nonNull);
     }
 
     public Map<String, Object> values() {
@@ -102,6 +106,14 @@ public class ContentRequest {
 
     public void setEntryIdInPhotoalbum(Long entryIdInPhotoalbum) {
         this.entryIdInPhotoalbum = entryIdInPhotoalbum;
+    }
+
+    public Long getIdPropose() {
+        return idPropose;
+    }
+
+    public void setIdPropose(Long idPropose) {
+        this.idPropose = idPropose;
     }
 
     public Long getFileVersionId() {

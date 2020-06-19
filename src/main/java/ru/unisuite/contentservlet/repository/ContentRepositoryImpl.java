@@ -1,6 +1,7 @@
 package ru.unisuite.contentservlet.repository;
 
 import ru.unisuite.contentservlet.exception.DataAccessException;
+import ru.unisuite.contentservlet.exception.EmptyFileException;
 import ru.unisuite.contentservlet.exception.NotFoundException;
 import ru.unisuite.contentservlet.model.Content;
 
@@ -57,6 +58,17 @@ public class ContentRepositoryImpl implements ContentRepository {
     }
 
     @Override
+    public Content getContentByIdPropose(long idPropose, Integer width, Integer height) {
+        Supplier<String> parametersStringSupplier = () -> "idPropose=" + idPropose;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = prepareContentByIdProposeStatement(conn, idPropose, width, height)) {
+            return getContentInternal(stmt, parametersStringSupplier);
+        } catch (SQLException e) {
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
+        }
+    }
+
+    @Override
     public Content getContentByIdFileVersion(Long idFileVersion, Integer width, Integer height) {
         Supplier<String> parametersStringSupplier = () -> "idFileVersion=" + idFileVersion;
         try (Connection conn = dataSource.getConnection();
@@ -75,6 +87,8 @@ public class ContentRepositoryImpl implements ContentRepository {
             }
             rs.next();
             return contentRowMapper.mapRow(rs);
+        } catch (EmptyFileException e) {
+            throw new EmptyFileException(parametersStringSupplier.get());
         } catch (SQLException e) {
             throw couldNotGetDataAccessException(parametersStringSupplier, e);
         }
@@ -83,8 +97,8 @@ public class ContentRepositoryImpl implements ContentRepository {
 
     @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareContentByMetatermStatement(Connection conn, Long idWebMetaterm, String metatermAlias, Integer width, Integer height) throws SQLException {
-        String query = "select " + SELECT_COLUMNS +
-                " from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setObject(1, idWebMetaterm, Types.BIGINT);
@@ -96,8 +110,8 @@ public class ContentRepositoryImpl implements ContentRepository {
 
     @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareContentByIdFeStatement(Connection conn, Long idFe, Long idPhotoAlbum, Integer width, Integer height) throws SQLException {
-        String query = "select " + SELECT_COLUMNS +
-                " from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setObject(1, idFe, Types.BIGINT);
@@ -108,9 +122,21 @@ public class ContentRepositoryImpl implements ContentRepository {
     }
 
     @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
+    private PreparedStatement prepareContentByIdProposeStatement(Connection conn, long idPropose, Integer width, Integer height) throws SQLException {
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_cm_kis_wp.Photo_Propose_Fit(A_id_pa_propose => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setObject(1, idPropose, Types.BIGINT);
+        stmt.setObject(2, width, Types.INTEGER);
+        stmt.setObject(3, height, Types.INTEGER);
+        return stmt;
+    }
+
+    @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareContentByIdFileVersion(Connection conn, Long idFileVersion, Integer width, Integer height) throws SQLException {
-        String query = "select " + SELECT_COLUMNS +
-                " from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => ?, AScaleHeight => ?) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setLong(1, idFileVersion);

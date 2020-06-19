@@ -1,5 +1,6 @@
 package ru.unisuite.contentservlet.repository;
 
+import ru.unisuite.contentservlet.exception.EmptyFileException;
 import ru.unisuite.contentservlet.model.Content;
 
 import java.sql.Blob;
@@ -10,6 +11,9 @@ public class ContentRowMapper {
     public Content mapRow(ResultSet rs) throws SQLException {
         Content content = new Content();
         Blob blob = rs.getBlob("data_binary");
+        if (blob == null) {
+            throw new EmptyFileException();
+        }
         content.setDataStream(blob.getBinaryStream());
         content.setSize(blob.length());
         content.setHash(rs.getString("hash"));

@@ -15,6 +15,8 @@ class RequestParamName {
     public static final String idFe = "id_fe";
     // ID записи в таблице фотоальбом
     public static final String entryIdInPhotoalbum = "id_fpa";
+    // ID запроса на изменение фотографии
+    public static final String[] idPropose = {"id_fpp", "id_photo_propose"};
 
     // ---------- image section ----------
     // "db" or "app"

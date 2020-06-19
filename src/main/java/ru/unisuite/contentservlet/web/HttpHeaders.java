@@ -34,7 +34,11 @@ class HttpHeaders {
     public void setCacheControl(HttpServletResponse response, ContentRequest contentRequest) {
         String requestedCacheControl = contentRequest.getCacheControl();
         if (requestedCacheControl != null) {
-            response.setHeader(cacheControlHeaderName, requestedCacheControl);
+            if (isNumeric(requestedCacheControl)) {
+                response.setHeader(cacheControlHeaderName, "public, max-age=" + requestedCacheControl);
+            } else {
+                response.setHeader(cacheControlHeaderName, requestedCacheControl);
+            }
         } else {
             if (Boolean.TRUE.equals(contentRequest.getPrivateCache())) {
                 response.setHeader(cacheControlHeaderName, "private");
@@ -87,6 +91,11 @@ class HttpHeaders {
                     return "filename=" + fileName;
             }
         }
+    }
+
+    private boolean isNumeric(String string) {
+        if (string == null || string.trim().length() == 0) return false;
+        return string.chars().allMatch(Character::isDigit);
     }
 
     private enum EtagValidation {

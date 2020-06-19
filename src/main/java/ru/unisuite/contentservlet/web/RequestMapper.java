@@ -31,6 +31,7 @@ public class RequestMapper {
         contentRequest.setMetatermAlias(params.get(RequestParamName.webMetaAlias));
         contentRequest.setFileVersionId(getLongValue(params, RequestParamName.fileVersionId));
         contentRequest.setIdFe(getLongValue(params, RequestParamName.idFe));
+        contentRequest.setIdPropose(getLongValue(params, RequestParamName.idPropose));
         contentRequest.setEntryIdInPhotoalbum(getLongValue(params, RequestParamName.entryIdInPhotoalbum));
 
         contentRequest.setContentDisposition(getIntValue(params, RequestParamName.contentDisposition));
@@ -51,14 +52,10 @@ public class RequestMapper {
         String requestedCacheControl = params.get(RequestParamName.cache);
         if (requestedCacheControl != null) {
             contentRequest.setCacheControl(requestedCacheControl);
-        } else {
-            if (params.containsKey(RequestParamName.priv)) {
-                contentRequest.setPrivateCache(true);
-            } else {
-                if (params.containsKey(RequestParamName.noCache) || "no-cache".equals(httpServletRequest.getHeader("Cache-Control"))) {
-                    contentRequest.setNoCache(true);
-                }
-            }
+        } else if (params.containsKey(RequestParamName.priv)) {
+            contentRequest.setPrivateCache(true);
+        } else if (params.containsKey(RequestParamName.noCache) || "no-cache".equals(httpServletRequest.getHeader("Cache-Control"))) {
+            contentRequest.setNoCache(true);
         }
 
         contentRequest.setFilename(getRequestedFilename(httpServletRequest));
@@ -81,6 +78,10 @@ public class RequestMapper {
 
     private Long getLongValue(Map<String, String> params, String parameterName) {
         return params.containsKey(parameterName) ? Long.parseLong(params.get(parameterName)) : null;
+    }
+
+    private Long getLongValue(Map<String, String> params, String[] parameterNames) {
+        return getParameter(params, parameterNames, Long::parseLong);
     }
 
     private Integer getIntValue(Map<String, String> params, String parameterName) {

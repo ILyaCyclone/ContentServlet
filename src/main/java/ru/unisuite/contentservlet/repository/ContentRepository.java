@@ -10,6 +10,8 @@ public interface ContentRepository {
 
     Content getContentByIdFe(Long idFe, Long idPhotoAlbum, Integer width, Integer height);
 
+    Content getContentByIdPropose(long idPropose, Integer width, Integer height);
+
     Content getContentByIdFileVersion(Long idFileVersion, Integer width, Integer height);
 
 }

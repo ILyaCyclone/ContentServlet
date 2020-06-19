@@ -1,11 +1,12 @@
 Content Servlet
 
 One of the following parameters is required:
-id_wm 		id of content version web_metaterm.
-alias_wm	alias of content version web_metaterm.
-id_vf		id of file's version.
-id_fe		id of person for their photo request.
-id_fpa		id of photo album.
+id_wm 		                id of content version web_metaterm.
+alias_wm	                alias of content version web_metaterm.
+id_vf		                id of file's version.
+id_fe		                id of person for their photo request.
+id_fpp,id_photo_propose     id photo propose for photo change.
+id_fpa		                id of photo album.
 
 Image parameters:
 resizer             resizer type. Valid value: db - database, th - thumbnailator, im - im4java, imaginary
@@ -14,12 +15,14 @@ SHeight,height,h    height of requested image in pixels. Example: h=500.
 quality,q           quality of requested image. Valid values: from 0 to 100. Example: q=80.
 
 Cache parameters:
-no_cache            Cache-Control. Valid values: any int value - max-age=int value, null - no-cache.
+cache               if number, will set reponse Cache-Control: public, max-age=<value>, else will be set as response Cache-Control as is.
+no_cache            will set response Cache-Control: no-cache; will make sure http cache is revalidated, requires no value.
+private             will set response Cache-Control: private; requires no value.
 
 Other parameters:
 cd                  Content-Disposition. Valid values: 1 - download, 2 - inline.
 
-URL part between /content/ and query parameters (? sign) is considered as filename.
+URL part between /content/get/ and query parameters (? sign) is considered as filename.
 
 Example:
-/content/banner.jpg?id_wm=798108&w=1200
+/content/get/banner.jpg?id_wm=798108&w=1200

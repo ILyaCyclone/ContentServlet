@@ -10,6 +10,8 @@ public interface HashAndLastModifiedRepository {
 
     HashAndLastModified getByIdFe(Long idFe, Long entryIdInPhotoalbum);
 
+    HashAndLastModified getByIdPropose(long IdPropose);
+
     HashAndLastModified getByIdFileVersion(Long fileVersionId);
 
 }

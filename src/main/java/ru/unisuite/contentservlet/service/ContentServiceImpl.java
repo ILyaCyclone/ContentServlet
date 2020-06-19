@@ -46,6 +46,10 @@ public class ContentServiceImpl implements ContentService {
             return contentRepository.getContentByIdFe(contentRequest.getIdFe(), contentRequest.getEntryIdInPhotoalbum(), effectiveWidth, effectiveHeight);
         }
 
+        if (contentRequest.getIdPropose() != null) {
+            return contentRepository.getContentByIdPropose(contentRequest.getIdPropose(), effectiveWidth, effectiveHeight);
+        }
+
         if (contentRequest.getFileVersionId() != null) {
             return contentRepository.getContentByIdFileVersion(contentRequest.getFileVersionId(), effectiveWidth, effectiveHeight);
         }
@@ -69,10 +73,15 @@ public class ContentServiceImpl implements ContentService {
             return hashAndLastModifiedRepository.getByIdFe(contentRequest.getIdFe(), contentRequest.getEntryIdInPhotoalbum());
         }
 
+        if (contentRequest.getIdPropose() != null) {
+            return hashAndLastModifiedRepository.getByIdPropose(contentRequest.getIdPropose());
+        }
+
         if (contentRequest.getFileVersionId() != null) {
             return hashAndLastModifiedRepository.getByIdFileVersion(contentRequest.getFileVersionId());
         }
 
+        logger.warn("Unknown contentRequest for getHashAndLastModified {contentRequest={}}", contentRequest);
         throw new IllegalArgumentException("ContentRequest does not determine content " + contentRequest);
     }
 }

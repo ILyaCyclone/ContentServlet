@@ -56,6 +56,17 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
     }
 
     @Override
+    public HashAndLastModified getByIdPropose(long idPropose) {
+        Supplier<String> parametersStringSupplier = () -> "idPropose=" + idPropose;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = prepareByIdPropose(conn, idPropose)) {
+            return getInternal(stmt, parametersStringSupplier);
+        } catch (SQLException e) {
+            throw couldNotGetDataAccessException(parametersStringSupplier, e);
+        }
+    }
+
+    @Override
     public HashAndLastModified getByIdFileVersion(Long fileVersionId) {
         Supplier<String> parametersStringSupplier = () -> "fileVersionId=" + fileVersionId;
         try (Connection conn = dataSource.getConnection();
@@ -81,8 +92,8 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
 
     @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareContentByMetatermStatement(Connection conn, Long idWebMetaterm, String metatermAlias) throws SQLException {
-        String query = "select " + SELECT_COLUMNS +
-                " from TABLE(cast(wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_fp_wp.ImgScaleAsSet(Aid_web_metaterm => ?, A_alias => ?, AScaleWidth => null, AScaleHeight => null) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setObject(1, idWebMetaterm, Types.BIGINT);
@@ -92,8 +103,8 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
 
     @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareByIdFeStatement(Connection conn, Long idFe, Long idPhotoAlbum) throws SQLException {
-        String query = "select " + SELECT_COLUMNS +
-                " from TABLE(cast(wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_cm_kis_wp.PhotoScaleAsSet(Aid_e => ?, Aid_photo_album => ?, AScaleWidth => null, AScaleHeight => null) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setObject(1, idFe, Types.BIGINT);
@@ -102,9 +113,19 @@ public class HashAndLastModifiedRepositoryImpl implements HashAndLastModifiedRep
     }
 
     @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
+    private PreparedStatement prepareByIdPropose(Connection conn, long idPropose) throws SQLException {
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_cm_kis_wp.Photo_Propose_Fit(A_id_pa_propose => ?, AScaleWidth => null, AScaleHeight => null) as wpt_t_data_img_wp))";
+
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setLong(1, idPropose);
+        return stmt;
+    }
+
+    @SuppressWarnings("java:S2095") // suppress SonarLint unclosed PreparedStatement
     private PreparedStatement prepareByIdFileVersion(Connection conn, Long idFileVersion) throws SQLException {
-        String query = "select " + SELECT_COLUMNS +
-                " from TABLE(cast(wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?) as wpt_t_data_img_wp))";
+        String query = "select " + SELECT_COLUMNS + " from TABLE(cast(" +
+                "wpms_cm_kis_wp.ImgVFScaleAsSet(Aid_version_file => ?, AScaleWidth => null, AScaleHeight => null) as wpt_t_data_img_wp))";
 
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setLong(1, idFileVersion);
