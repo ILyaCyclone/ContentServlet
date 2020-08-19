@@ -17,12 +17,24 @@ import java.nio.charset.StandardCharsets;
 public class HelpServlet extends HttpServlet {
     private static final String HELP_FILE = "/help.txt";
 
-    private BuildProperties buildProperties;
+    private String buildOutput;
 
     @Override
     public void init() {
         ApplicationConfig applicationConfig = (ApplicationConfig) getServletContext().getAttribute("applicationConfig");
-        this.buildProperties = applicationConfig.getBuildProperties();
+        BuildProperties buildProperties = applicationConfig.getBuildProperties();
+
+        if (buildProperties != null) {
+            //@formatter:off
+            buildOutput = "\n\nVersion Info"
+                    + "\nbuild date: "     + buildProperties.getBuildDate()
+                    + "\nbranch: "         + buildProperties.getBranch()
+                    + "\ncommit date: "    + buildProperties.getCommitDate()
+                    + "\ncommit id: "      + buildProperties.getCommitId()
+                    + "\ncommit message: " + buildProperties.getShortMessage()
+                    + "\ndirty: "          + buildProperties.getDirty();
+            //@formatter:on
+        }
     }
 
     @Override
@@ -36,16 +48,7 @@ public class HelpServlet extends HttpServlet {
             IOUtils.copy(is, out);
         }
 
-        if(buildProperties != null) {
-            //@formatter:off
-            String buildOutput = "\n\nVersion Info"
-                    + "\nbuild date: "     + buildProperties.getBuildDate()
-                    + "\nbranch: "         + buildProperties.getBranch()
-                    + "\ncommit date: "    + buildProperties.getCommitDate()
-                    + "\ncommit id: "      + buildProperties.getCommitId()
-                    + "\ncommit message: " + buildProperties.getShortMessage()
-                    + "\ndirty: "          + buildProperties.getDirty();
-            //@formatter:on
+        if (buildOutput != null) {
             out.write(buildOutput.getBytes(StandardCharsets.UTF_8));
         }
     }

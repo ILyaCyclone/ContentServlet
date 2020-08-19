@@ -54,6 +54,7 @@ public class ApplicationInitializer implements ServletContextListener {
         servletContext.setAttribute("applicationConfig", applicationConfig);
 
         registerContentServlet(servletContext, applicationConfig, contentServletProperties);
+        registerConfigServlet(servletContext, applicationConfig, contentServletProperties);
 
         if (contentServletProperties.isEnableMetrics()) {
             registerPrometheusFilter(servletContext, contentServletProperties);
@@ -66,21 +67,23 @@ public class ApplicationInitializer implements ServletContextListener {
 
     private void registerContentServlet(ServletContext servletContext, ApplicationConfig applicationConfig
             , ContentServletProperties contentServletProperties) {
-        ContentServlet contentServlet = new ContentServlet(applicationConfig);
-        ServletRegistration.Dynamic servletRegistration = servletContext.addServlet("contentServlet", contentServlet);
-        servletRegistration.setLoadOnStartup(1);
+        registerServlet(servletContext, "contentServlet", new ContentServlet(applicationConfig)
+                , contentServletProperties.getContentUrlPattern(), contentServletProperties.getContentSecureUrlPattern());
+    }
 
-        servletRegistration.addMapping(contentServletProperties.getContentUrlPattern()
-                , contentServletProperties.getContentSecureUrlPattern());
+    private void registerConfigServlet(ServletContext servletContext, ApplicationConfig applicationConfig
+            , ContentServletProperties contentServletProperties) {
+        ConfigServlet configServlet = new ConfigServlet(applicationConfig, contentServletProperties);
+        registerServlet(servletContext, "config", configServlet, "/config");
     }
 
 
 
     private void registerPrometheusFilter(ServletContext servletContext, ContentServletProperties contentServletProperties) {
         Map<String, String> initParameters = new HashMap<>();
-        initParameters.put("metric-name", "contentservlet_metrics_filter");
+        initParameters.put("metric-name", "contentservlet_request_duration_seconds");
         initParameters.put("help", "The time taken fulfilling servlet requests");
-        initParameters.put("buckets", "0.5,0.75,0.9,0.95");
+        initParameters.put("buckets", "0.25,0.5,1,1.5,2,3,5,10"); // buckets in seconds
         initParameters.put("path-components", "2"); // group uri by levels, including root. E.g. 1 for /content/*, 2 for /content/get/*
 
         FilterRegistration.Dynamic prometheusFilter = servletContext.addFilter("prometheusFilter", MetricsFilter.class);
@@ -96,9 +99,23 @@ public class ApplicationInitializer implements ServletContextListener {
     }
 
     private void registerPrometheusServlet(ServletContext servletContext) {
-        ServletRegistration.Dynamic prometheusServlet = servletContext.addServlet("prometheus", MetricsServlet.class);
+        registerServlet(servletContext, "prometheus", MetricsServlet.class, "/metrics");
+    }
+
+
+
+    private void registerServlet(ServletContext servletContext, String servletName, Class<? extends Servlet> servletClass
+            , String... urlPatterns) {
+        ServletRegistration.Dynamic prometheusServlet = servletContext.addServlet(servletName, servletClass);
         prometheusServlet.setLoadOnStartup(1);
-        prometheusServlet.addMapping("/metrics");
+        prometheusServlet.addMapping(urlPatterns);
+    }
+
+    private void registerServlet(ServletContext servletContext, String servletName, Servlet servlet
+            , String... urlPatterns) {
+        ServletRegistration.Dynamic prometheusServlet = servletContext.addServlet(servletName, servlet);
+        prometheusServlet.setLoadOnStartup(1);
+        prometheusServlet.addMapping(urlPatterns);
     }
 
     @Override

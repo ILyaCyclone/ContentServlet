@@ -12,7 +12,7 @@ import java.io.IOException;
 //@WebFilter("/*")
 //@WebFilter("/get/*")
 public class CustomMetricsFilter implements Filter {
-    private static final String PREFIX = "custom_";
+    private static final String PREFIX = "contentservlet_";
     private static final String HTTP_RESPONSE_COUNTER_NAME = PREFIX + "http_response";
 
     private MeterRegistry meterRegistry;
@@ -30,7 +30,7 @@ public class CustomMetricsFilter implements Filter {
         ApplicationConfig applicationConfig = (ApplicationConfig) filterConfig.getServletContext().getAttribute("applicationConfig");
         this.meterRegistry = applicationConfig.getMeterRegistry();
 
-        this.receivedRequests = this.meterRegistry.counter(PREFIX + "received_requests");
+        this.receivedRequests = this.meterRegistry.counter(PREFIX + "received_requests_total");
         //@formatter:off
         this.responseOkCounter                  = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "200");
         this.responseNotModifiedCounter         = this.meterRegistry.counter(HTTP_RESPONSE_COUNTER_NAME, "status", "304");
