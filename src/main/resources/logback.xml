@@ -26,10 +26,12 @@
   </appender>
 
 
-  <logger name="ru.unisuite.contentservlet" level="WARN"/>
+  <logger name="ru.unisuite.contentservlet" level="INFO">
+    <appender-ref ref="FILE"/>
+  </logger>
 
   <root level="WARN">
-    <appender-ref ref="STDOUT"/>
+    <!--    <appender-ref ref="STDOUT"/>-->
     <appender-ref ref="FILE"/>
   </root>
 </configuration>

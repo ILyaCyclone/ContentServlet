@@ -1,16 +1,14 @@
 package ru.unisuite.contentservlet.web;
 
-import org.apache.commons.io.IOUtils;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.unisuite.contentservlet.config.ApplicationConfig;
 import ru.unisuite.contentservlet.config.ResizerType;
-import ru.unisuite.contentservlet.exception.NotFoundException;
-import ru.unisuite.contentservlet.model.Content;
-import ru.unisuite.contentservlet.model.HashAndLastModified;
 import ru.unisuite.contentservlet.service.ContentRequest;
 import ru.unisuite.contentservlet.service.ContentService;
-import ru.unisuite.imageprocessing.ImageParameters;
+import ru.unisuite.contentservlet.util.ListRoundRobin;
 import ru.unisuite.imageprocessing.ImageProcessor;
 
 import javax.servlet.ServletException;
@@ -18,6 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 //@WebServlet({"/*", "/private/*"})
@@ -26,41 +26,42 @@ public class ContentServlet extends HttpServlet {
     private final Logger logger = LoggerFactory.getLogger(ContentServlet.class.getName());
     private static final String contentTypeHTML = "text/html; charset=UTF-8";
 
-    private final  ContentService contentService;
     private final RequestMapper requestMapper;
-
-    private final HttpHeaders httpHeaders;
-
-    private final ResizerType defaultResizerType;
-    private final Map<ResizerType, ImageProcessor> imageProcessors;
-    private final byte defaultImageQuality;
-
-    private final static String contentTypeHTML = "text/html; charset=UTF-8";
-
-//    private io.micrometer.core.instrument.MeterRegistry meterRegistry;
-
-    @Override
-    public void init() {
-        ApplicationConfig applicationConfig = (ApplicationConfig) getServletContext().getAttribute("applicationConfig");
+    private final ListRoundRobin<ServeContent> serveContents;
 
     ContentServlet(ApplicationConfig applicationConfig) {
-        this.contentService = applicationConfig.contentService();
-        this.httpHeaders = new HttpHeaders(applicationConfig);
-
-        this.imageProcessors = applicationConfig.getImageProcessors();
-        this.defaultResizerType = applicationConfig.getResizerType();
-        this.defaultImageQuality = applicationConfig.getDefaultImageQuality();
-
-//        this.meterRegistry = applicationConfig.getMeterRegistry();
-
         this.requestMapper = new RequestMapper();
+
+        ContentService contentService = applicationConfig.contentService();
+
+        Map<ResizerType, ImageProcessor> imageProcessors = applicationConfig.getImageProcessors();
+        ResizerType defaultResizerType = applicationConfig.getResizerType();
+        byte defaultImageQuality = applicationConfig.getDefaultImageQuality();
+
+        MeterRegistry meterRegistry = applicationConfig.getMeterRegistry();
+
+        HttpHeaders httpHeaders = new HttpHeaders(applicationConfig);
+
+
+        List<ServeContent> serveContentImplementations = new ArrayList<>();
+        Timer.Builder serverContentTimerBuilder = Timer.builder("contentservlet_serve_content")
+                .publishPercentiles(0.5, 0.75, 0.9, 0.95);
+        serveContentImplementations.add(new ServeContentTimed(
+                new ServeContentInOneDBCall(contentService, httpHeaders, imageProcessors, defaultImageQuality, defaultResizerType)
+                , serverContentTimerBuilder.tags("db_calls", "1").register(meterRegistry)
+        ));
+        serveContentImplementations.add(new ServeContentTimed(
+                new ServeContentInTwoDBCalls(contentService, httpHeaders, imageProcessors, defaultImageQuality, defaultResizerType)
+                , serverContentTimerBuilder.tags("db_calls", "2").register(meterRegistry)
+        ));
+        serveContents = new ListRoundRobin<>(serveContentImplementations);
     }
 
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (logger.isTraceEnabled())
-            logger.trace("request URI {}", request.getRequestURI() + "?" + request.getQueryString());
+            logger.trace("request URI {}", String.join("?", request.getRequestURI(), request.getQueryString()));
 
         ContentRequest contentRequest;
         try {
@@ -84,78 +85,9 @@ public class ContentServlet extends HttpServlet {
     }
 
     private void serveContentRequest(ContentRequest contentRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        httpHeaders.setCacheControl(response, contentRequest);
-
-        String requestedCacheControl = contentRequest.getCacheControl();
-        if (!(Boolean.TRUE.equals(contentRequest.getNoCache()) || (requestedCacheControl != null && requestedCacheControl.contains("no-cache")))) {
-
-            String requestedEtag = httpHeaders.getEtag(request);
-            String requestedModifiedSince = httpHeaders.getModifiedSince(request);
-
-            if (checkNotModified(contentRequest, requestedEtag, requestedModifiedSince)) {
-                if (logger.isTraceEnabled()) logger.trace("304 not modified {}", contentRequest);
-                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                return;
-            }
-
-        }
-
-        replyWithContent(contentRequest, response);
+        ServeContent serveContent = serveContents.getNext();
+        serveContent.serveContentRequest(contentRequest, request, response);
     }
-
-    private boolean checkNotModified(ContentRequest contentRequest, String requestedEtag, String requestedModifiedSince) {
-        if (requestedEtag != null || requestedModifiedSince != null) {
-            HashAndLastModified hashAndLastModified = contentService.getHashAndLastModified(contentRequest);
-
-            if (requestedEtag != null && requestedEtag.equals(hashAndLastModified.getHash())) {
-                return true;
-            }
-
-            long requestedLastModified = HttpDateFormatter.parse(requestedModifiedSince);
-            if (requestedLastModified != -1L && requestedLastModified == hashAndLastModified.getLastModified()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void replyWithContent(ContentRequest contentRequest, HttpServletResponse response) throws IOException {
-        Content content;
-        try {
-            content = contentService.getContent(contentRequest);
-        } catch (NotFoundException nfe) {
-            replyWithHtml(response, "Запрошенный контент не найден", HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        httpHeaders.setContentDisposition(response, contentRequest);
-        httpHeaders.setContentResponseHeaders(response, content);
-
-        Integer width = contentRequest.getWidth();
-        Integer height = contentRequest.getHeight();
-        if (width != null || height != null || contentRequest.getQuality() != null) {
-            ResizerType resizerType = contentRequest.getResizerType() != null ? contentRequest.getResizerType() : defaultResizerType;
-            if (resizerType != ResizerType.DB) {
-                byte quality = contentRequest.getQuality() != null ? contentRequest.getQuality() : defaultImageQuality;
-
-                ImageProcessor imageProcessor = imageProcessors.get(resizerType);
-                ImageParameters imageParameters = new ImageParameters();
-                imageParameters.setQuality(quality);
-                imageParameters.setSourceFormat(content.getExtension());
-                if (width != null) {
-                    imageParameters.setWidth(width);
-                }
-                if (height != null) {
-                    imageParameters.setHeight(height);
-                }
-
-                imageProcessor.resize(content.getDataStream(), imageParameters, response.getOutputStream());
-            }
-        }
-        IOUtils.copy(content.getDataStream(), response.getOutputStream());
-    }
-
 
 
     private void serveHelp(HttpServletRequest request, HttpServletResponse response) {
@@ -163,10 +95,9 @@ public class ContentServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             request.getServletContext().getRequestDispatcher("/help").forward(request, response);
         } catch (ServletException | IOException e) {
-            logger.error("Could not forward to help page", e);
+            logger.error("Could not forward to help page {requestURI='{}', queryString='{}'}", request.getRequestURI(), request.getQueryString(), e);
         }
     }
-
 
 
     private void replyWithHtml(HttpServletResponse response, String html, int statusCode) {
@@ -175,7 +106,7 @@ public class ContentServlet extends HttpServlet {
         try {
             response.getWriter().println(html);
         } catch (IOException e) {
-            logger.error("Could not print html response", e);
+            logger.error("Could not print html response code {} '{}'", statusCode, html, e);
         }
     }
 }
